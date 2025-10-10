@@ -10,62 +10,96 @@ Class {
 }
 
 { #category : 'accessing' }
+HistoryPrinter >> indent [
+        ^ indent ifNil: [ indent := '' ]
+]
+
+{ #category : 'accessing' }
 HistoryPrinter >> indent: aString [
-	indent := aString.
+
+	indent := aString ifNil: [ '' ].
+]
+
+{ #category : 'accessing' }
+HistoryPrinter >> initialize [
+
+        super initialize.
+        transcript := Transcript.
+        indent := ''.
+]
+
+{ #category : 'accessing' }
+HistoryPrinter >> maxPreviewLines [
+        ^ 20
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> printCode: codeString [
-	| lines |
-	lines := codeString lines.
-	lines size > 20 
-		ifTrue: [
-			(lines first: 20) do: [ :line | transcript show: indent, '    ', line; cr ].
-			transcript show: indent, '    ... (', (lines size - 20) asString, ' more lines)'; cr
-		]
-		ifFalse: [ lines do: [ :line | transcript show: indent, '    ', line; cr ] ].
+
+        | lines |
+        codeString ifNil: [ ^ self ].
+        lines := codeString lines.
+        lines size > self maxPreviewLines
+                ifTrue: [
+                        (lines first: self maxPreviewLines) do: [ :line | self printIndentedLine: line ].
+                        self printIndentedLine: ('... (' , (lines size - self maxPreviewLines) asString , ' more lines)')
+                ]
+                ifFalse: [ lines do: [ :line | self printIndentedLine: line ] ].
+]
+
+{ #category : 'accessing' }
+HistoryPrinter >> printIndentedLine: aString [
+
+        self transcript show: self indent, '    ', aString; cr.
+]
+
+{ #category : 'accessing' }
+HistoryPrinter >> transcript [
+        ^ transcript ifNil: [ transcript := Transcript ]
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> transcript: aTranscript [
 	transcript := aTranscript.
+        transcript := aTranscript ifNil: [ Transcript ].
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitAddition: anAddition [
 
-	transcript
-		show: indent , '+ ADDED: ' , anAddition description;
-		cr.
-	anAddition definition isMethodDefinition ifFalse: [ ^ self ].
-	transcript
-		show: indent , '  Code:';
-		cr.
-	self printCode: anAddition leftContents
+        self transcript
+                show: self indent , '+ ADDED: ' , anAddition description;
+                cr.
+        anAddition definition isMethodDefinition ifFalse: [ ^ self ].
+        self transcript
+                show: self indent , '  Code:';
+                cr.
+        self printCode: anAddition leftContents
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitClassDefinition: aClass [
-	transcript show: indent, 'Class: ', aClass name; cr.
+        self transcript show: self indent, 'Class: ', aClass name; cr.
 ]
 
 { #category : 'accessing' }
-HistoryPrinter >> visitDirectoryDefinition: aDir [.
+HistoryPrinter >> visitDirectoryDefinition: aDirectory [
 
-	"nothing"
+        "no-op"
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitExtensionDefinition: anExtension [
-	transcript show: indent, 'Extension: ', anExtension name; cr.
 
+        self transcript show: self indent, 'Extension: ', anExtension name; cr.
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitFileNode: aFile [
-	transcript 
-		show: indent, 'File: ', aFile name; cr;
-		show: indent, '  (', aFile contents size asString, ' bytes)'; cr.
+
+        self transcript
+                show: self indent, 'File: ', aFile name; cr;
+                show: self indent, '  (', aFile contents size asString, ' bytes)'; cr.
 ]
 
 { #category : 'accessing' }
@@ -76,45 +110,44 @@ HistoryPrinter >> visitMethodNode: aMethod [
 
 { #category : 'accessing' }
 HistoryPrinter >> visitModification: aModification [
-
-	transcript
-		show: indent , '~ MODIFIED: ' , aModification description;
-		cr.
-	aModification definition isMethodDefinition ifFalse: [ ^ self ].
-	transcript
-		show: indent , '  Old code:';
-		cr.
-	self printCode: aModification rightContents.
-	transcript
-		show: indent , '  New code:';
-		cr.
-	self printCode: aModification leftContents
+        self transcript
+                show: self indent , '~ MODIFIED: ' , aModification description;
+                cr.
+        aModification definition isMethodDefinition ifFalse: [ ^ self ].
+        self transcript
+                show: self indent , '  Old code:';
+                cr.
+        self printCode: aModification rightContents.
+        self transcript
+                show: self indent , '  New code:';
+                cr.
+        self printCode: aModification leftContents
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitNoModification: aNoModification [
-
 	"nothing "
 
+	
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitPackage: aPackage [
 
-	transcript show: indent, 'Package: ', aPackage name; cr.
+self transcript show: self indent, 'Package: ', aPackage name; cr.
 ]
 
 { #category : 'accessing' }
 HistoryPrinter >> visitRemoval: aRemoval [
 
-	transcript
-		show: indent , '- REMOVED: ' , aRemoval description;
-		cr.
-	aRemoval definition isMethodDefinition ifFalse: [ ^ self ].
-	transcript
-		show: indent , '  Code:';
-		cr.
-	self printCode: aRemoval leftContents
+        self transcript
+                show: self indent , '- REMOVED: ' , aRemoval description;
+                cr.
+        aRemoval definition isMethodDefinition ifFalse: [ ^ self ].
+        self transcript
+                show: self indent , '  Code:';
+                cr.
+        self printCode: aRemoval leftContents
 ]
 
 { #category : 'accessing' }
@@ -126,7 +159,7 @@ HistoryPrinter >> visitRootDefinition: aRoot [
 { #category : 'accessing' }
 HistoryPrinter >> visitTraitDefinition: aTrait [
 
-	transcript
-		show: indent , 'Trait: ' , aTrait name;
-		cr
+        self transcript
+                show: self indent , 'Trait: ' , aTrait name;
+                cr
 ]

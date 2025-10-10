@@ -104,80 +104,103 @@ HistoryScrapper class >> repositoryURL: aString [
 { #category : 'as yet unclassified' }
 HistoryScrapper >> cloneRepositoryFrom: url [
 	"Clone the repository to a temporary location."
-	| creator |
-	Transcript show: 'Cloning repository to: ', location pathString; cr.
 
-	location parent ensureCreateDirectory.
-	location exists ifTrue: [ location ensureDeleteAll ].
+        | creator |
+        Transcript show: 'Cloning repository to: ', location pathString; cr.
+        location parent ensureCreateDirectory.
+        location exists ifTrue: [ location ensureDeleteAll ].
 
-	creator := IceRepositoryCreator new
-		url: url;
-		location: location;
-		yourself.
+        creator := IceRepositoryCreator new
+                url: url;
+                location: location;
+                yourself.
 
-	^ [ creator createRepository ]
-		on: IceDuplicatedRepository
-		do: [ :ex | ex return: ex repository ].
+        ^ [ creator createRepository ]
+                on: IceDuplicatedRepository
+                do: [ :ex | ex return: ex repository ].
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> fetchLatestCommits [
+
+        "Fetch remote changes and answer last 10 commits."
+        Transcript show: 'Fetching latest changes...'; cr.
+        repository fetch.
+ ^ repository head withCommitWalkDo: [ :walk |
+                walk
+                        maxNumber: 10;
+                        commits ]
 ]
 
 { #category : 'as yet unclassified' }
 HistoryScrapper >> fetchLatestCommitsAndPrint [
-	"Fetch remote changes and show last 10 commits with diffs."
-	| commits |
-	Transcript show: 'Fetching latest changes...'; cr.
-	repository fetch.
 
-	commits := repository head withCommitWalkDo: [ :walk |
-		walk maxNumber: 10; commits ].
-
-	Transcript cr; show: '=== Last 10 Commits with Contents ==='; cr; cr.
-
-	commits doWithIndex: [ :commit :index |
-		self printCommit: commit index: index ].
-
-	Transcript show: 'Done!'; cr.
+        | commits |
+        commits := self fetchLatestCommits.
+        self printCommits: commits.
 ]
 
 { #category : 'as yet unclassified' }
 HistoryScrapper >> initializeRepository [
 	"Find or clone the repository locally."
+
 	| url |
 	url := self class repositoryURL.
 	location := FileLocator temp / 'iceberg-repos' / (url copyAfterLast: $/).
 
 	repository := IceRepository registry
-		detect: [ :repo | 
-			repo remotes anySatisfy: [ :remote | 
-				remote url = url or: [ remote url = (url, '.git') ] ] ]
-		ifNone: [ self cloneRepositoryFrom: url ].
+		              detect: [ :repo | repo remotes anySatisfy: [ :remote | remote url = url or: [ remote url = (url , '.git') ] ] ]
+		              ifNone: [ self cloneRepositoryFrom: url ].
 
-	(IceRepository registry includes: repository)
-		ifFalse: [ repository register ].
+	self registerRepositoryIfNeeded
 ]
 
 { #category : 'as yet unclassified' }
 HistoryScrapper >> printCommit: commit index: index [
-	| diff printer |
-	printer := HistoryPrinter new
-		transcript: Transcript;
-		indent: '  ';
-		yourself.
 
-	Transcript
-		show: '--- Commit ', index asString, ' ---'; cr;
-		show: 'Hash:   ', commit shortId; cr;
-		show: 'Author: ', commit author; cr;
-		show: 'Date:   ', commit datetime asLocalStringYMDHM; cr;
-		show: 'Message: ', commit comment; cr; cr.
+        | diff printer |
+        self printCommitHeader: commit index: index.
+        diff := commit diffToParent.
+        diff ifNil: [ ^ self ].
+        diff isEmpty
+                ifTrue: [ Transcript show: '  (No changes)'; cr ]
+                ifFalse: [
+                        Transcript show: 'Changes:'; cr.
+                        printer := self printer.
+                        diff tree allChildrenDo: [ :node | node value accept: printer ].
+                ].
+]
 
-	diff := commit diffToParent.
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> printCommitHeader: commit index: index [
 
-	diff ifNotNil: [
-		diff isEmpty
-			ifTrue: [ Transcript show: '  (No changes)'; cr ]
-			ifFalse: [
-				Transcript show: 'Changes:'; cr.
-				diff tree allChildrenDo: [ :node | node value accept: printer ].
-			]
-	].
+        Transcript
+                show: '--- Commit ', index asString, ' ---'; cr;
+                show: 'Hash:   ', commit shortId; cr;
+                show: 'Author: ', commit author; cr;
+                show: 'Date:   ', commit datetime asLocalStringYMDHM; cr;
+                show: 'Message: ', commit comment; cr; cr.
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> printCommits: commits [
+        commits ifNil: [ ^ Transcript show: 'No commits found.'; cr ].
+        commits ifEmpty: [ ^ Transcript show: 'No commits found.'; cr ].
+        Transcript cr; show: '=== Last 10 Commits with Contents ==='; cr; cr.
+        commits withIndexDo: [ :commit :index | self printCommit: commit index: index ].
+        Transcript show: 'Done!'; cr.
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> printer [
+        ^ HistoryPrinter new
+                transcript: Transcript;
+                indent: '  ';
+                yourself
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> registerRepositoryIfNeeded [
+        (IceRepository registry includes: repository)
+                ifFalse: [ repository register ].
 ]
