@@ -1,8 +1,8 @@
 Class {
 	#name : 'BaselineOfExtendedHeuristicCompletionHistory',
 	#superclass : 'BaselineOf',
-	#category : 'BaselineOfExtendedHeuristicCompletion-History',
-	#package : 'BaselineOfExtendedHeuristicCompletion-History'
+	#category : 'BaselineOfExtendedHeuristicCompletionHistory',
+	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
 }
 
 { #category : 'baselines' }
