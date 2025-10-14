@@ -5,8 +5,8 @@ Class {
 		'transcript',
 		'indent'
 	],
-	#category : 'HeuristicCompletion-Model-History-Fetching-Github',
-	#package : 'HeuristicCompletion-Model-History',
+	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
+	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'Fetching-Github'
 }
 

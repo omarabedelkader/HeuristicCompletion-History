@@ -10,7 +10,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	<baseline>
 	
 	spec for: #common do: [ 
-		spec package: 'HeuristicCompletion-Model-History'.
+		spec package: 'ExtendedHeuristicCompletion-History'.
 		]
 
 ]

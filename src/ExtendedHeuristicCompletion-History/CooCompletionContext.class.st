@@ -16,8 +16,8 @@ Class {
 		'completion',
 		'completionToken'
 	],
-	#category : 'HeuristicCompletion-Model-History-History-Fetcher',
-	#package : 'HeuristicCompletion-Model-History',
+	#category : 'ExtendedHeuristicCompletion-History-History-Fetcher',
+	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'History-Fetcher'
 }
 
