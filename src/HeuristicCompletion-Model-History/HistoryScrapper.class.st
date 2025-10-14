@@ -74,8 +74,9 @@ Class {
 	#classInstVars : [
 		'RepositoryURL'
 	],
-	#category : 'HeuristicCompletion-Model-History',
-	#package : 'HeuristicCompletion-Model-History'
+	#category : 'HeuristicCompletion-Model-History-Fetching-Github',
+	#package : 'HeuristicCompletion-Model-History',
+	#tag : 'Fetching-Github'
 }
 
 { #category : 'as yet unclassified' }
