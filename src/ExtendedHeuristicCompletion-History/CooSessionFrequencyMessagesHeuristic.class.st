@@ -2,35 +2,35 @@
 I am an heuristic that autocompletes messages based on a session vocabulary.
 "
 Class {
-	#name : 'CooSessionMessagesHeuristic',
+	#name : 'CooSessionFrequencyMessagesHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Frequency-Messages',
+	#category : 'ExtendedHeuristicCompletion-History-Messages-Frequency',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Frequency-Messages'
+	#tag : 'Messages-Frequency'
 }
 
 { #category : 'requests' }
-CooSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
+CooSessionFrequencyMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
 
 	^ aNode isMethod or: [ aNode isMessage ]
 ]
 
 { #category : 'requests' }
-CooSessionMessagesHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
+CooSessionFrequencyMessagesHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
 	
 	^ CoCollectionFetcher onCollection: 
 			( self session words collect: [ :each | (NECSelectorEntry contents: each key node: each value) ])
 ]
 
 { #category : 'accessing' }
-CooSessionMessagesHeuristic >> session [
-	^ session ifNil: [ session := CooSession current ]
+CooSessionFrequencyMessagesHeuristic >> session [
+	^ session ifNil: [ session := CooSessionFrequencyMessages current ]
 ]
 
 { #category : 'accessing' }
-CooSessionMessagesHeuristic >> session: anObject [
+CooSessionFrequencyMessagesHeuristic >> session: anObject [
 	session := anObject
 ]

@@ -1,0 +1,97 @@
+Class {
+	#name : 'CooCachTemporalMessages',
+	#superclass : 'Object',
+	#instVars : [
+		'entries',
+		'maximumWeight'
+	],
+	#category : 'ExtendedHeuristicCompletion-History-Cach',
+	#package : 'ExtendedHeuristicCompletion-History',
+	#tag : 'Cach'
+}
+
+{ #category : 'initialization' }
+CooCachTemporalMessages >> association: firstAssociation precedes: secondAssociation [
+
+	| firstSeen secondSeen |
+	firstSeen := firstAssociation value.
+	secondSeen := secondAssociation value.
+	firstSeen = secondSeen ifTrue: [ ^ firstAssociation key asString <= secondAssociation key asString ].
+	firstSeen ifNil: [ ^ false ].
+	secondSeen ifNil: [ ^ true ].
+	^ firstSeen > secondSeen
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> associations [
+
+	^ self sortedAssociations
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> at: aKey [
+
+	^ entries at: aKey
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> at: aKey put: aValue [
+
+	entries at: aKey put: aValue.
+	self enforceLimit.
+	^ aValue
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> enforceLimit [
+
+	entries size <= maximumWeight ifTrue: [ ^ self ].
+	(self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
+		entries removeKey: association key ifAbsent: [ ] ]
+]
+
+{ #category : 'testing' }
+CooCachTemporalMessages >> includesKey: aKey [
+
+	^ entries includesKey: aKey
+]
+
+{ #category : 'initialization' }
+CooCachTemporalMessages >> initialize [
+
+	super initialize.
+	entries := Dictionary new.
+	maximumWeight := 1000
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> keys [
+
+	^ self sortedAssociations collect: [ :association | association key ]
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> maximumWeight: anInteger [
+
+	maximumWeight := anInteger.
+	self enforceLimit.
+	^ self
+]
+
+{ #category : 'removing' }
+CooCachTemporalMessages >> removeKey: aKey ifAbsent: aBlock [
+
+	^ entries removeKey: aKey ifAbsent: aBlock
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> size [
+
+	^ entries size
+]
+
+{ #category : 'accessing' }
+CooCachTemporalMessages >> sortedAssociations [
+
+	^ entries associations asSortedCollection: [ :first :second | self association: first precedes: second ]
+]

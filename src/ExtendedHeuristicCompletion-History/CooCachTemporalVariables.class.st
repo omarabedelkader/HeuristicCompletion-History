@@ -1,17 +1,20 @@
+"
+Temporal cach
+"
 Class {
-	#name : 'CooSessionTemporalVocabularyCache',
+	#name : 'CooCachTemporalVariables',
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
 		'maximumWeight'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Temporal-Classes',
+	#category : 'ExtendedHeuristicCompletion-History-Cach',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Temporal-Classes'
+	#tag : 'Cach'
 }
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> association: firstAssociation precedes: secondAssociation [
+CooCachTemporalVariables >> association: firstAssociation precedes: secondAssociation [
 
     | firstSeen secondSeen |
     firstSeen := firstAssociation value.
@@ -23,19 +26,19 @@ CooSessionTemporalVocabularyCache >> association: firstAssociation precedes: sec
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> associations [
+CooCachTemporalVariables >> associations [
 
     ^ self sortedAssociations
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> at: aKey [
+CooCachTemporalVariables >> at: aKey [
 
     ^ entries at: aKey
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> at: aKey put: aValue [
+CooCachTemporalVariables >> at: aKey put: aValue [
 
     entries at: aKey put: aValue.
     self enforceLimit.
@@ -43,23 +46,23 @@ CooSessionTemporalVocabularyCache >> at: aKey put: aValue [
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> enforceLimit [
+CooCachTemporalVariables >> enforceLimit [
 
-    entries size <= maximumWeight ifTrue: [ ^ self ].
-    self sortedAssociations
-        copyFrom: maximumWeight + 1
-        to: entries size
-        do: [ :association | entries removeKey: association key ifAbsent: [ ] ]
+	entries size <= maximumWeight ifTrue: [ ^ self ].
+	(self sortedAssociations
+		copyFrom: maximumWeight + 1
+		to: entries size)
+		do: [ :association | entries removeKey: association key ifAbsent: [ ] ]
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> includesKey: aKey [
+CooCachTemporalVariables >> includesKey: aKey [
 
     ^ entries includesKey: aKey
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> initialize [
+CooCachTemporalVariables >> initialize [
 
     super initialize.
     entries := Dictionary new.
@@ -67,13 +70,13 @@ CooSessionTemporalVocabularyCache >> initialize [
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> keys [
+CooCachTemporalVariables >> keys [
 
     ^ self sortedAssociations collect: [ :association | association key ]
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> maximumWeight: anInteger [
+CooCachTemporalVariables >> maximumWeight: anInteger [
 
     maximumWeight := anInteger.
     self enforceLimit.
@@ -81,18 +84,18 @@ CooSessionTemporalVocabularyCache >> maximumWeight: anInteger [
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> removeKey: aKey ifAbsent: aBlock [
+CooCachTemporalVariables >> removeKey: aKey ifAbsent: aBlock [
 
     ^ entries removeKey: aKey ifAbsent: aBlock
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> size [
+CooCachTemporalVariables >> size [
     ^ entries size
 ]
 
 { #category : 'initialization' }
-CooSessionTemporalVocabularyCache >> sortedAssociations [
+CooCachTemporalVariables >> sortedAssociations [
 
     ^ entries associations
         asSortedCollection: [ :first :second |

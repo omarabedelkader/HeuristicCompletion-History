@@ -2,7 +2,7 @@
 Session varibales
 "
 Class {
-	#name : 'CooSessionVariable',
+	#name : 'CooSessionTemporalVariable',
 	#superclass : 'Object',
 	#instVars : [
 		'vocabularyCache'
@@ -10,45 +10,35 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Temporal-Classes',
+	#category : 'ExtendedHeuristicCompletion-History-Classes-Temporal',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Temporal-Classes'
+	#tag : 'Classes-Temporal'
 }
 
 { #category : 'accessing' }
-CooSessionVariable class >> current [ 
+CooSessionTemporalVariable class >> current [ 
 
 	^ Current ifNil: [ Current := self new ]
 ]
 
 { #category : 'actions' }
-CooSessionVariable class >> deinstall [
+CooSessionTemporalVariable class >> deinstall [
 	<script>
 	
 	self environment codeChangeAnnouncer unsubscribe: self current.
-	CooSessionVariable allInstances 
+	CooSessionTemporalVariable allInstances 
 		do: [ :each | self environment codeChangeAnnouncer unsubscribe: each ]
 ]
 
 { #category : 'actions' }
-CooSessionVariable class >> install [
+CooSessionTemporalVariable class >> install [
+
 	<script>
-	
-	self environment codeChangeAnnouncer
-		when: ClassAdded 
-		send: #addNewVariableInVocabulary: 
-		to: self current.
-	"
-	This does not work for now because we are expecting a node and the menu does not give us a node
-	in addition we do not get the."
-	"self environment codeChangeAnnouncer
-		when: CompletionItemSelected
-		send: #addMessageInVocabulary: 
-		to: self current."
+	self environment codeChangeAnnouncer when: ClassAdded send: #addNewVariableInVocabulary: to: self current
 ]
 
 { #category : 'initialization' }
-CooSessionVariable class >> reset [
+CooSessionTemporalVariable class >> reset [
 	<script>
 	Current ifNotNil: [ 
 		self environment codeChangeAnnouncer
@@ -57,37 +47,37 @@ CooSessionVariable class >> reset [
 ]
 
 { #category : 'adding' }
-CooSessionVariable >> addNewVariableInVocabulary: anAnn [
+CooSessionTemporalVariable >> addNewVariableInVocabulary: anAnn [
 	
 	self addVocabulary: (anAnn classAdded -> anAnn classAdded) at: DateAndTime now
 ]
 
 { #category : 'adding' }
-CooSessionVariable >> addVariableInVocabulary: anAnn [
+CooSessionTemporalVariable >> addVariableInVocabulary: anAnn [
 
 	self addVocabulary: anAnn selectedItem class at: DateAndTime now
 ]
 
 { #category : 'adding' }
-CooSessionVariable >> addVocabulary: aString at: aDateAndTime [
+CooSessionTemporalVariable >> addVocabulary: aString at: aDateAndTime [
 
 	vocabularyCache at: aString put: aDateAndTime
 ]
 
 { #category : 'initialization' }
-CooSessionVariable >> initialize [
+CooSessionTemporalVariable >> initialize [
 
 	super initialize.
-	vocabularyCache := CooSessionTemporalVocabularyCache new maximumWeight: 1000
+	vocabularyCache := CooCachTemporalVariables new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }
-CooSessionVariable >> size [
+CooSessionTemporalVariable >> size [
 	^ vocabularyCache size
 ]
 
 { #category : 'matching' }
-CooSessionVariable >> words [
+CooSessionTemporalVariable >> words [
 
 	^ vocabularyCache keys
 ]

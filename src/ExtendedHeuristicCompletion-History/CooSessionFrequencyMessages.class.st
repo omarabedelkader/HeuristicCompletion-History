@@ -5,7 +5,7 @@ I collect the last words in modified methods.
 I
 "
 Class {
-	#name : 'CooSession',
+	#name : 'CooSessionFrequencyMessages',
 	#superclass : 'Object',
 	#instVars : [
 		'vocabularyCache'
@@ -13,28 +13,28 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Frequency-Messages',
+	#category : 'ExtendedHeuristicCompletion-History-Messages-Frequency',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Frequency-Messages'
+	#tag : 'Messages-Frequency'
 }
 
 { #category : 'actions' }
-CooSession class >> current [ 
+CooSessionFrequencyMessages class >> current [ 
 
 	^ Current ifNil: [ Current := self new ]
 ]
 
 { #category : 'actions' }
-CooSession class >> deinstall [
+CooSessionFrequencyMessages class >> deinstall [
 	<script>
 	
 	self environment codeChangeAnnouncer unsubscribe: self current.
-	CooSession allInstances 
+	CooSessionFrequencyMessages allInstances 
 		do: [ :each | self environment codeChangeAnnouncer unsubscribe: each ]
 ]
 
 { #category : 'actions' }
-CooSession class >> install [
+CooSessionFrequencyMessages class >> install [
 
 	<script>
 	self environment codeChangeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
@@ -43,7 +43,7 @@ CooSession class >> install [
 ]
 
 { #category : 'actions' }
-CooSession class >> reset [
+CooSessionFrequencyMessages class >> reset [
 	<script>
 	Current ifNotNil: [ 
 		self environment codeChangeAnnouncer
@@ -52,7 +52,7 @@ CooSession class >> reset [
 ]
 
 { #category : 'accessing' }
-CooSession >> addMessageInVocabulary: anAnn [
+CooSessionFrequencyMessages >> addMessageInVocabulary: anAnn [
 
 self
                 registerSelector: anAnn selectedItem selector
@@ -62,7 +62,7 @@ self
 ]
 
 { #category : 'vocabulary' }
-CooSession >> addModifiedMethodInVocabulary: anAnn [
+CooSessionFrequencyMessages >> addModifiedMethodInVocabulary: anAnn [
 
 	   self
                 registerSelector: anAnn selector
@@ -72,7 +72,7 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 ]
 
 { #category : 'vocabulary' }
-CooSession >> addNewMethodInVocabulary: anAnn [
+CooSessionFrequencyMessages >> addNewMethodInVocabulary: anAnn [
 
         self
                 registerSelector: anAnn selector
@@ -82,13 +82,13 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'vocabulary' }
-CooSession >> addVocabulary: aString at: aDateAndTime [
+CooSessionFrequencyMessages >> addVocabulary: aString at: aDateAndTime [
 
 	vocabularyCache at: aString put: aDateAndTime
 ]
 
 { #category : 'accessing' }
-CooSession >> eventCountKeyFor: anEventSymbol [
+CooSessionFrequencyMessages >> eventCountKeyFor: anEventSymbol [
 
         anEventSymbol = #added ifTrue: [ ^ #addedCount ].
         anEventSymbol = #modified ifTrue: [ ^ #modifiedCount ].
@@ -96,7 +96,7 @@ CooSession >> eventCountKeyFor: anEventSymbol [
 ]
 
 { #category : 'accessing' }
-CooSession >> frequencies [
+CooSessionFrequencyMessages >> frequencies [
 
         | result |
         result := Dictionary new.
@@ -106,7 +106,7 @@ CooSession >> frequencies [
 ]
 
 { #category : 'accessing' }
-CooSession >> frequencyDictionaryFor: anEntry [
+CooSessionFrequencyMessages >> frequencyDictionaryFor: anEntry [
 
         ^ Dictionary new
                 at: #added put: (anEntry at: #addedCount ifAbsent: [ 0 ]);
@@ -115,21 +115,21 @@ CooSession >> frequencyDictionaryFor: anEntry [
 ]
 
 { #category : 'accessing' }
-CooSession >> frequencyForSelector: aSelector [
+CooSessionFrequencyMessages >> frequencyForSelector: aSelector [
 
         (vocabularyCache includesKey: aSelector) ifFalse: [ ^ self newFrequencyDictionary ].
         ^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
 ]
 
 { #category : 'initialization' }
-CooSession >> initialize [
+CooSessionFrequencyMessages >> initialize [
 
 	super initialize.
-	vocabularyCache := CooSessionVocabularyCache new maximumWeight: 1000
+	vocabularyCache := CooCachFrequencyMessages new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }
-CooSession >> newFrequencyDictionary [
+CooSessionFrequencyMessages >> newFrequencyDictionary [
 
         ^ Dictionary new
                 at: #added put: 0;
@@ -138,7 +138,7 @@ CooSession >> newFrequencyDictionary [
 ]
 
 { #category : 'accessing' }
-CooSession >> newVocabularyEntry [
+CooSessionFrequencyMessages >> newVocabularyEntry [
 
         ^ Dictionary new
                 at: #ast put: nil;
@@ -149,7 +149,7 @@ CooSession >> newVocabularyEntry [
 ]
 
 { #category : 'accessing' }
-CooSession >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
+CooSessionFrequencyMessages >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
         | entry |
         (vocabularyCache includesKey: aSelector)
@@ -161,18 +161,18 @@ CooSession >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aD
 ]
 
 { #category : 'accessing' }
-CooSession >> removeMethodFromVocabulary: anAnn [
+CooSessionFrequencyMessages >> removeMethodFromVocabulary: anAnn [
 
 	vocabularyCache removeKey: anAnn selector ifAbsent: [ ]
 ]
 
 { #category : 'accessing' }
-CooSession >> size [
+CooSessionFrequencyMessages >> size [
 	^ vocabularyCache size
 ]
 
 { #category : 'accessing' }
-CooSession >> updateEntry: anEntry withEvent: anEventSymbol [
+CooSessionFrequencyMessages >> updateEntry: anEntry withEvent: anEventSymbol [
 
         | countKey |
         countKey := self eventCountKeyFor: anEventSymbol.
@@ -181,7 +181,7 @@ CooSession >> updateEntry: anEntry withEvent: anEventSymbol [
 ]
 
 { #category : 'accessing' }
-CooSession >> words [
+CooSessionFrequencyMessages >> words [
 
 	^ vocabularyCache keys collect: [ :selector |
                 | entry |

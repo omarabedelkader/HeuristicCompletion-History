@@ -2,19 +2,19 @@
 I'm a cach vocab
 "
 Class {
-	#name : 'CooSessionVocabularyCache',
+	#name : 'CooCachFrequencyVariables',
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
 		'maximumWeight'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Frequency-Messages',
+	#category : 'ExtendedHeuristicCompletion-History-Cach',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Frequency-Messages'
+	#tag : 'Cach'
 }
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> association: firstAssociation precedes: secondAssociation [
+CooCachFrequencyVariables >> association: firstAssociation precedes: secondAssociation [
 
 	| firstModified secondModified |
 	firstModified := self modificationCountFor: firstAssociation value.
@@ -25,19 +25,19 @@ CooSessionVocabularyCache >> association: firstAssociation precedes: secondAssoc
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> associations [
+CooCachFrequencyVariables >> associations [
 
 	^ self sortedAssociations
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> at: aKey [
+CooCachFrequencyVariables >> at: aKey [
 
 	^ entries at: aKey
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> at: aKey put: aValue [
+CooCachFrequencyVariables >> at: aKey put: aValue [
 
 	entries at: aKey put: aValue.
 	self enforceLimit.
@@ -45,23 +45,23 @@ CooSessionVocabularyCache >> at: aKey put: aValue [
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> enforceLimit [
+CooCachFrequencyVariables >> enforceLimit [
 
 	entries size <= maximumWeight ifTrue: [ ^ self ].
-	self sortedAssociations
-	copyFrom: maximumWeight + 1
-	to: entries size
-	do: [ :association | entries removeKey: association key ifAbsent: [ ] ]
+	(self sortedAssociations
+		copyFrom: maximumWeight + 1
+		to: entries size)
+		do: [ :association | entries removeKey: association key ifAbsent: [ ] ]
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> includesKey: aKey [
+CooCachFrequencyVariables >> includesKey: aKey [
 
 	^ entries includesKey: aKey
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> initialize [
+CooCachFrequencyVariables >> initialize [
 
 	super initialize.
 	entries := Dictionary new.
@@ -69,13 +69,13 @@ CooSessionVocabularyCache >> initialize [
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> keys [
+CooCachFrequencyVariables >> keys [
 
 	^ self associations collect: [ :association | association key ]
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> maximumWeight: anInteger [
+CooCachFrequencyVariables >> maximumWeight: anInteger [
 
 	maximumWeight := anInteger.
 	self enforceLimit.
@@ -83,7 +83,7 @@ CooSessionVocabularyCache >> maximumWeight: anInteger [
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> modificationCountFor: anEntry [
+CooCachFrequencyVariables >> modificationCountFor: anEntry [
 
 	(anEntry isKindOf: Dictionary)
 	ifFalse: [ ^ 0 ].
@@ -91,19 +91,19 @@ CooSessionVocabularyCache >> modificationCountFor: anEntry [
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> removeKey: aKey ifAbsent: aBlock [
+CooCachFrequencyVariables >> removeKey: aKey ifAbsent: aBlock [
 
 	^ entries removeKey: aKey ifAbsent: aBlock
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> size [
+CooCachFrequencyVariables >> size [
 
 	^ entries size
 ]
 
 { #category : 'initialization' }
-CooSessionVocabularyCache >> sortedAssociations [
+CooCachFrequencyVariables >> sortedAssociations [
 
 	^ entries associations
 	asSortedCollection: [ :first :second |

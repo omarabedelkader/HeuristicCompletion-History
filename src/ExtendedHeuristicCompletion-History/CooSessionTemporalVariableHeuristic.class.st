@@ -2,24 +2,24 @@
 Session variables
 "
 Class {
-	#name : 'CooSessionVariableHeuristic',
+	#name : 'CooSessionTemporalVariableHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Temporal-Classes',
+	#category : 'ExtendedHeuristicCompletion-History-Classes-Temporal',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Temporal-Classes'
+	#tag : 'Classes-Temporal'
 }
 
 { #category : 'requests' }
-CooSessionVariableHeuristic >> appliesForNode: aNode inContext: aContext [
+CooSessionTemporalVariableHeuristic >> appliesForNode: aNode inContext: aContext [
 
 	^ aNode isVariable
 ]
 
 { #category : 'requests' }
-CooSessionVariableHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
+CooSessionTemporalVariableHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
 	
         ^ CoCollectionFetcher onCollection:
                         (self session words collect: [ :each |
@@ -35,11 +35,11 @@ CooSessionVariableHeuristic >> buildFetcherFor: aMessageNode inContext: aContext
 ]
 
 { #category : 'accessing' }
-CooSessionVariableHeuristic >> session [
-	^ session ifNil: [ session := CooSessionVariable current ]
+CooSessionTemporalVariableHeuristic >> session [
+	^ session ifNil: [ session := CooSessionTemporalVariable current ]
 ]
 
 { #category : 'accessing' }
-CooSessionVariableHeuristic >> session: anObject [
+CooSessionTemporalVariableHeuristic >> session: anObject [
 	session := anObject
 ]
