@@ -13,13 +13,15 @@ Class {
 { #category : 'initialization' }
 CooCachTemporalMessages >> association: firstAssociation precedes: secondAssociation [
 
-	| firstSeen secondSeen |
-	firstSeen := firstAssociation value.
-	secondSeen := secondAssociation value.
-	firstSeen = secondSeen ifTrue: [ ^ firstAssociation key asString <= secondAssociation key asString ].
-	firstSeen ifNil: [ ^ false ].
-	secondSeen ifNil: [ ^ true ].
-	^ firstSeen > secondSeen
+| firstEntry secondEntry firstSeen secondSeen |
+firstEntry := firstAssociation value.
+secondEntry := secondAssociation value.
+firstSeen := firstEntry at: #lastSeen ifAbsent: [ nil ].
+secondSeen := secondEntry at: #lastSeen ifAbsent: [ nil ].
+firstSeen = secondSeen ifTrue: [ ^ firstAssociation key asString <= secondAssociation key asString ].
+firstSeen ifNil: [ ^ false ].
+secondSeen ifNil: [ ^ true ].
+^ firstSeen > secondSeen
 ]
 
 { #category : 'accessing' }
