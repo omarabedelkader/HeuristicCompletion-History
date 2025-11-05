@@ -51,19 +51,36 @@ CooSessionFrequencyVariable class >> reset [
 { #category : 'adding' }
 CooSessionFrequencyVariable >> addNewVariableInVocabulary: anAnn [
 
-	self addVocabulary: anAnn classAdded -> anAnn classAdded at: DateAndTime now
+        self
+                registerClass: anAnn classAdded -> anAnn classAdded
+                event: #added
+                at: DateAndTime now
 ]
 
 { #category : 'adding' }
 CooSessionFrequencyVariable >> addVariableInVocabulary: anAnn [
 
-	self addVocabulary: anAnn selectedItem class at: DateAndTime now
+        self
+                registerClass: anAnn selectedItem class
+                event: #selected
+                at: DateAndTime now
 ]
 
 { #category : 'adding' }
 CooSessionFrequencyVariable >> addVocabulary: aString at: aDateAndTime [
 
-	vocabularyCache at: aString put: aDateAndTime
+	        self
+                registerClass: aString
+                event: #added
+                at: aDateAndTime
+]
+
+{ #category : 'adding' }
+CooSessionFrequencyVariable >> eventCountKeyFor: anEventSymbol [
+
+        anEventSymbol = #added ifTrue: [ ^ #addedCount ].
+        anEventSymbol = #selected ifTrue: [ ^ #selectedCount ].
+        ^ nil
 ]
 
 { #category : 'initialization' }
@@ -71,6 +88,27 @@ CooSessionFrequencyVariable >> initialize [
 
 	super initialize.
 	vocabularyCache := CooCachFrequency new maximumWeight: 1000
+]
+
+{ #category : 'adding' }
+CooSessionFrequencyVariable >> newVocabularyEntry [
+
+        ^ Dictionary new
+                at: #addedCount put: 0;
+                at: #selectedCount put: 0;
+                at: #lastSeen put: nil;
+                yourself
+]
+
+{ #category : 'adding' }
+CooSessionFrequencyVariable >> registerClass: aClassReference event: anEventSymbol at: aDateAndTime [
+
+        | entry |
+        (vocabularyCache includesKey: aClassReference)
+                ifFalse: [ vocabularyCache at: aClassReference put: self newVocabularyEntry ].
+        entry := vocabularyCache at: aClassReference.
+        self updateEntry: entry withEvent: anEventSymbol.
+        entry at: #lastSeen put: aDateAndTime
 ]
 
 { #category : 'adding' }
@@ -85,6 +123,15 @@ CooSessionFrequencyVariable >> removeVariableFromVocabulary: anAnn [
 CooSessionFrequencyVariable >> size [
 
 	^ vocabularyCache size
+]
+
+{ #category : 'adding' }
+CooSessionFrequencyVariable >> updateEntry: anEntry withEvent: anEventSymbol [
+
+        | countKey |
+        countKey := self eventCountKeyFor: anEventSymbol.
+        countKey ifNil: [ ^ self ].
+        anEntry at: countKey put: ((anEntry at: countKey ifAbsent: [ 0 ]) + 1)
 ]
 
 { #category : 'matching' }

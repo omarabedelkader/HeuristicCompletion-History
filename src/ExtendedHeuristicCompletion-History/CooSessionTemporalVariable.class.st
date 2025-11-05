@@ -50,20 +50,29 @@ CooSessionTemporalVariable class >> reset [
 
 { #category : 'adding' }
 CooSessionTemporalVariable >> addNewVariableInVocabulary: anAnn [
-	
-	self addVocabulary: (anAnn classAdded -> anAnn classAdded) at: DateAndTime now
+
+	    self
+                registerClass: (anAnn classAdded -> anAnn classAdded)
+                event: #added
+                at: DateAndTime now
 ]
 
 { #category : 'adding' }
 CooSessionTemporalVariable >> addVariableInVocabulary: anAnn [
 
-	self addVocabulary: anAnn selectedItem class at: DateAndTime now
+	       self
+                registerClass: anAnn selectedItem class
+                event: #selected
+                at: DateAndTime now
 ]
 
 { #category : 'adding' }
 CooSessionTemporalVariable >> addVocabulary: aString at: aDateAndTime [
 
-	vocabularyCache at: aString put: aDateAndTime
+	      self
+                registerClass: aString
+                event: #added
+                at: aDateAndTime
 ]
 
 { #category : 'initialization' }
@@ -71,6 +80,27 @@ CooSessionTemporalVariable >> initialize [
 
 	super initialize.
 	vocabularyCache := CooCachTemporal new maximumWeight: 1000
+]
+
+{ #category : 'adding' }
+CooSessionTemporalVariable >> newVocabularyEntry [
+
+        ^ Dictionary new
+                at: #event put: nil;
+                at: #lastSeen put: nil;
+                yourself
+
+]
+
+{ #category : 'adding' }
+CooSessionTemporalVariable >> registerClass: aClassReference event: anEventSymbol at: aDateAndTime [
+
+        | entry |
+        (vocabularyCache includesKey: aClassReference)
+                ifFalse: [ vocabularyCache at: aClassReference put: self newVocabularyEntry ].
+        entry := vocabularyCache at: aClassReference.
+        entry at: #event put: anEventSymbol.
+        entry at: #lastSeen put: aDateAndTime
 ]
 
 { #category : 'adding' }
