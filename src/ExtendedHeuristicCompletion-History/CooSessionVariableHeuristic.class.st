@@ -4,9 +4,9 @@ Class {
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Session',
+	#category : 'ExtendedHeuristicCompletion-History-Temporal-Classes',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Session'
+	#tag : 'Temporal-Classes'
 }
 
 { #category : 'requests' }

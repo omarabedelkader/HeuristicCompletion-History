@@ -13,9 +13,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Session',
+	#category : 'ExtendedHeuristicCompletion-History-Frequency-Messages',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Session'
+	#tag : 'Frequency-Messages'
 }
 
 { #category : 'actions' }
@@ -125,7 +125,7 @@ CooSession >> frequencyForSelector: aSelector [
 CooSession >> initialize [
 
 	super initialize.
-	vocabularyCache := LRUCache new maximumWeight: 1000
+	vocabularyCache := CooSessionVocabularyCache new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }
