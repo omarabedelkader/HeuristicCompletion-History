@@ -54,25 +54,71 @@ CooSession class >> reset [
 { #category : 'accessing' }
 CooSession >> addMessageInVocabulary: anAnn [
 
-	self addVocabulary: anAnn selectedItem selector  at: DateAndTime now
+self
+                registerSelector: anAnn selectedItem selector
+                ast: nil
+                event: #selected
+                at: DateAndTime now
 ]
 
 { #category : 'vocabulary' }
 CooSession >> addModifiedMethodInVocabulary: anAnn [
 
-	self addVocabulary: (anAnn selector -> anAnn newMethod ast) at: DateAndTime now
+	   self
+                registerSelector: anAnn selector
+                ast: anAnn newMethod ast
+                event: #modified
+                at: DateAndTime now
 ]
 
 { #category : 'vocabulary' }
 CooSession >> addNewMethodInVocabulary: anAnn [
-	
-	self addVocabulary: (anAnn selector -> anAnn method ast) at: DateAndTime now 
+
+        self
+                registerSelector: anAnn selector
+                ast: anAnn method ast
+                event: #added
+                at: DateAndTime now
 ]
 
 { #category : 'vocabulary' }
 CooSession >> addVocabulary: aString at: aDateAndTime [
 
 	vocabularyCache at: aString put: aDateAndTime
+]
+
+{ #category : 'accessing' }
+CooSession >> eventCountKeyFor: anEventSymbol [
+
+        anEventSymbol = #added ifTrue: [ ^ #addedCount ].
+        anEventSymbol = #modified ifTrue: [ ^ #modifiedCount ].
+        ^ nil
+]
+
+{ #category : 'accessing' }
+CooSession >> frequencies [
+
+        | result |
+        result := Dictionary new.
+        vocabularyCache keys do: [ :selector |
+                result at: selector put: (self frequencyDictionaryFor: (vocabularyCache at: selector)) ].
+        ^ result
+]
+
+{ #category : 'accessing' }
+CooSession >> frequencyDictionaryFor: anEntry [
+
+        ^ Dictionary new
+                at: #added put: (anEntry at: #addedCount ifAbsent: [ 0 ]);
+                at: #modified put: (anEntry at: #modifiedCount ifAbsent: [ 0 ]);
+                yourself
+]
+
+{ #category : 'accessing' }
+CooSession >> frequencyForSelector: aSelector [
+
+        (vocabularyCache includesKey: aSelector) ifFalse: [ ^ self newFrequencyDictionary ].
+        ^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
 ]
 
 { #category : 'initialization' }
@@ -83,12 +129,41 @@ CooSession >> initialize [
 ]
 
 { #category : 'accessing' }
+CooSession >> newFrequencyDictionary [
+
+        ^ Dictionary new
+                at: #added put: 0;
+                at: #modified put: 0;
+                yourself
+]
+
+{ #category : 'accessing' }
+CooSession >> newVocabularyEntry [
+
+        ^ Dictionary new
+                at: #ast put: nil;
+                at: #lastSeen put: nil;
+                at: #addedCount put: 0;
+                at: #modifiedCount put: 0;
+                yourself
+]
+
+{ #category : 'accessing' }
+CooSession >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
+
+        | entry |
+        (vocabularyCache includesKey: aSelector)
+                ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
+        entry := vocabularyCache at: aSelector.
+        self updateEntry: entry withEvent: anEventSymbol.
+        anAst ifNotNil: [ entry at: #ast put: anAst ].
+        entry at: #lastSeen put: aDateAndTime
+]
+
+{ #category : 'accessing' }
 CooSession >> removeMethodFromVocabulary: anAnn [
 
-        | selector |
-        selector := anAnn selector.
-        (vocabularyCache keys select: [ :each | each key = selector ])
-                do: [ :each | vocabularyCache removeKey: each ifAbsent: [ ] ].
+	vocabularyCache removeKey: anAnn selector ifAbsent: [ ]
 ]
 
 { #category : 'accessing' }
@@ -97,7 +172,20 @@ CooSession >> size [
 ]
 
 { #category : 'accessing' }
+CooSession >> updateEntry: anEntry withEvent: anEventSymbol [
+
+        | countKey |
+        countKey := self eventCountKeyFor: anEventSymbol.
+        countKey ifNil: [ ^ self ].
+        anEntry at: countKey put: ((anEntry at: countKey ifAbsent: [ 0 ]) + 1)
+]
+
+{ #category : 'accessing' }
 CooSession >> words [
 
-	^ vocabularyCache keys
+	^ vocabularyCache keys collect: [ :selector |
+                | entry |
+                entry := vocabularyCache at: selector.
+                selector -> (entry at: #ast ifAbsent: [ nil ])
+        ]
 ]
