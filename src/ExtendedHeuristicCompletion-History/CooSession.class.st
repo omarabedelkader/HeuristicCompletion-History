@@ -35,19 +35,10 @@ CooSession class >> deinstall [
 
 { #category : 'actions' }
 CooSession class >> install [
+
 	<script>
-	
-	self environment codeChangeAnnouncer
-		when: MethodAdded
-		send: #addNewMethodInVocabulary: 
-		to: self current.
-	"
-	This does not work for now because we are expecting a node and the menu does not give us a node
-	in addition we do not get the."
-	"self environment codeChangeAnnouncer
-		when: CompletionItemSelected
-		send: #addMessageInVocabulary: 
-		to: self current."
+	self environment codeChangeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
+	self environment codeChangeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current
 ]
 
 { #category : 'actions' }
@@ -63,6 +54,12 @@ CooSession class >> reset [
 CooSession >> addMessageInVocabulary: anAnn [
 
 	self addVocabulary: anAnn selectedItem selector  at: DateAndTime now
+]
+
+{ #category : 'vocabulary' }
+CooSession >> addModifiedMethodInVocabulary: anAnn [
+
+	self addVocabulary: (anAnn selector -> anAnn newMethod ast) at: DateAndTime now
 ]
 
 { #category : 'vocabulary' }
