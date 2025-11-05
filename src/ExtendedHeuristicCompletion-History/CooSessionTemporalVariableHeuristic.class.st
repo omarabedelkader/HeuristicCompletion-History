@@ -1,5 +1,6 @@
 "
-Session variables
+A heuristic that offers variable name completions based on the most recently used variables tracked in the current temporal session.
+
 "
 Class {
 	#name : 'CooSessionTemporalVariableHeuristic',

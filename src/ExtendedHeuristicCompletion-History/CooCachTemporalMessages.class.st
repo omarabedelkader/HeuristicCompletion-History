@@ -1,3 +1,7 @@
+"
+A cache that stores message entries ordered by their most recent access time, removing the oldest ones when the size limit is exceeded.
+
+"
 Class {
 	#name : 'CooCachTemporalMessages',
 	#superclass : 'Object',

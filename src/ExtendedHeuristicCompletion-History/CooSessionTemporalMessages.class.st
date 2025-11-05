@@ -1,3 +1,7 @@
+"
+A session manager that tracks message activity over time, recording when methods are added or modified to support temporally based autocompletion.
+
+"
 Class {
 	#name : 'CooSessionTemporalMessages',
 	#superclass : 'Object',

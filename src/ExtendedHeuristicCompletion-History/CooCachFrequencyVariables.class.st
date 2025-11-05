@@ -1,5 +1,6 @@
 "
-I'm a cach vocab
+A cache that stores variable entries ranked by their modification frequency, discarding the least frequently updated ones when the limit is reached.
+
 "
 Class {
 	#name : 'CooCachFrequencyVariables',

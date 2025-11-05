@@ -1,3 +1,7 @@
+"
+A heuristic that provides variable name completions using the vocabulary gathered from the current session’s tracked variable activity.
+
+"
 Class {
 	#name : 'CooSessionFrequencyVariableHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',

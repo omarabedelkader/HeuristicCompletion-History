@@ -1,3 +1,7 @@
+"
+A heuristic that suggests message completions based on the most recently used methods recorded in the current temporal session.
+
+"
 Class {
 	#name : 'CooSessionTemporalMessagesHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',

@@ -1,3 +1,7 @@
+"
+A cache that stores message entries ordered by their modification frequency, removing the least frequently used ones when exceeding a size limit.
+
+"
 Class {
 	#name : 'CooCachFrequencyMessages',
 	#superclass : 'Object',

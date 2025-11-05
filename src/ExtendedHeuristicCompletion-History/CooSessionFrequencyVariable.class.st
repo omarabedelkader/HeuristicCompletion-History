@@ -1,3 +1,7 @@
+"
+A session manager that tracks and stores recently added variables by recording their creation times for frequency-based completion.
+
+"
 Class {
 	#name : 'CooSessionFrequencyVariable',
 	#superclass : 'Object',

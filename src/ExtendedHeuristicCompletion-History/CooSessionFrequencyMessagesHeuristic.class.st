@@ -1,5 +1,6 @@
 "
-I am an heuristic that autocompletes messages based on a session vocabulary.
+A heuristic that suggests message completions using the vocabulary gathered from the current session’s recorded method activity.
+
 "
 Class {
 	#name : 'CooSessionFrequencyMessagesHeuristic',

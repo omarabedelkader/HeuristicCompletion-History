@@ -1,5 +1,6 @@
 "
-Session varibales
+A session manager that records recently added variables, keeping track of their creation times to enable temporally based variable completion.
+
 "
 Class {
 	#name : 'CooSessionTemporalVariable',

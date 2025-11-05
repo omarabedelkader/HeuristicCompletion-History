@@ -1,8 +1,6 @@
 "
-I implement a session that collects execution information.
-I collect the last words in modified methods.
+A session manager that tracks message usage by recording and updating the frequency and timing of method additions and modifications.
 
-I
 "
 Class {
 	#name : 'CooSessionFrequencyMessages',

@@ -1,5 +1,6 @@
 "
-Temporal cach
+A cache that stores variable entries sorted by their most recent usage time, discarding the oldest ones when the capacity limit is reached.
+
 "
 Class {
 	#name : 'CooCachTemporalVariables',
