@@ -38,7 +38,8 @@ CooSession class >> install [
 
 	<script>
 	self environment codeChangeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
-	self environment codeChangeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current
+	self environment codeChangeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current.
+	self environment codeChangeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current.
 ]
 
 { #category : 'actions' }
@@ -79,6 +80,15 @@ CooSession >> initialize [
 
 	super initialize.
 	vocabularyCache := LRUCache new maximumWeight: 1000
+]
+
+{ #category : 'accessing' }
+CooSession >> removeMethodFromVocabulary: anAnn [
+
+        | selector |
+        selector := anAnn selector.
+        (vocabularyCache keys select: [ :each | each key = selector ])
+                do: [ :each | vocabularyCache removeKey: each ifAbsent: [ ] ].
 ]
 
 { #category : 'accessing' }
