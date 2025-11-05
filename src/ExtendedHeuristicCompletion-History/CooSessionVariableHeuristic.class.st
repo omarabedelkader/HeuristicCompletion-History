@@ -1,3 +1,6 @@
+"
+Session variables
+"
 Class {
 	#name : 'CooSessionVariableHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',

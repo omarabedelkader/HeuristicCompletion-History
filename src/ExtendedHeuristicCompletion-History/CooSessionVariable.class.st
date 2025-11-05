@@ -1,3 +1,6 @@
+"
+Session varibales
+"
 Class {
 	#name : 'CooSessionVariable',
 	#superclass : 'Object',
@@ -75,7 +78,7 @@ CooSessionVariable >> addVocabulary: aString at: aDateAndTime [
 CooSessionVariable >> initialize [
 
 	super initialize.
-	vocabularyCache := LRUCache new maximumWeight: 1000
+	vocabularyCache := CooSessionTemporalVocabularyCache new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }

@@ -1,3 +1,6 @@
+"
+I'm a cach vocab
+"
 Class {
 	#name : 'CooSessionVocabularyCache',
 	#superclass : 'Object',
