@@ -35,7 +35,8 @@ CooSessionTemporalVariable class >> deinstall [
 CooSessionTemporalVariable class >> install [
 
 	<script>
-	self environment codeChangeAnnouncer when: ClassAdded send: #addNewVariableInVocabulary: to: self current
+	self environment codeChangeAnnouncer when: ClassAdded send: #addNewVariableInVocabulary: to: self current.
+	self environment codeChangeAnnouncer when: ClassRemoved send: #removeVariableFromVocabulary: to: self current
 ]
 
 { #category : 'initialization' }
@@ -70,6 +71,14 @@ CooSessionTemporalVariable >> initialize [
 
 	super initialize.
 	vocabularyCache := CooCachTemporal new maximumWeight: 1000
+]
+
+{ #category : 'adding' }
+CooSessionTemporalVariable >> removeVariableFromVocabulary: anAnn [
+
+        | removedAssociation |
+        removedAssociation := anAnn classRemoved -> anAnn classRemoved.
+        vocabularyCache removeKey: removedAssociation ifAbsent: [ ]
 ]
 
 { #category : 'accessing' }

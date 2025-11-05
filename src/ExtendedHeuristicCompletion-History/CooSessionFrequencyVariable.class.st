@@ -34,7 +34,9 @@ CooSessionFrequencyVariable class >> deinstall [
 CooSessionFrequencyVariable class >> install [
 
 	<script>
-	self environment codeChangeAnnouncer when: ClassAdded send: #addNewVariableInVocabulary: to: self current
+	self environment codeChangeAnnouncer
+		when: ClassAdded send: #addNewVariableInVocabulary: to: self current;
+		when: ClassRemoved send: #removeVariableFromVocabulary: to: self current
 ]
 
 { #category : 'actions' }
@@ -69,6 +71,14 @@ CooSessionFrequencyVariable >> initialize [
 
 	super initialize.
 	vocabularyCache := CooCachFrequency new maximumWeight: 1000
+]
+
+{ #category : 'adding' }
+CooSessionFrequencyVariable >> removeVariableFromVocabulary: anAnn [
+
+        | removedAssociation |
+        removedAssociation := anAnn classRemoved -> anAnn classRemoved.
+        vocabularyCache removeKey: removedAssociation ifAbsent: [ ]
 ]
 
 { #category : 'accessing' }
