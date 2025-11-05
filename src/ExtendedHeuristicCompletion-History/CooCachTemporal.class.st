@@ -7,7 +7,9 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
-		'maximumWeight'
+		'maximumWeight',
+		'insertionOrder',
+		'orderCounter'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Cach',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -17,15 +19,19 @@ Class {
 { #category : 'initialization' }
 CooCachTemporal >> association: firstAssociation precedes: secondAssociation [
 
-| firstEntry secondEntry firstSeen secondSeen |
-firstEntry := firstAssociation value.
-secondEntry := secondAssociation value.
-firstSeen := firstEntry at: #lastSeen ifAbsent: [ nil ].
-secondSeen := secondEntry at: #lastSeen ifAbsent: [ nil ].
-firstSeen = secondSeen ifTrue: [ ^ firstAssociation key asString <= secondAssociation key asString ].
-firstSeen ifNil: [ ^ false ].
-secondSeen ifNil: [ ^ true ].
-^ firstSeen > secondSeen
+	| firstEntry secondEntry firstSeen secondSeen firstOrder secondOrder |
+	firstEntry := firstAssociation value.
+	secondEntry := secondAssociation value.
+	firstSeen := firstEntry at: #lastSeen ifAbsent: [ nil ].
+	secondSeen := secondEntry at: #lastSeen ifAbsent: [ nil ].
+firstSeen = secondSeen ifTrue: [
+    firstOrder := self orderFor: firstAssociation key.
+    secondOrder := self orderFor: secondAssociation key.
+    firstOrder = secondOrder ifTrue: [ ^ firstAssociation key asString <= secondAssociation key asString ].
+    ^ firstOrder > secondOrder ].
+	firstSeen ifNil: [ ^ false ].
+	secondSeen ifNil: [ ^ true ].
+	^ firstSeen > secondSeen
 ]
 
 { #category : 'accessing' }
@@ -37,23 +43,29 @@ CooCachTemporal >> associations [
 { #category : 'accessing' }
 CooCachTemporal >> at: aKey [
 
-	^ entries at: aKey
+        | entry |
+        entry := entries at: aKey.
+        self recordAccessOf: aKey.
+        ^ entry
 ]
 
 { #category : 'accessing' }
 CooCachTemporal >> at: aKey put: aValue [
 
-	entries at: aKey put: aValue.
-	self enforceLimit.
-	^ aValue
+        entries at: aKey put: aValue.
+        self recordInsertionOf: aKey.
+        self enforceLimit.
+        ^ aValue
 ]
 
 { #category : 'accessing' }
 CooCachTemporal >> enforceLimit [
-
-	entries size <= maximumWeight ifTrue: [ ^ self ].
-	(self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
-		entries removeKey: association key ifAbsent: [ ] ]
+        entries size <= maximumWeight ifTrue: [ ^ self ].
+        (self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
+                | key |
+                key := association key.
+                entries removeKey: key ifAbsent: [ ].
+                insertionOrder removeKey: key ifAbsent: [ ] ]
 ]
 
 { #category : 'testing' }
@@ -65,9 +77,11 @@ CooCachTemporal >> includesKey: aKey [
 { #category : 'initialization' }
 CooCachTemporal >> initialize [
 
-	super initialize.
-	entries := Dictionary new.
-	maximumWeight := 1000
+        super initialize.
+        entries := Dictionary new.
+        insertionOrder := Dictionary new.
+        orderCounter := 0.
+        maximumWeight := 1000
 ]
 
 { #category : 'accessing' }
@@ -82,6 +96,30 @@ CooCachTemporal >> maximumWeight: anInteger [
 	maximumWeight := anInteger.
 	self enforceLimit.
 	^ self
+]
+
+{ #category : 'initialization' }
+CooCachTemporal >> nextOrderValue [
+
+        ^ orderCounter := orderCounter + 1
+]
+
+{ #category : 'initialization' }
+CooCachTemporal >> orderFor: aKey [
+
+        ^ insertionOrder at: aKey ifAbsent: [ 0 ]
+]
+
+{ #category : 'initialization' }
+CooCachTemporal >> recordAccessOf: aKey [
+
+        (insertionOrder includesKey: aKey) ifTrue: [ insertionOrder at: aKey put: self nextOrderValue ]
+]
+
+{ #category : 'initialization' }
+CooCachTemporal >> recordInsertionOf: aKey [
+
+        insertionOrder at: aKey put: self nextOrderValue
 ]
 
 { #category : 'removing' }
