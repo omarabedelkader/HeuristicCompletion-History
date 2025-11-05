@@ -3,7 +3,7 @@ A cache that stores message entries ordered by their most recent access time, re
 
 "
 Class {
-	#name : 'CooCachTemporalMessages',
+	#name : 'CooCachTemporal',
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
@@ -15,7 +15,7 @@ Class {
 }
 
 { #category : 'initialization' }
-CooCachTemporalMessages >> association: firstAssociation precedes: secondAssociation [
+CooCachTemporal >> association: firstAssociation precedes: secondAssociation [
 
 | firstEntry secondEntry firstSeen secondSeen |
 firstEntry := firstAssociation value.
@@ -29,19 +29,19 @@ secondSeen ifNil: [ ^ true ].
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> associations [
+CooCachTemporal >> associations [
 
 	^ self sortedAssociations
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> at: aKey [
+CooCachTemporal >> at: aKey [
 
 	^ entries at: aKey
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> at: aKey put: aValue [
+CooCachTemporal >> at: aKey put: aValue [
 
 	entries at: aKey put: aValue.
 	self enforceLimit.
@@ -49,7 +49,7 @@ CooCachTemporalMessages >> at: aKey put: aValue [
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> enforceLimit [
+CooCachTemporal >> enforceLimit [
 
 	entries size <= maximumWeight ifTrue: [ ^ self ].
 	(self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
@@ -57,13 +57,13 @@ CooCachTemporalMessages >> enforceLimit [
 ]
 
 { #category : 'testing' }
-CooCachTemporalMessages >> includesKey: aKey [
+CooCachTemporal >> includesKey: aKey [
 
 	^ entries includesKey: aKey
 ]
 
 { #category : 'initialization' }
-CooCachTemporalMessages >> initialize [
+CooCachTemporal >> initialize [
 
 	super initialize.
 	entries := Dictionary new.
@@ -71,13 +71,13 @@ CooCachTemporalMessages >> initialize [
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> keys [
+CooCachTemporal >> keys [
 
 	^ self sortedAssociations collect: [ :association | association key ]
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> maximumWeight: anInteger [
+CooCachTemporal >> maximumWeight: anInteger [
 
 	maximumWeight := anInteger.
 	self enforceLimit.
@@ -85,19 +85,19 @@ CooCachTemporalMessages >> maximumWeight: anInteger [
 ]
 
 { #category : 'removing' }
-CooCachTemporalMessages >> removeKey: aKey ifAbsent: aBlock [
+CooCachTemporal >> removeKey: aKey ifAbsent: aBlock [
 
 	^ entries removeKey: aKey ifAbsent: aBlock
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> size [
+CooCachTemporal >> size [
 
 	^ entries size
 ]
 
 { #category : 'accessing' }
-CooCachTemporalMessages >> sortedAssociations [
+CooCachTemporal >> sortedAssociations [
 
 	^ entries associations asSortedCollection: [ :first :second | self association: first precedes: second ]
 ]

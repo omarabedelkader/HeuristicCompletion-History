@@ -123,7 +123,7 @@ CooSessionFrequencyMessages >> frequencyForSelector: aSelector [
 CooSessionFrequencyMessages >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachFrequencyMessages new maximumWeight: 1000
+	vocabularyCache := CooCachFrequency new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }

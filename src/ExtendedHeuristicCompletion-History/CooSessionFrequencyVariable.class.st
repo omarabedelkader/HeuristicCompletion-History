@@ -68,7 +68,7 @@ CooSessionFrequencyVariable >> addVocabulary: aString at: aDateAndTime [
 CooSessionFrequencyVariable >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachFrequencyVariables new maximumWeight: 1000
+	vocabularyCache := CooCachFrequency new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }

@@ -69,7 +69,7 @@ CooSessionTemporalVariable >> addVocabulary: aString at: aDateAndTime [
 CooSessionTemporalVariable >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachTemporalVariables new maximumWeight: 1000
+	vocabularyCache := CooCachTemporal new maximumWeight: 1000
 ]
 
 { #category : 'accessing' }
