@@ -1,3 +1,6 @@
+"
+Mock class
+"
 Class {
 	#name : 'CooMockVariable',
 	#superclass : 'Object',

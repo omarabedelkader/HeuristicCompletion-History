@@ -1,3 +1,8 @@
+"
+Class: CooMockVariableSelectedAnnouncement
+
+mock class
+"
 Class {
 	#name : 'CooMockVariableSelectedAnnouncement',
 	#superclass : 'Object',

@@ -14,7 +14,7 @@ CooSessionFrequencyVariableTest >> cache [
     ^ session instVarNamed: 'vocabularyCache'
 ]
 
-{ #category : 'origins' }
+{ #category : 'running' }
 CooSessionFrequencyVariableTest >> setUp [
 
     super setUp.
