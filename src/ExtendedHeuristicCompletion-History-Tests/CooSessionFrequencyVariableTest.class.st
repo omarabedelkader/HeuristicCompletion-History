@@ -11,7 +11,7 @@ Class {
 { #category : 'origins' }
 CooSessionFrequencyVariableTest >> cache [
 
-    ^ session instVarNamed: 'vocabularyCache'
+	^ session vocabularyCache
 ]
 
 { #category : 'running' }
@@ -38,14 +38,14 @@ CooSessionFrequencyVariableTest >> testAddNewVariableAnnouncementRegistersEntry 
 { #category : 'origins' }
 CooSessionFrequencyVariableTest >> testAddVocabularyRecordsMetadata [
 
-    | timestamp entry |
-    timestamp := DateAndTime now.
-    session addVocabulary: 'Foo' at: timestamp.
-    entry := self cache at: 'Foo'.
-    self assert: session size = 1.
-    self assert: (entry at: #addedCount) = 1.
-    self assert: (entry at: #selectedCount) = 0.
-    self assert: (entry at: #lastSeen) = timestamp
+	| timestamp entry |
+	timestamp := DateAndTime now.
+	session addVocabulary: 'Foo' at: timestamp.
+	entry := self cache at: 'Foo'.
+	self assert: session size = 1.
+	self assert: (entry at: #addedCount) equals: 1.
+	self assert: (entry at: #selectedCount) equals: 0.
+	self assert: (entry at: #lastSeen) equals: timestamp
 ]
 
 { #category : 'origins' }

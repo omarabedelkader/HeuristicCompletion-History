@@ -21,7 +21,8 @@ CooSessionTemporalMessagesHeuristic >> appliesForNode: aNode inContext: aContext
 
 { #category : 'requests' }
 CooSessionTemporalMessagesHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
-
+	"We generate a list based on the previous selectors"
+	
 	^ CoCollectionFetcher onCollection:
 		  (self session words collect: [ :each | NECSelectorEntry contents: each key node: each value ])
 ]

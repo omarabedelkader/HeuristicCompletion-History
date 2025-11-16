@@ -1,6 +1,20 @@
 "
 A session manager that tracks message activity over time, recording when methods are added or modified to support temporally based autocompletion.
 
+
+#### Implementation questions.
+
+Questions: I do not really understand the use of a dictionary in the context of a sequence because temporal means that we will want to take into account more frequent first 
+
+So why not having 
+
+	entry1 entry2 ..... entryn
+	
+then when the user type x we select the entries with x* and pass them to the fetcher. 
+
+I have to think about it.
+
+
 "
 Class {
 	#name : 'CooSessionTemporalMessages',

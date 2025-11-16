@@ -134,6 +134,12 @@ CooSessionFrequencyVariable >> updateEntry: anEntry withEvent: anEventSymbol [
         anEntry at: countKey put: ((anEntry at: countKey ifAbsent: [ 0 ]) + 1)
 ]
 
+{ #category : 'accessing' }
+CooSessionFrequencyVariable >> vocabularyCache [
+
+	^ vocabularyCache
+]
+
 { #category : 'matching' }
 CooSessionFrequencyVariable >> words [
 

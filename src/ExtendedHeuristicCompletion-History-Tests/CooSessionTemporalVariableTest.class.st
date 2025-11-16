@@ -23,14 +23,14 @@ CooSessionTemporalVariableTest >> setUp [
 { #category : 'origins' }
 CooSessionTemporalVariableTest >> testAddNewVariableAnnouncementRegistersEntry [
 
-    | announcement association entry |
-    announcement := CooMockClassAddedAnnouncement for: #TemporalMock.
-    session addNewVariableInVocabulary: announcement.
-    association := #TemporalMock -> #TemporalMock.
-    entry := self cache at: association.
-    self assert: session size = 1.
-    self assert: (entry at: #event) = #added.
-    self assert: (entry at: #lastSeen) notNil
+	| announcement association entry |
+	announcement := CooMockClassAddedAnnouncement for: #TemporalMock.
+	session addNewVariableInVocabulary: announcement.
+	association := #TemporalMock -> #TemporalMock.
+	entry := self cache at: association.
+	self assert: session size equals: 1.
+	self assert: (entry at: #event) equals: #added.
+	self assert: (entry at: #lastSeen) notNil
 ]
 
 { #category : 'origins' }
@@ -86,9 +86,9 @@ CooSessionTemporalVariableTest >> testSelectionAnnouncementUpdatesEntry [
 { #category : 'tests' }
 CooSessionTemporalVariableTest >> testWordsReflectTrackedAssociations [
 
-    | announcement |
-    announcement := CooMockClassAddedAnnouncement for: #TemporalWord.
-    session addNewVariableInVocabulary: announcement.
-    self assert: session words size = 1.
-    self assert: (session words includes: #TemporalWord -> #TemporalWord)
+	| announcement |
+	announcement := CooMockClassAddedAnnouncement for: #TemporalWord.
+	session addNewVariableInVocabulary: announcement.
+	self assert: session words size equals: 1.
+	self assert: (session words includes: #TemporalWord -> #TemporalWord)
 ]
