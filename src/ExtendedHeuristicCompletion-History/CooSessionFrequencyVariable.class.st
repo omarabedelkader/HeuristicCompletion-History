@@ -87,7 +87,7 @@ CooSessionFrequencyVariable >> eventCountKeyFor: anEventSymbol [
 CooSessionFrequencyVariable >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachFrequency new maximumWeight: 1000
+	vocabularyCache := CooFrequencyCache new maximumWeight: 1000
 ]
 
 { #category : 'adding' }

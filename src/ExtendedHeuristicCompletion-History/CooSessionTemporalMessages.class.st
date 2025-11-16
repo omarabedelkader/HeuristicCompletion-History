@@ -121,7 +121,7 @@ CooSessionTemporalMessages >> frequencyForSelector: aSelector [
 CooSessionTemporalMessages >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachTemporal new maximumWeight: 1000
+	vocabularyCache := CooTemporalCache new maximumWeight: 1000
 ]
 
 { #category : 'adding' }

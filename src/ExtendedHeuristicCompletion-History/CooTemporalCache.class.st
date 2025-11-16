@@ -3,7 +3,7 @@ A cache that stores message entries ordered by their most recent access time, re
 
 "
 Class {
-	#name : 'CooCachTemporal',
+	#name : 'CooTemporalCache',
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
@@ -11,13 +11,13 @@ Class {
 		'insertionOrder',
 		'orderCounter'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Cach',
+	#category : 'ExtendedHeuristicCompletion-History-Cache',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Cach'
+	#tag : 'Cache'
 }
 
 { #category : 'initialization' }
-CooCachTemporal >> association: firstAssociation precedes: secondAssociation [
+CooTemporalCache >> association: firstAssociation precedes: secondAssociation [
 
 	| firstEntry secondEntry firstSeen secondSeen firstOrder secondOrder |
 	firstEntry := firstAssociation value.
@@ -35,13 +35,13 @@ firstSeen = secondSeen ifTrue: [
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> associations [
+CooTemporalCache >> associations [
 
 	^ self sortedAssociations
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> at: aKey [
+CooTemporalCache >> at: aKey [
 
         | entry |
         entry := entries at: aKey.
@@ -50,7 +50,7 @@ CooCachTemporal >> at: aKey [
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> at: aKey put: aValue [
+CooTemporalCache >> at: aKey put: aValue [
 
         entries at: aKey put: aValue.
         self recordInsertionOf: aKey.
@@ -59,7 +59,7 @@ CooCachTemporal >> at: aKey put: aValue [
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> enforceLimit [
+CooTemporalCache >> enforceLimit [
         entries size <= maximumWeight ifTrue: [ ^ self ].
         (self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
                 | key |
@@ -69,13 +69,13 @@ CooCachTemporal >> enforceLimit [
 ]
 
 { #category : 'testing' }
-CooCachTemporal >> includesKey: aKey [
+CooTemporalCache >> includesKey: aKey [
 
 	^ entries includesKey: aKey
 ]
 
 { #category : 'initialization' }
-CooCachTemporal >> initialize [
+CooTemporalCache >> initialize [
 
         super initialize.
         entries := Dictionary new.
@@ -85,13 +85,13 @@ CooCachTemporal >> initialize [
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> keys [
+CooTemporalCache >> keys [
 
 	^ self sortedAssociations collect: [ :association | association key ]
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> maximumWeight: anInteger [
+CooTemporalCache >> maximumWeight: anInteger [
 
 	maximumWeight := anInteger.
 	self enforceLimit.
@@ -99,43 +99,43 @@ CooCachTemporal >> maximumWeight: anInteger [
 ]
 
 { #category : 'initialization' }
-CooCachTemporal >> nextOrderValue [
+CooTemporalCache >> nextOrderValue [
 
         ^ orderCounter := orderCounter + 1
 ]
 
 { #category : 'initialization' }
-CooCachTemporal >> orderFor: aKey [
+CooTemporalCache >> orderFor: aKey [
 
         ^ insertionOrder at: aKey ifAbsent: [ 0 ]
 ]
 
 { #category : 'initialization' }
-CooCachTemporal >> recordAccessOf: aKey [
+CooTemporalCache >> recordAccessOf: aKey [
 
         (insertionOrder includesKey: aKey) ifTrue: [ insertionOrder at: aKey put: self nextOrderValue ]
 ]
 
 { #category : 'initialization' }
-CooCachTemporal >> recordInsertionOf: aKey [
+CooTemporalCache >> recordInsertionOf: aKey [
 
         insertionOrder at: aKey put: self nextOrderValue
 ]
 
 { #category : 'removing' }
-CooCachTemporal >> removeKey: aKey ifAbsent: aBlock [
+CooTemporalCache >> removeKey: aKey ifAbsent: aBlock [
 
 	^ entries removeKey: aKey ifAbsent: aBlock
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> size [
+CooTemporalCache >> size [
 
 	^ entries size
 ]
 
 { #category : 'accessing' }
-CooCachTemporal >> sortedAssociations [
+CooTemporalCache >> sortedAssociations [
 
 	^ entries associations asSortedCollection: [ :first :second | self association: first precedes: second ]
 ]

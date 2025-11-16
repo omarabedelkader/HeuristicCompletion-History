@@ -3,19 +3,19 @@ A cache that stores message entries ordered by their modification frequency, rem
 
 "
 Class {
-	#name : 'CooCachFrequency',
+	#name : 'CooFrequencyCache',
 	#superclass : 'Object',
 	#instVars : [
 		'entries',
 		'maximumWeight'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Cach',
+	#category : 'ExtendedHeuristicCompletion-History-Cache',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Cach'
+	#tag : 'Cache'
 }
 
 { #category : 'initialization' }
-CooCachFrequency >> association: firstAssociation precedes: secondAssociation [
+CooFrequencyCache >> association: firstAssociation precedes: secondAssociation [
 
 	| firstModified secondModified |
 	firstModified := self modificationCountFor: firstAssociation value.
@@ -25,19 +25,19 @@ CooCachFrequency >> association: firstAssociation precedes: secondAssociation [
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> associations [
+CooFrequencyCache >> associations [
 
 	^ self sortedAssociations
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> at: aKey [
+CooFrequencyCache >> at: aKey [
 
 	^ entries at: aKey
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> at: aKey put: aValue [
+CooFrequencyCache >> at: aKey put: aValue [
 
 	entries at: aKey put: aValue.
 	self enforceLimit.
@@ -45,35 +45,35 @@ CooCachFrequency >> at: aKey put: aValue [
 ]
 
 { #category : 'initialization' }
-CooCachFrequency >> enforceLimit [
-
+CooFrequencyCache >> enforceLimit [
+	"We remove brut force some items."
 	entries size <= maximumWeight ifTrue: [ ^ self ].
 	(self sortedAssociations copyFrom: maximumWeight + 1 to: entries size) do: [ :association |
 		entries removeKey: association key ifAbsent: [ ] ]
 ]
 
 { #category : 'testing' }
-CooCachFrequency >> includesKey: aKey [
+CooFrequencyCache >> includesKey: aKey [
 
 	^ entries includesKey: aKey
 ]
 
 { #category : 'initialization' }
-CooCachFrequency >> initialize [
+CooFrequencyCache >> initialize [
 
 	super initialize.
 	entries := Dictionary new.
-	maximumWeight := 1000
+	maximumWeight := 10000
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> keys [
+CooFrequencyCache >> keys [
 
 	^ self associations collect: [ :association | association key ]
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> maximumWeight: anInteger [
+CooFrequencyCache >> maximumWeight: anInteger [
 
 	maximumWeight := anInteger.
 	self enforceLimit.
@@ -81,26 +81,26 @@ CooCachFrequency >> maximumWeight: anInteger [
 ]
 
 { #category : 'initialization' }
-CooCachFrequency >> modificationCountFor: anEntry [
+CooFrequencyCache >> modificationCountFor: anEntry [
 
 	(anEntry isKindOf: Dictionary) ifFalse: [ ^ 0 ].
 	^ anEntry at: #modifiedCount ifAbsent: [ 0 ]
 ]
 
 { #category : 'removing' }
-CooCachFrequency >> removeKey: aKey ifAbsent: aBlock [
+CooFrequencyCache >> removeKey: aKey ifAbsent: aBlock [
 
 	^ entries removeKey: aKey ifAbsent: aBlock
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> size [
+CooFrequencyCache >> size [
 
 	^ entries size
 ]
 
 { #category : 'accessing' }
-CooCachFrequency >> sortedAssociations [
+CooFrequencyCache >> sortedAssociations [
 
 	^ entries associations asSortedCollection: [ :first :second | self association: first precedes: second ]
 ]

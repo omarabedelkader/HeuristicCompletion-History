@@ -62,11 +62,11 @@ self
 { #category : 'vocabulary' }
 CooSessionFrequencyMessages >> addModifiedMethodInVocabulary: anAnn [
 
-	   self
-                registerSelector: anAnn selector
-                ast: anAnn newMethod ast
-                event: #modified
-                at: DateAndTime now
+	self
+		registerSelector: anAnn selector
+		ast: anAnn newMethod ast
+		event: #modified
+		at: DateAndTime now
 ]
 
 { #category : 'vocabulary' }
@@ -96,11 +96,13 @@ CooSessionFrequencyMessages >> eventCountKeyFor: anEventSymbol [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> frequencies [
 
-        | result |
-        result := Dictionary new.
-        vocabularyCache keys do: [ :selector |
-                result at: selector put: (self frequencyDictionaryFor: (vocabularyCache at: selector)) ].
-        ^ result
+	| result |
+	result := Dictionary new.
+	vocabularyCache keys 
+		do: [ :selector | result
+					at: selector 
+					put: (self frequencyDictionaryFor: (vocabularyCache at: selector)) ].
+	^ result
 ]
 
 { #category : 'accessing' }
@@ -123,16 +125,16 @@ CooSessionFrequencyMessages >> frequencyForSelector: aSelector [
 CooSessionFrequencyMessages >> initialize [
 
 	super initialize.
-	vocabularyCache := CooCachFrequency new maximumWeight: 1000
+	vocabularyCache := CooFrequencyCache new
 ]
 
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> newFrequencyDictionary [
 
-        ^ Dictionary new
-                at: #added put: 0;
-                at: #modified put: 0;
-                yourself
+	^ Dictionary new
+		  at: #added put: 0;
+		  at: #modified put: 0;
+		  yourself
 ]
 
 { #category : 'accessing' }
@@ -149,13 +151,13 @@ CooSessionFrequencyMessages >> newVocabularyEntry [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
-        | entry |
-        (vocabularyCache includesKey: aSelector)
-                ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
-        entry := vocabularyCache at: aSelector.
-        self updateEntry: entry withEvent: anEventSymbol.
-        anAst ifNotNil: [ entry at: #ast put: anAst ].
-        entry at: #lastSeen put: aDateAndTime
+	| entry |
+	(vocabularyCache includesKey: aSelector) 
+		ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
+	entry := vocabularyCache at: aSelector.
+	self updateEntry: entry withEvent: anEventSymbol.
+	anAst ifNotNil: [ entry at: #ast put: anAst ].
+	entry at: #lastSeen put: aDateAndTime
 ]
 
 { #category : 'accessing' }
@@ -182,8 +184,7 @@ CooSessionFrequencyMessages >> updateEntry: anEntry withEvent: anEventSymbol [
 CooSessionFrequencyMessages >> words [
 
 	^ vocabularyCache keys collect: [ :selector |
-                | entry |
-                entry := vocabularyCache at: selector.
-                selector -> (entry at: #ast ifAbsent: [ nil ])
-        ]
+		| entry |
+      entry := vocabularyCache at: selector.
+      selector -> (entry at: #ast ifAbsent: [ nil ]) ]
 ]
