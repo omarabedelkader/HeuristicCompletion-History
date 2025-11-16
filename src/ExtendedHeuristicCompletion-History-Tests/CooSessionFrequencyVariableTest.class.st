@@ -49,6 +49,20 @@ CooSessionFrequencyVariableTest >> testAddVocabularyRecordsMetadata [
 ]
 
 { #category : 'origins' }
+CooSessionFrequencyVariableTest >> testRegisterClassAccumulatesCounts [
+
+    | timestampOlder timestampRecent entry |
+    timestampOlder := DateAndTime now.
+    timestampRecent := timestampOlder + (Duration seconds: 3).
+    session registerClass: #TrackedFrequency event: #added at: timestampOlder.
+    session registerClass: #TrackedFrequency event: #selected at: timestampRecent.
+    entry := self cache at: #TrackedFrequency.
+    self assert: (entry at: #addedCount) = 1.
+    self assert: (entry at: #selectedCount) = 1.
+    self assert: (entry at: #lastSeen) = timestampRecent
+]
+
+{ #category : 'origins' }
 CooSessionFrequencyVariableTest >> testRemoveVariableFromVocabularyDropsAssociation [
 
     | announcement association removal |
@@ -72,4 +86,17 @@ CooSessionFrequencyVariableTest >> testSelectionAnnouncementIncrementsCount [
     self assert: (entry at: #addedCount) = 0.
     self assert: (entry at: #selectedCount) = 1.
     self assert: (entry at: #lastSeen) notNil
+]
+
+{ #category : 'origins' }
+CooSessionFrequencyVariableTest >> testUnknownEventDoesNotChangeCounters [
+
+    | timestamp entry |
+    timestamp := DateAndTime now.
+    session registerClass: #UnknownEvent event: #added at: timestamp.
+    session registerClass: #UnknownEvent event: #mystery at: timestamp.
+    entry := self cache at: #UnknownEvent.
+    self assert: (entry at: #addedCount) = 1.
+    self assert: (entry at: #selectedCount) = 0.
+    self assert: (entry at: #lastSeen) = timestamp
 ]

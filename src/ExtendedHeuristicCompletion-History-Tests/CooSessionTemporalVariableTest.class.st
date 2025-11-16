@@ -45,6 +45,19 @@ CooSessionTemporalVariableTest >> testAddVocabularyRecordsMetadata [
     self assert: (entry at: #lastSeen) = timestamp
 ]
 
+{ #category : 'tests' }
+CooSessionTemporalVariableTest >> testRegisterClassUpdatesExistingEntry [
+
+    | timestampOlder timestampRecent entry |
+    timestampOlder := DateAndTime now.
+    timestampRecent := timestampOlder + (Duration seconds: 5).
+    session registerClass: #TemporalTracked event: #added at: timestampOlder.
+    session registerClass: #TemporalTracked event: #selected at: timestampRecent.
+    entry := self cache at: #TemporalTracked.
+    self assert: (entry at: #event) = #selected.
+    self assert: (entry at: #lastSeen) = timestampRecent
+]
+
 { #category : 'origins' }
 CooSessionTemporalVariableTest >> testRemoveVariableFromVocabularyDropsAssociation [
 
@@ -68,4 +81,14 @@ CooSessionTemporalVariableTest >> testSelectionAnnouncementUpdatesEntry [
     self assert: session size = 1.
     self assert: (entry at: #event) = #selected.
     self assert: (entry at: #lastSeen) notNil
+]
+
+{ #category : 'tests' }
+CooSessionTemporalVariableTest >> testWordsReflectTrackedAssociations [
+
+    | announcement |
+    announcement := CooMockClassAddedAnnouncement for: #TemporalWord.
+    session addNewVariableInVocabulary: announcement.
+    self assert: session words size = 1.
+    self assert: (session words includes: #TemporalWord -> #TemporalWord)
 ]
