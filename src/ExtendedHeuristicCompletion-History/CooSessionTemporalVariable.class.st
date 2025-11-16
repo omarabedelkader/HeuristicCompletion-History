@@ -11,9 +11,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Classes-Temporal',
+	#category : 'ExtendedHeuristicCompletion-History-Variables-Temporal',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Classes-Temporal'
+	#tag : 'Variables-Temporal'
 }
 
 { #category : 'accessing' }

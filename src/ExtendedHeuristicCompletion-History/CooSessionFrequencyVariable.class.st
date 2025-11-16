@@ -11,9 +11,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Classes-Frequency',
+	#category : 'ExtendedHeuristicCompletion-History-Variables-Frequency',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Classes-Frequency'
+	#tag : 'Variables-Frequency'
 }
 
 { #category : 'accessing' }
