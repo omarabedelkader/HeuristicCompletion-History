@@ -102,26 +102,28 @@ HistoryScrapper class >> repositoryURL: aString [
 	RepositoryURL := aString.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'actions' }
 HistoryScrapper >> cloneRepositoryFrom: url [
 	"Clone the repository to a temporary location."
 
-        | creator |
-        Transcript show: 'Cloning repository to: ', location pathString; cr.
-        location parent ensureCreateDirectory.
-        location exists ifTrue: [ location ensureDeleteAll ].
+	| creator |
+	Transcript
+		show: 'Cloning repository to: ' , location pathString;
+		cr.
+	location parent ensureCreateDirectory.
+	location exists ifTrue: [ location ensureDeleteAll ].
 
-        creator := IceRepositoryCreator new
-                url: url;
-                location: location;
-                yourself.
+	creator := IceRepositoryCreator new
+		           url: url;
+		           location: location;
+		           yourself.
 
-        ^ [ creator createRepository ]
-                on: IceDuplicatedRepository
-                do: [ :ex | ex return: ex repository ].
+	^ [ creator createRepository ]
+		  on: IceDuplicatedRepository
+		  do: [ :ex | ex return: ex repository ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'actions' }
 HistoryScrapper >> fetchLatestCommits [
 
         "Fetch remote changes and answer last 10 commits."
@@ -133,7 +135,7 @@ HistoryScrapper >> fetchLatestCommits [
                         commits ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'actions' }
 HistoryScrapper >> fetchLatestCommitsAndPrint [
 
         | commits |
@@ -141,7 +143,7 @@ HistoryScrapper >> fetchLatestCommitsAndPrint [
         self printCommits: commits.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'actions' }
 HistoryScrapper >> initializeRepository [
 	"Find or clone the repository locally."
 
@@ -156,7 +158,7 @@ HistoryScrapper >> initializeRepository [
 	self registerRepositoryIfNeeded
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'printing' }
 HistoryScrapper >> printCommit: commit index: index [
 
         | diff printer |
@@ -172,7 +174,7 @@ HistoryScrapper >> printCommit: commit index: index [
                 ].
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'printing' }
 HistoryScrapper >> printCommitHeader: commit index: index [
 
         Transcript
@@ -183,7 +185,7 @@ HistoryScrapper >> printCommitHeader: commit index: index [
                 show: 'Message: ', commit comment; cr; cr.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'printing' }
 HistoryScrapper >> printCommits: commits [
         commits ifNil: [ ^ Transcript show: 'No commits found.'; cr ].
         commits ifEmpty: [ ^ Transcript show: 'No commits found.'; cr ].
@@ -192,16 +194,17 @@ HistoryScrapper >> printCommits: commits [
         Transcript show: 'Done!'; cr.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'printing' }
 HistoryScrapper >> printer [
-        ^ HistoryPrinter new
-                transcript: Transcript;
-                indent: '  ';
-                yourself
+
+	^ HistoryPrinter new
+		  transcript: Transcript;
+		  indent: '  ';
+		  yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'actions' }
 HistoryScrapper >> registerRepositoryIfNeeded [
-        (IceRepository registry includes: repository)
-                ifFalse: [ repository register ].
+	(IceRepository registry includes: repository)
+		ifFalse: [ repository register ]
 ]

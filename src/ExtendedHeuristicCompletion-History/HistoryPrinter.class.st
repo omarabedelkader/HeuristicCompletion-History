@@ -1,6 +1,6 @@
 Class {
 	#name : 'HistoryPrinter',
-	#superclass : 'Object',
+	#superclass : 'IceTreeVisitor',
 	#instVars : [
 		'transcript',
 		'indent'
