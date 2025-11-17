@@ -70,7 +70,8 @@ Class {
 	#instVars : [
 		'repository',
 		'location',
-		'repositoryURL'
+		'repositoryURL',
+		'commitCount'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -90,9 +91,28 @@ HistoryScrapper class >> fetchRepo: aURLString [
 ]
 
 { #category : 'as yet unclassified' }
+HistoryScrapper class >> fetchRepo: aURLString commits: aNumber [
+	"Fetch and show a specific number of commits for the given repository URL.
+	Usage: HistoryScrapper fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 20"
+	
+	^ self new
+		repositoryURL: aURLString;
+		commitCount: aNumber;
+		initializeRepository;
+		fetchLatestCommitsAndPrint;
+		yourself
+]
+
+{ #category : 'as yet unclassified' }
 HistoryScrapper class >> spec [
 	<script>
 	^ self fetchRepo: 'https://github.com/pharo-spec/Spec'
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper class >> spec50 [
+	<script>
+	^ self fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 50
 ]
 
 { #category : 'as yet unclassified' }
@@ -117,14 +137,29 @@ HistoryScrapper >> cloneRepositoryFrom: url [
 ]
 
 { #category : 'as yet unclassified' }
-HistoryScrapper >> fetchLatestCommits [
-	"Fetch remote changes and answer last 10 commits."
+HistoryScrapper >> commitCount [
+	"Answer the number of commits to fetch (default: 10)"
 	
-	Transcript show: 'Fetching latest changes...'; cr.
+	^ commitCount
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> commitCount: aNumber [
+	
+	commitCount := aNumber
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> fetchLatestCommits [
+	"Fetch remote changes and answer the requested number of commits."
+	
+	| count |
+	count := self commitCount.
+	Transcript show: 'Fetching latest ', count asString, ' changes...'; cr.
 	repository fetch.
 	^ repository head withCommitWalkDo: [ :walk |
 		walk
-			maxNumber: 10;
+			maxNumber: count;
 			commits ]
 ]
 
