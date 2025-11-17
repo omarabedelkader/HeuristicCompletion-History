@@ -69,10 +69,9 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'repository',
-		'location'
-	],
-	#classInstVars : [
-		'RepositoryURL'
+		'location',
+		'repositoryURL',
+		'commitCount'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -80,29 +79,43 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
-HistoryScrapper class >> fetchAndShowCommits [
-
-	| inspector |
-	inspector := self new.
-	inspector
+HistoryScrapper class >> fetchRepo: aURLString [
+	"Fetch and show commits for the given repository URL.
+	Usage: HistoryScrapper fetchRepo: 'https://github.com/pharo-spec/Spec'"
+	
+	^ self new
+		repositoryURL: aURLString;
 		initializeRepository;
-		fetchLatestCommitsAndPrint.
+		fetchLatestCommitsAndPrint;
+		yourself
 ]
 
 { #category : 'as yet unclassified' }
-HistoryScrapper class >> repositoryURL [
-
-	^ RepositoryURL ifNil: [ RepositoryURL := 'https://github.com/omarabedelkader/ChatPharo' ]
-
+HistoryScrapper class >> fetchRepo: aURLString commits: aNumber [
+	"Fetch and show a specific number of commits for the given repository URL.
+	Usage: HistoryScrapper fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 20"
+	
+	^ self new
+		repositoryURL: aURLString;
+		commitCount: aNumber;
+		initializeRepository;
+		fetchLatestCommitsAndPrint;
+		yourself
 ]
 
 { #category : 'as yet unclassified' }
-HistoryScrapper class >> repositoryURL: aString [
-
-	RepositoryURL := aString.
+HistoryScrapper class >> spec [
+	<script>
+	^ self fetchRepo: 'https://github.com/pharo-spec/Spec'
 ]
 
-{ #category : 'actions' }
+{ #category : 'as yet unclassified' }
+HistoryScrapper class >> spec50 [
+	<script>
+	^ self fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 50
+]
+
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> cloneRepositoryFrom: url [
 	"Clone the repository to a temporary location."
 
@@ -123,88 +136,121 @@ HistoryScrapper >> cloneRepositoryFrom: url [
 		  do: [ :ex | ex return: ex repository ]
 ]
 
-{ #category : 'actions' }
-HistoryScrapper >> fetchLatestCommits [
-
-        "Fetch remote changes and answer last 10 commits."
-        Transcript show: 'Fetching latest changes...'; cr.
-        repository fetch.
- ^ repository head withCommitWalkDo: [ :walk |
-                walk
-                        maxNumber: 10;
-                        commits ]
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> commitCount [
+	"Answer the number of commits to fetch (default: 10)"
+	
+	^ commitCount
 ]
 
-{ #category : 'actions' }
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> commitCount: aNumber [
+	
+	commitCount := aNumber
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> fetchLatestCommits [
+	"Fetch remote changes and answer the requested number of commits."
+	
+	| count |
+	count := self commitCount.
+	Transcript show: 'Fetching latest ', count asString, ' changes...'; cr.
+	repository fetch.
+	^ repository head withCommitWalkDo: [ :walk |
+		walk
+			maxNumber: count;
+			commits ]
+]
+
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> fetchLatestCommitsAndPrint [
 
-        | commits |
-        commits := self fetchLatestCommits.
-        self printCommits: commits.
+	| commits |
+	commits := self fetchLatestCommits.
+	self printCommits: commits.
 ]
 
-{ #category : 'actions' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> initializeRepository [
 	"Find or clone the repository locally."
 
 	| url |
-	url := self class repositoryURL.
+	url := self repositoryURL.
+	url ifNil: [ self error: 'Repository URL must be set before initializing' ].
+	
 	location := FileLocator temp / 'iceberg-repos' / (url copyAfterLast: $/).
 
 	repository := IceRepository registry
-		              detect: [ :repo | repo remotes anySatisfy: [ :remote | remote url = url or: [ remote url = (url , '.git') ] ] ]
-		              ifNone: [ self cloneRepositoryFrom: url ].
+		detect: [ :repo | 
+			repo remotes anySatisfy: [ :remote | 
+				remote url = url or: [ remote url = (url , '.git') ] ] ]
+		ifNone: [ self cloneRepositoryFrom: url ].
 
 	self registerRepositoryIfNeeded
 ]
 
-{ #category : 'printing' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> printCommit: commit index: index [
 
-        | diff printer |
-        self printCommitHeader: commit index: index.
-        diff := commit diffToParent.
-        diff ifNil: [ ^ self ].
-        diff isEmpty
-                ifTrue: [ Transcript show: '  (No changes)'; cr ]
-                ifFalse: [
-                        Transcript show: 'Changes:'; cr.
-                        printer := self printer.
-                        diff tree allChildrenDo: [ :node | node value accept: printer ].
-                ].
+	| diff printer |
+	self printCommitHeader: commit index: index.
+	diff := commit diffToParent.
+	diff ifNil: [ ^ self ].
+	diff isEmpty
+		ifTrue: [ Transcript show: '  (No changes)'; cr ]
+		ifFalse: [
+			Transcript show: 'Changes:'; cr.
+			printer := self printer.
+			diff tree allChildrenDo: [ :node | node value accept: printer ] ]
 ]
 
-{ #category : 'printing' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> printCommitHeader: commit index: index [
 
-        Transcript
-                show: '--- Commit ', index asString, ' ---'; cr;
-                show: 'Hash:   ', commit shortId; cr;
-                show: 'Author: ', commit author; cr;
-                show: 'Date:   ', commit datetime asLocalStringYMDHM; cr;
-                show: 'Message: ', commit comment; cr; cr.
+	Transcript
+		show: '--- Commit ', index asString, ' ---'; cr;
+		show: 'Hash:   ', commit shortId; cr;
+		show: 'Author: ', commit author; cr;
+		show: 'Date:   ', commit datetime asLocalStringYMDHM; cr;
+		show: 'Message: ', commit comment; cr; cr
 ]
 
-{ #category : 'printing' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> printCommits: commits [
-        commits ifNil: [ ^ Transcript show: 'No commits found.'; cr ].
-        commits ifEmpty: [ ^ Transcript show: 'No commits found.'; cr ].
-        Transcript cr; show: '=== Last 10 Commits with Contents ==='; cr; cr.
-        commits withIndexDo: [ :commit :index | self printCommit: commit index: index ].
-        Transcript show: 'Done!'; cr.
+
+	commits ifNil: [ ^ Transcript show: 'No commits found.'; cr ].
+	commits ifEmpty: [ ^ Transcript show: 'No commits found.'; cr ].
+	Transcript cr; show: '=== Last 10 Commits with Contents ==='; cr; cr.
+	commits withIndexDo: [ :commit :index | self printCommit: commit index: index ].
+	Transcript show: 'Done!'; cr
 ]
 
-{ #category : 'printing' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> printer [
 
 	^ HistoryPrinter new
-		  transcript: Transcript;
-		  indent: '  ';
-		  yourself
+		transcript: Transcript;
+		indent: '  ';
+		yourself
 ]
 
-{ #category : 'actions' }
+{ #category : 'as yet unclassified' }
 HistoryScrapper >> registerRepositoryIfNeeded [
+
 	(IceRepository registry includes: repository)
 		ifFalse: [ repository register ]
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> repositoryURL [
+	"Answer the repository URL"
+	
+	^ repositoryURL
+]
+
+{ #category : 'as yet unclassified' }
+HistoryScrapper >> repositoryURL: aString [
+	
+	repositoryURL := aString
 ]
