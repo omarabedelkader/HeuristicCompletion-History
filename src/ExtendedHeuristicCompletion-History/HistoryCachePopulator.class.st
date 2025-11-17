@@ -37,6 +37,14 @@ HistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
 ]
 
 { #category : 'as yet unclassified' }
+HistoryCachePopulator class >> spec10 [ 
+
+	<script>
+	(self populateFromRepo: 'https://github.com/pharo-spec/Spec' commits: 10) inspect
+
+]
+
+{ #category : 'as yet unclassified' }
 HistoryCachePopulator >> extractMethodFromDiffNode: aDiffNode [
 	"Extract method information from a diff node if it's a method change."
 	
