@@ -7,8 +7,9 @@ Class {
 	#instVars : [
 		'classRemoved'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Tests',
-	#package : 'ExtendedHeuristicCompletion-History-Tests'
+	#category : 'ExtendedHeuristicCompletion-History-Tests-Mock',
+	#package : 'ExtendedHeuristicCompletion-History-Tests',
+	#tag : 'Mock'
 }
 
 { #category : 'instance creation' }

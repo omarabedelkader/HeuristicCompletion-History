@@ -1,3 +1,6 @@
+"
+This class builds and updates temporal and frequency caches by scraping Git commits, extracting changed methods, and registering their metadata.
+"
 Class {
 	#name : 'HistoryCachePopulator',
 	#superclass : 'Object',
