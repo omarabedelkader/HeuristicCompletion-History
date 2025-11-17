@@ -4,7 +4,7 @@ Mock class
 Class {
 	#name : 'CooMockVariable',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Tests-Mock',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-History-Mock',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'Mock'
+	#tag : 'History-Mock'
 }
