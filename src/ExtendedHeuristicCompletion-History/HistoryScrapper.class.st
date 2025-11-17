@@ -1,4 +1,8 @@
 "
+This class locates or clones a Git repository, fetches a chosen number of commits, and prints each commit’s metadata and diff contents with a structured visitor.
+
+Initial code:
+
 ```st
 | url repository commits location |
 
@@ -104,15 +108,9 @@ HistoryScrapper class >> fetchRepo: aURLString commits: aNumber [
 ]
 
 { #category : 'as yet unclassified' }
-HistoryScrapper class >> spec [
+HistoryScrapper class >> spec10 [
 	<script>
-	^ self fetchRepo: 'https://github.com/pharo-spec/Spec'
-]
-
-{ #category : 'as yet unclassified' }
-HistoryScrapper class >> spec50 [
-	<script>
-	^ self fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 50
+	^ self fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 10
 ]
 
 { #category : 'as yet unclassified' }

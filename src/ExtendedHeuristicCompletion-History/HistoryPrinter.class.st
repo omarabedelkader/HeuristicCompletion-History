@@ -1,3 +1,7 @@
+"
+This class traverses a Git diff tree and prints a readable, indented summary of added, modified, and removed code elements with optional code previews.
+
+"
 Class {
 	#name : 'HistoryPrinter',
 	#superclass : 'IceTreeVisitor',

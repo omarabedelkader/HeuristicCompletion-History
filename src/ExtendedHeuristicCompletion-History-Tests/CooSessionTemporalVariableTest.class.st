@@ -4,8 +4,9 @@ Class {
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Tests',
-	#package : 'ExtendedHeuristicCompletion-History-Tests'
+	#category : 'ExtendedHeuristicCompletion-History-Tests-History',
+	#package : 'ExtendedHeuristicCompletion-History-Tests',
+	#tag : 'History'
 }
 
 { #category : 'origins' }
