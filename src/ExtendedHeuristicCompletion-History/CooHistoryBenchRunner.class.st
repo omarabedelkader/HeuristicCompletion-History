@@ -10,6 +10,25 @@ Class {
 }
 
 { #category : 'accessing' }
+CooHistoryBenchRunner class >> configuredRunnerForPackage: aPackageNameOrPackage [
+    ^ self new
+            package: (self packageFrom: aPackageNameOrPackage);
+            baseline: #baselineNoHistory;
+            others: self historyBenchmarkSelectors;
+            yourself
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> historyBenchmarkSelectors [
+    ^ {
+            #temporalMessages.
+            #frequencyMessages.
+            #temporalVariables.
+            #frequencyVariables.
+            #combinedHistory }
+]
+
+{ #category : 'accessing' }
 CooHistoryBenchRunner class >> packageFrom: aPackageNameOrPackage [
     ^ aPackageNameOrPackage isString
             ifTrue: [ PackageOrganizer default packageNamed: aPackageNameOrPackage ]
@@ -23,23 +42,37 @@ CooHistoryBenchRunner class >> populateHistoryFrom: repoURL commits: commitCount
 ]
 
 { #category : 'accessing' }
-CooHistoryBenchRunner class >> runOnPackage: aPackageNameOrPackage [
-	"Run benchmarks on the given package using existing history."
+CooHistoryBenchRunner class >> resultsForPackages: packageNamesOrPackages [
+    | packageNames |
+    packageNames := packageNamesOrPackages collect: [ :each |
+            each isString
+                    ifTrue: [ each ]
+                    ifFalse: [ each name ] ].
+    ^ self allResultsFor: packageNames
+]
 
-    | runner |
-    runner := self new
-            package: (self packageFrom: aPackageNameOrPackage);
-            baseline: #baselineNoHistory;
-            others: {
-                    #temporalMessages.
-                    #frequencyMessages.
-                    #temporalVariables.
-                    #frequencyVariables.
-                    #combinedHistory
-            };
-            yourself.
-    runner run.
-    ^ runner
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> resultsForPackages: packageNamesOrPackages withHistory: repoURL commits: commitCount [
+    self populateHistoryFrom: repoURL commits: commitCount.
+    ^ self resultsForPackages: packageNamesOrPackages
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> runComparisonForPackages: aCol [
+    | packages runners |
+    packages := aCol collect: [ :each | self packageFrom: each ].
+    runners := OrderedCollection new.
+    packages do: [ :each |
+            | runner |
+            runner := self configuredRunnerForPackage: each.
+            runner run.
+            runners add: runner ].
+    ^ runners
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> runOnPackage: aPackageNameOrPackage [
+	^ (self runComparisonForPackages: { aPackageNameOrPackage }) first
 ]
 
 { #category : 'accessing' }
@@ -52,26 +85,7 @@ CooHistoryBenchRunner class >> runOnPackage: aPackageNameOrPackage withHistory: 
 
 { #category : 'accessing' }
 CooHistoryBenchRunner class >> runOnPackages: packageNamesOrPackages [
-    "Run benchmarks for multiple packages using existing history."
-
-    | runners |
-    runners := OrderedCollection new.
-    packageNamesOrPackages do: [ :each |
-            | runner |
-            runner := self new
-                    package: (self packageFrom: each);
-                    baseline: #baselineNoHistory;
-                    others: {
-                            #temporalMessages.
-                            #frequencyMessages.
-                            #temporalVariables.
-                            #frequencyVariables.
-                            #combinedHistory
-                    };
-                    yourself.
-            runner run.
-            runners add: runner ].
-    ^ runners
+^ self runComparisonForPackages: packageNamesOrPackages
 ]
 
 { #category : 'accessing' }
@@ -124,6 +138,16 @@ CooHistoryBenchRunner class >> specWithHistory [
                 runOnPackages: self specPackageNames
                 withHistory: 'https://github.com/pharo-spec/Spec'
                 commits: 50) inspect
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> specWithHistoryResults [
+
+        <script>
+        ^ (self
+                resultsForPackages: self specPackageNames
+                withHistory: 'https://github.com/pharo-spec/Spec'
+                commits: 600) inspect
 ]
 
 { #category : 'accessing' }
