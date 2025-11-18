@@ -10,52 +10,77 @@ Class {
 }
 
 { #category : 'accessing' }
+CooHistoryBenchRunner class >> packageFrom: aPackageNameOrPackage [
+    ^ aPackageNameOrPackage isString
+            ifTrue: [ PackageOrganizer default packageNamed: aPackageNameOrPackage ]
+            ifFalse: [ aPackageNameOrPackage ]
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> populateHistoryFrom: repoURL commits: commitCount [
+    Transcript show: 'Populating history from repository...'; cr.
+    self new populateHistoryFrom: repoURL commits: commitCount
+]
+
+{ #category : 'accessing' }
 CooHistoryBenchRunner class >> runOnPackage: aPackageNameOrPackage [
 	"Run benchmarks on the given package using existing history."
-	
-	^ self new
-		package: (aPackageNameOrPackage isString
-			ifTrue: [ PackageOrganizer default packageNamed: aPackageNameOrPackage ]
-			ifFalse: [ aPackageNameOrPackage ]);
-		baseline: #baselineNoHistory;
-		others: { 
-			#temporalMessages. 
-			#frequencyMessages. 
-			#temporalVariables. 
-			#frequencyVariables. 
-			#combinedHistory 
-		};
-		run;
-		yourself
+
+    | runner |
+    runner := self new
+            package: (self packageFrom: aPackageNameOrPackage);
+            baseline: #baselineNoHistory;
+            others: {
+                    #temporalMessages.
+                    #frequencyMessages.
+                    #temporalVariables.
+                    #frequencyVariables.
+                    #combinedHistory
+            };
+            yourself.
+    runner run.
+    ^ runner
 ]
 
 { #category : 'accessing' }
 CooHistoryBenchRunner class >> runOnPackage: aPackageNameOrPackage withHistory: repoURL commits: commitCount [
 	"Run benchmarks after populating history from a Git repository."
-	
-	| runner package |
-	package := aPackageNameOrPackage isString
-		ifTrue: [ PackageOrganizer default packageNamed: aPackageNameOrPackage ]
-		ifFalse: [ aPackageNameOrPackage ].
-	
-	runner := self new
-		package: package;
-		baseline: #baselineNoHistory;
-		others: { 
-			#temporalMessages. 
-			#frequencyMessages. 
-			#temporalVariables. 
-			#frequencyVariables. 
-			#combinedHistory 
-		};
-		yourself.
-	
-	"Populate history from Git"
-	Transcript show: 'Populating history from repository...'; cr.
-	runner populateHistoryFrom: repoURL commits: commitCount.
-	
-	"Run benchmarks"
-	^ runner run; yourself
+
+    self populateHistoryFrom: repoURL commits: commitCount.
+    ^ self runOnPackage: aPackageNameOrPackage
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> runOnPackages: packageNamesOrPackages [
+    "Run benchmarks for multiple packages using existing history."
+
+    | runners |
+    runners := OrderedCollection new.
+    packageNamesOrPackages do: [ :each |
+            | runner |
+            runner := self new
+                    package: (self packageFrom: each);
+                    baseline: #baselineNoHistory;
+                    others: {
+                            #temporalMessages.
+                            #frequencyMessages.
+                            #temporalVariables.
+                            #frequencyVariables.
+                            #combinedHistory
+                    };
+                    yourself.
+            runner run.
+            runners add: runner ].
+    ^ runners
+]
+
+{ #category : 'accessing' }
+CooHistoryBenchRunner class >> runOnPackages: packageNamesOrPackages withHistory: repoURL commits: commitCount [
+    "Populate history once and run benchmarks for multiple packages."
+
+    self populateHistoryFrom: repoURL commits: commitCount.
+    ^ self runOnPackages: packageNamesOrPackages
+
 ]
 
 { #category : 'accessing' }
@@ -65,12 +90,40 @@ CooHistoryBenchRunner class >> spec [
 ]
 
 { #category : 'accessing' }
+CooHistoryBenchRunner class >> specPackageNames [
+        ^ #(
+                'Spec2-Adapters-Morphic'
+                'Spec2-Adapters-Morphic-ListView'
+                'Spec2-Adapters-Stub'
+                'Spec2-Code'
+                'Spec2-Code-Commands'
+                'Spec2-Code-Diff'
+                'Spec2-Code-Diff-Morphic'
+                'Spec2-Code-Morphic'
+                'Spec2-CommandLine'
+                'Spec2-Commander2'
+                'Spec2-Commands'
+                'Spec2-CommonWidgets'
+                'Spec2-Core'
+                'Spec2-Dialogs'
+                'Spec2-Examples'
+                'Spec2-Interactions'
+                'Spec2-Layout'
+                'Spec2-ListView'
+                'Spec2-Microdown'
+                'Spec2-Morphic'
+                'Spec2-Morphic-Examples'
+                'Spec2-Transmission')
+]
+
+{ #category : 'accessing' }
 CooHistoryBenchRunner class >> specWithHistory [
+
 	<script>
-	^ (self 
-		runOnPackage: 'Spec2-Core' 
-		withHistory: 'https://github.com/pharo-spec/Spec' 
-		commits: 50) inspect
+        ^ (self
+                runOnPackages: self specPackageNames
+                withHistory: 'https://github.com/pharo-spec/Spec'
+                commits: 50) inspect
 ]
 
 { #category : 'accessing' }
