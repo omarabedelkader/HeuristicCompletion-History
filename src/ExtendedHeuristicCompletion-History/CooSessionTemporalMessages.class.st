@@ -101,8 +101,8 @@ CooSessionTemporalMessages >> addVocabulary: aString at: aDateAndTime [
 { #category : 'adding' }
 CooSessionTemporalMessages >> eventCountKeyFor: anEventSymbol [
 
-	anEventSymbol = #added ifTrue: [ ^ #addedCount ].
-	anEventSymbol = #modified ifTrue: [ ^ #modifiedCount ].
+	anEventSymbol = #added ifTrue: [ ^ #incrementAdded].
+	anEventSymbol = #modified ifTrue: [ ^ #incrementModified ].
 	^ nil
 ]
 
@@ -127,7 +127,8 @@ CooSessionTemporalMessages >> frequencyDictionaryFor: anEntry [
 { #category : 'adding' }
 CooSessionTemporalMessages >> frequencyForSelector: aSelector [
 
-	(vocabularyCache includesKey: aSelector) ifFalse: [ ^ self newFrequencyDictionary ].
+	(vocabularyCache includesKey: aSelector) 
+		ifFalse: [ ^ self newFrequencyDictionary ].
 	^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
 ]
 
@@ -150,23 +151,20 @@ CooSessionTemporalMessages >> newFrequencyDictionary [
 { #category : 'adding' }
 CooSessionTemporalMessages >> newVocabularyEntry [
 
-	^ Dictionary new
-		  at: #ast put: nil;
-		  at: #lastSeen put: nil;
-		  at: #addedCount put: 0;
-		  at: #modifiedCount put: 0;
-		  yourself
+	^ CooCountingODescriptionItem new
+		
 ]
 
 { #category : 'adding' }
 CooSessionTemporalMessages >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
 	| entry |
-	(vocabularyCache includesKey: aSelector) ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
+	(vocabularyCache includesKey: aSelector) 
+		ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
 	entry := vocabularyCache at: aSelector.
 	self updateEntry: entry withEvent: anEventSymbol.
-	anAst ifNotNil: [ entry at: #ast put: anAst ].
-	entry at: #lastSeen put: aDateAndTime
+	anAst ifNotNil: [ entry ast: anAst ].
+	entry lastSeen: aDateAndTime
 ]
 
 { #category : 'adding' }

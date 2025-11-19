@@ -240,6 +240,11 @@ HistoryScrapper >> registerRepositoryIfNeeded [
 		ifFalse: [ repository register ]
 ]
 
+{ #category : 'accessing' }
+HistoryScrapper >> repository: aRepo [
+	repository := aRepo
+]
+
 { #category : 'as yet unclassified' }
 HistoryScrapper >> repositoryURL [
 	"Answer the repository URL"

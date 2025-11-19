@@ -17,12 +17,13 @@ HistoryMockSession >> initialize [
 
 { #category : 'accessing' }
 HistoryMockSession >> registerSelector: aSelector ast: anAst event: anEvent at: aTimestamp [
-    registrations add: (Dictionary new
-        at: #selector put: aSelector;
-        at: #ast put: anAst;
-        at: #event put: anEvent;
-        at: #timestamp put: aTimestamp;
-        yourself)
+
+	registrations add: (CooODescriptionItem new
+			 selector: aSelector;
+			 ast: anAst;
+			 event: anEvent;
+			 timestamp: aTimestamp;
+			 yourself)
 ]
 
 { #category : 'accessing' }

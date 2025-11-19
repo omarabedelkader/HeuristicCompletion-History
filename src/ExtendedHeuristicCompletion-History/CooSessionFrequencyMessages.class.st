@@ -88,9 +88,9 @@ CooSessionFrequencyMessages >> addVocabulary: aString at: aDateAndTime [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> eventCountKeyFor: anEventSymbol [
 
-        anEventSymbol = #added ifTrue: [ ^ #addedCount ].
-        anEventSymbol = #modified ifTrue: [ ^ #modifiedCount ].
-        ^ nil
+	anEventSymbol = #added ifTrue: [ ^ #incrementAdded ].
+	anEventSymbol = #modified ifTrue: [ ^ #incrementModified ].
+	^ nil
 ]
 
 { #category : 'accessing' }
@@ -108,17 +108,18 @@ CooSessionFrequencyMessages >> frequencies [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> frequencyDictionaryFor: anEntry [
 
-        ^ Dictionary new
-                at: #added put: (anEntry at: #addedCount ifAbsent: [ 0 ]);
-                at: #modified put: (anEntry at: #modifiedCount ifAbsent: [ 0 ]);
-                yourself
+	^ CooCountingODescriptionItem new
+		  addedCount: (anEntry addedCount);
+		  modifiedCount: (anEntry modifiedCount);
+		  yourself
 ]
 
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> frequencyForSelector: aSelector [
 
-        (vocabularyCache includesKey: aSelector) ifFalse: [ ^ self newFrequencyDictionary ].
-        ^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
+	(vocabularyCache includesKey: aSelector) 
+		ifFalse: [ ^ self newFrequencyDictionary ].
+	^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
 ]
 
 { #category : 'initialization' }
@@ -131,21 +132,14 @@ CooSessionFrequencyMessages >> initialize [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> newFrequencyDictionary [
 
-	^ Dictionary new
-		  at: #added put: 0;
-		  at: #modified put: 0;
-		  yourself
+	^ CooCountingODescriptionItem new
+		
 ]
 
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> newVocabularyEntry [
 
-        ^ Dictionary new
-                at: #ast put: nil;
-                at: #lastSeen put: nil;
-                at: #addedCount put: 0;
-                at: #modifiedCount put: 0;
-                yourself
+	^ CooCountingODescriptionItem new
 ]
 
 { #category : 'accessing' }
@@ -156,8 +150,8 @@ CooSessionFrequencyMessages >> registerSelector: aSelector ast: anAst event: anE
 		ifFalse: [ vocabularyCache at: aSelector put: self newVocabularyEntry ].
 	entry := vocabularyCache at: aSelector.
 	self updateEntry: entry withEvent: anEventSymbol.
-	anAst ifNotNil: [ entry at: #ast put: anAst ].
-	entry at: #lastSeen put: aDateAndTime
+	anAst ifNotNil: [ entry ast: anAst ].
+	entry lastSeen: aDateAndTime
 ]
 
 { #category : 'accessing' }
@@ -174,10 +168,10 @@ CooSessionFrequencyMessages >> size [
 { #category : 'accessing' }
 CooSessionFrequencyMessages >> updateEntry: anEntry withEvent: anEventSymbol [
 
-        | countKey |
-        countKey := self eventCountKeyFor: anEventSymbol.
-        countKey ifNil: [ ^ self ].
-        anEntry at: countKey put: ((anEntry at: countKey ifAbsent: [ 0 ]) + 1)
+	| countKey |
+	countKey := self eventCountKeyFor: anEventSymbol.
+	countKey ifNil: [ ^ self ].
+	anEntry perform: countKey
 ]
 
 { #category : 'accessing' }
@@ -186,5 +180,5 @@ CooSessionFrequencyMessages >> words [
 	^ vocabularyCache keys collect: [ :selector |
 		| entry |
       entry := vocabularyCache at: selector.
-      selector -> (entry at: #ast ifAbsent: [ nil ]) ]
+      selector -> (entry ast) ]
 ]

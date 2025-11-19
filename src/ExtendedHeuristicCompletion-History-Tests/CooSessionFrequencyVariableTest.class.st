@@ -25,15 +25,15 @@ CooSessionFrequencyVariableTest >> setUp [
 { #category : 'origins' }
 CooSessionFrequencyVariableTest >> testAddNewVariableAnnouncementRegistersEntry [
 
-    | announcement association entry |
-    announcement := CooMockClassAddedAnnouncement for: #Mock.
-    session addNewVariableInVocabulary: announcement.
-    association := #Mock -> #Mock.
-    entry := self cache at: association.
-    self assert: session size = 1.
-    self assert: (entry at: #addedCount) = 1.
-    self assert: (entry at: #selectedCount) = 0.
-    self assert: (entry at: #lastSeen) notNil
+	| announcement association entry |
+	announcement := CooMockClassAddedAnnouncement for: #Mock.
+	session addNewVariableInVocabulary: announcement.
+	association := #Mock -> #Mock.
+	entry := self cache at: association.
+	self assert: session size equals: 1.
+	self assert: (entry addedCount) equals: 1.
+	self assert: (entry selectedCount) isZero.
+	self assert: (entry lastSeen) notNil
 ]
 
 { #category : 'origins' }
@@ -44,9 +44,9 @@ CooSessionFrequencyVariableTest >> testAddVocabularyRecordsMetadata [
 	session addVocabulary: 'Foo' at: timestamp.
 	entry := self cache at: 'Foo'.
 	self assert: session size = 1.
-	self assert: (entry at: #addedCount) equals: 1.
-	self assert: (entry at: #selectedCount) equals: 0.
-	self assert: (entry at: #lastSeen) equals: timestamp
+	self assert: (entry addedCount) equals: 1.
+	self assert: (entry selectedCount) equals: 0.
+	self assert: (entry lastSeen) equals: timestamp
 ]
 
 { #category : 'origins' }
@@ -58,9 +58,9 @@ CooSessionFrequencyVariableTest >> testRegisterClassAccumulatesCounts [
     session registerClass: #TrackedFrequency event: #added at: timestampOlder.
     session registerClass: #TrackedFrequency event: #selected at: timestampRecent.
     entry := self cache at: #TrackedFrequency.
-    self assert: (entry at: #addedCount) = 1.
-    self assert: (entry at: #selectedCount) = 1.
-    self assert: (entry at: #lastSeen) = timestampRecent
+    self assert: (entry addedCount) equals: 1.
+    self assert: (entry selectedCount) equals: 1.
+    self assert: (entry lastSeen) equals: timestampRecent
 ]
 
 { #category : 'origins' }
@@ -83,10 +83,10 @@ CooSessionFrequencyVariableTest >> testSelectionAnnouncementIncrementsCount [
     announcement := CooMockVariableSelectedAnnouncement for: variable.
     session addVariableInVocabulary: announcement.
     entry := self cache at: CooMockVariable.
-    self assert: session size = 1.
-    self assert: (entry at: #addedCount) = 0.
-    self assert: (entry at: #selectedCount) = 1.
-    self assert: (entry at: #lastSeen) notNil
+    self assert: session size equals: 1.
+    self assert: (entry addedCount) equals: 0.
+    self assert: (entry selectedCount) equals: 1.
+    self assert: (entry lastSeen) notNil
 ]
 
 { #category : 'origins' }
@@ -97,7 +97,7 @@ CooSessionFrequencyVariableTest >> testUnknownEventDoesNotChangeCounters [
     session registerClass: #UnknownEvent event: #added at: timestamp.
     session registerClass: #UnknownEvent event: #mystery at: timestamp.
     entry := self cache at: #UnknownEvent.
-    self assert: (entry at: #addedCount) = 1.
-    self assert: (entry at: #selectedCount) = 0.
-    self assert: (entry at: #lastSeen) = timestamp
+    self assert: (entry addedCount) equals: 1.
+    self assert: (entry selectedCount) equals: 0.
+    self assert: (entry lastSeen) equals: timestamp
 ]

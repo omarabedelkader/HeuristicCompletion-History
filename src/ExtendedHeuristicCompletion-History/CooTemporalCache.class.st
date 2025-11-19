@@ -77,11 +77,11 @@ CooTemporalCache >> includesKey: aKey [
 { #category : 'initialization' }
 CooTemporalCache >> initialize [
 
-        super initialize.
-        entries := Dictionary new.
-        insertionOrder := Dictionary new.
-        orderCounter := 0.
-        maximumWeight := 1000
+	super initialize.
+	entries := Dictionary new.
+	insertionOrder := Dictionary new.
+	orderCounter := 0.
+	maximumWeight := 1000
 ]
 
 { #category : 'accessing' }

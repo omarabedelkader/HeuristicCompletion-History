@@ -37,16 +37,16 @@ HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions
     frequency := HistoryMockSession new.
     populator temporalSession: temporal.
     populator frequencySession: frequency.
-    info := Dictionary new
-        at: #selector put: #sample;
-        at: #ast put: nil;
-        at: #event put: #added;
-        at: #timestamp put: DateAndTime now;
-        yourself.
+    info := CooODescriptionItem new
+		selector: #sample;
+		event: #added;
+		timestamp: DateAndTime now;
+		yourself.
+		
     populator populateCachesWithMethodInfo: info.
     self assert: temporal registrations size equals: 1.
     self assert: frequency registrations size equals: 1.
-    self assert: ((temporal registrations first) at: #selector) equals: #sample
+    self assert: ((temporal registrations first) selector) equals: #sample
 ]
 
 { #category : 'running' }
@@ -58,10 +58,10 @@ HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
     populator processAddition: addition into: collection timestamp: timestamp.
     self assert: collection size equals: 1.
     info := collection first.
-    self assert: (info at: #selector) equals: #bar.
-    self assert: (info at: #event) equals: #added.
-    self assert: (info at: #timestamp) equals: timestamp.
-    self deny: (info at: #ast) isNil
+    self assert: (info selector) equals: #bar.
+    self assert: (info event) equals: #added.
+    self assert: (info timestamp) equals: timestamp.
+    self deny: (info ast) isNil
 ]
 
 { #category : 'running' }
@@ -76,7 +76,7 @@ HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
     populator processModification: modification into: collection timestamp: timestamp.
     self assert: collection size equals: 1.
     info := collection first.
-    self assert: (info at: #selector) equals: #baz.
-    self assert: (info at: #event) equals: #modified.
-    self assert: (info at: #timestamp) equals: timestamp
+    self assert: (info selector) equals: #baz.
+    self assert: (info event) equals: #modified.
+    self assert: (info timestamp) equals: timestamp
 ]

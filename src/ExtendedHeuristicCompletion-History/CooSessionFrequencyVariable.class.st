@@ -78,9 +78,9 @@ CooSessionFrequencyVariable >> addVocabulary: aString at: aDateAndTime [
 { #category : 'adding' }
 CooSessionFrequencyVariable >> eventCountKeyFor: anEventSymbol [
 
-        anEventSymbol = #added ifTrue: [ ^ #addedCount ].
-        anEventSymbol = #selected ifTrue: [ ^ #selectedCount ].
-        ^ nil
+	anEventSymbol = #added ifTrue: [ ^ #incrementAdded ].
+	anEventSymbol = #selected ifTrue: [ ^ #incrementSelected ].
+	^ nil
 ]
 
 { #category : 'initialization' }
@@ -93,22 +93,18 @@ CooSessionFrequencyVariable >> initialize [
 { #category : 'adding' }
 CooSessionFrequencyVariable >> newVocabularyEntry [
 
-        ^ Dictionary new
-                at: #addedCount put: 0;
-                at: #selectedCount put: 0;
-                at: #lastSeen put: nil;
-                yourself
+	^ CooCountingODescriptionItem new
+		
 ]
 
 { #category : 'adding' }
 CooSessionFrequencyVariable >> registerClass: aClassReference event: anEventSymbol at: aDateAndTime [
 
-        | entry |
-        (vocabularyCache includesKey: aClassReference)
-                ifFalse: [ vocabularyCache at: aClassReference put: self newVocabularyEntry ].
-        entry := vocabularyCache at: aClassReference.
-        self updateEntry: entry withEvent: anEventSymbol.
-        entry at: #lastSeen put: aDateAndTime
+	| entry |
+	(vocabularyCache includesKey: aClassReference) ifFalse: [ vocabularyCache at: aClassReference put: self newVocabularyEntry ].
+	entry := vocabularyCache at: aClassReference.
+	self updateEntry: entry withEvent: anEventSymbol.
+	entry lastSeen: aDateAndTime
 ]
 
 { #category : 'adding' }
@@ -128,10 +124,10 @@ CooSessionFrequencyVariable >> size [
 { #category : 'adding' }
 CooSessionFrequencyVariable >> updateEntry: anEntry withEvent: anEventSymbol [
 
-        | countKey |
-        countKey := self eventCountKeyFor: anEventSymbol.
-        countKey ifNil: [ ^ self ].
-        anEntry at: countKey put: ((anEntry at: countKey ifAbsent: [ 0 ]) + 1)
+	| countKey |
+	countKey := self eventCountKeyFor: anEventSymbol.
+	countKey ifNil: [ ^ self ].
+	anEntry perform: countKey
 ]
 
 { #category : 'accessing' }

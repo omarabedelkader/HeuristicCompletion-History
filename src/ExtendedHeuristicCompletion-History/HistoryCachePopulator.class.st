@@ -75,7 +75,7 @@ HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 
 { #category : 'as yet unclassified' }
 HistoryCachePopulator >> frequencySession [
-	^ frequencySession ifNil: [ frequencySession := CooSessionFrequencyMessages current ]
+	^ frequencySession
 ]
 
 { #category : 'as yet unclassified' }
@@ -121,10 +121,10 @@ HistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 	"Add a method to both temporal and frequency caches."
 	
 	| selector ast event timestamp |
-	selector := aMethodInfo at: #selector.
-	ast := aMethodInfo at: #ast ifAbsent: [ nil ].
-	event := aMethodInfo at: #event.
-	timestamp := aMethodInfo at: #timestamp.
+	selector := aMethodInfo selector.
+	ast := aMethodInfo ast.
+	event := aMethodInfo event.
+	timestamp := aMethodInfo timestamp.
 	
 	"Populate temporal cache"
 	self temporalSession
@@ -151,11 +151,11 @@ HistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp
 	
 	ast := self tryParseAST: anAddition leftContents.
 	
-	aCollection add: (Dictionary new
-		at: #selector put: selector;
-		at: #ast put: ast;
-		at: #event put: #added;
-		at: #timestamp put: aTimestamp;
+	aCollection add: (CooODescriptionItem new
+		selector:selector;
+		ast: ast;
+		event: #added;
+		timestamp: aTimestamp;
 		yourself)
 ]
 
@@ -169,12 +169,14 @@ HistoryCachePopulator >> processModification: aModification into: aCollection ti
 	
 	ast := self tryParseAST: aModification leftContents.
 	
-	aCollection add: (Dictionary new
-		at: #selector put: selector;
-		at: #ast put: ast;
-		at: #event put: #modified;
-		at: #timestamp put: aTimestamp;
+	aCollection add: 
+	(CooODescriptionItem new
+		selector:selector;
+		ast: ast;
+		event: #modified;
+		timestamp: aTimestamp;
 		yourself)
+
 ]
 
 { #category : 'as yet unclassified' }
@@ -189,7 +191,7 @@ HistoryCachePopulator >> scrapper: aHistoryScrapper [
 
 { #category : 'as yet unclassified' }
 HistoryCachePopulator >> temporalSession [
-	^ temporalSession ifNil: [ temporalSession := CooSessionTemporalMessages current ]
+	^ temporalSession
 ]
 
 { #category : 'as yet unclassified' }
