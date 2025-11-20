@@ -1,9 +1,6 @@
 Class {
 	#name : 'NewCooSessionMessageTest',
-	#superclass : 'TestCase',
-	#instVars : [
-		'session'
-	],
+	#superclass : 'NewCooSessionTest',
 	#category : 'ExtendedHeuristicCompletion-History-Tests-History',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
 	#tag : 'History'

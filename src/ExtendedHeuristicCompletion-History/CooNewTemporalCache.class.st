@@ -21,25 +21,10 @@ Class {
 	#classInstVars : [
 		'current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Cache2',
+	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Cache2'
+	#tag : 'New'
 }
-
-{ #category : 'accessing' }
-CooNewTemporalCache class >> current [
-
-	^ current ifNil: [ current := self new ]
-]
-
-{ #category : 'accessing' }
-CooNewTemporalCache class >> registerInterestToSystemAnnouncement [ 
-	"self registerInterestToSystemAnnouncement"
-	
-	self environment codeChangeAnnouncer 
-		when: MethodAdded send: #addNewMethodInVocabulary: 
-		to: self current
-]
 
 { #category : 'initialization' }
 CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
@@ -71,6 +56,13 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 			 methodClassName: anAnn method methodClass name;
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
+]
+
+{ #category : 'adding' }
+CooNewTemporalCache >> addNewVariableInVocabulary: ann [
+
+ 
+	self halt.
 ]
 
 { #category : 'accessing - computed' }

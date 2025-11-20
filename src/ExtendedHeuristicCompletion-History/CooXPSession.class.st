@@ -26,6 +26,12 @@ CooXPSession >> addNewMethodInVocabulary: anAnn [
 	vocabularyCache addNewMethodInVocabulary: anAnn
 ]
 
+{ #category : 'adding' }
+CooXPSession >> addNewVariableInVocabulary: aCooMockClassAddedAnnouncement [ 
+
+	vocabularyCache addNewVariableInVocabulary: aCooMockClassAddedAnnouncement 
+]
+
 { #category : 'accessing' }
 CooXPSession >> vocabularyCache [
 	^ vocabularyCache 

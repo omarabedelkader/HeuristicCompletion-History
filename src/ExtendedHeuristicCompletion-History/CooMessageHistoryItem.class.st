@@ -10,9 +10,9 @@ Class {
 		'commit',
 		'deltaMessages'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Cache2',
+	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Cache2'
+	#tag : 'New'
 }
 
 { #category : 'accessing' }
