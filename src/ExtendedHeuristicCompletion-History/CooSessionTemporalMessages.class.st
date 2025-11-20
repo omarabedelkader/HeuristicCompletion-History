@@ -107,45 +107,10 @@ CooSessionTemporalMessages >> eventCountKeyFor: anEventSymbol [
 ]
 
 { #category : 'adding' }
-CooSessionTemporalMessages >> frequencies [
-
-	| result |
-	result := Dictionary new.
-	vocabularyCache keys do: [ :selector | result at: selector put: (self frequencyDictionaryFor: (vocabularyCache at: selector)) ].
-	^ result
-]
-
-{ #category : 'adding' }
-CooSessionTemporalMessages >> frequencyDictionaryFor: anEntry [
-
-	^ Dictionary new
-		  at: #added put: (anEntry at: #addedCount ifAbsent: [ 0 ]);
-		  at: #modified put: (anEntry at: #modifiedCount ifAbsent: [ 0 ]);
-		  yourself
-]
-
-{ #category : 'adding' }
-CooSessionTemporalMessages >> frequencyForSelector: aSelector [
-
-	(vocabularyCache includesKey: aSelector) 
-		ifFalse: [ ^ self newFrequencyDictionary ].
-	^ self frequencyDictionaryFor: (vocabularyCache at: aSelector)
-]
-
-{ #category : 'adding' }
 CooSessionTemporalMessages >> initialize [
 
 	super initialize.
 	vocabularyCache := CooTemporalCache new maximumWeight: 1000
-]
-
-{ #category : 'adding' }
-CooSessionTemporalMessages >> newFrequencyDictionary [
-
-	^ Dictionary new
-		  at: #added put: 0;
-		  at: #modified put: 0;
-		  yourself
 ]
 
 { #category : 'adding' }

@@ -24,14 +24,14 @@ CooSessionTemporalVariableTest >> setUp [
 { #category : 'origins' }
 CooSessionTemporalVariableTest >> testAddNewVariableAnnouncementRegistersEntry [
 
-    | announcement association entry |
-    announcement := CooMockClassAddedAnnouncement for: #TemporalMock.
-    session addNewVariableInVocabulary: announcement.
-    association := #TemporalMock -> #TemporalMock.
-    entry := self cache at: association.
-    self assert: session size = 1.
-    self assert: (entry at: #event) = #added.
-    self assert: (entry at: #lastSeen) notNil
+	| announcement association entry |
+	announcement := CooMockClassAddedAnnouncement for: #TemporalMock.
+	session addNewVariableInVocabulary: announcement.
+	association := #TemporalMock -> #TemporalMock.
+	entry := self cache at: association.
+	self assert: session size equals: 1.
+	self assert: (entry event) equals: #added.
+	self assert: (entry lastSeen) notNil
 ]
 
 { #category : 'origins' }
@@ -41,22 +41,22 @@ CooSessionTemporalVariableTest >> testAddVocabularyRecordsMetadata [
     timestamp := DateAndTime now.
     session addVocabulary: 'TemporalFoo' at: timestamp.
     entry := self cache at: 'TemporalFoo'.
-    self assert: session size = 1.
-    self assert: (entry at: #event) = #added.
-    self assert: (entry at: #lastSeen) = timestamp
+    self assert: session size equals: 1.
+    self assert: (entry event) equals: #added.
+    self assert: (entry lastSeen) equals: timestamp
 ]
 
 { #category : 'tests' }
 CooSessionTemporalVariableTest >> testRegisterClassUpdatesExistingEntry [
 
-    | timestampOlder timestampRecent entry |
-    timestampOlder := DateAndTime now.
-    timestampRecent := timestampOlder + (Duration seconds: 5).
-    session registerClass: #TemporalTracked event: #added at: timestampOlder.
-    session registerClass: #TemporalTracked event: #selected at: timestampRecent.
-    entry := self cache at: #TemporalTracked.
-    self assert: (entry at: #event) = #selected.
-    self assert: (entry at: #lastSeen) = timestampRecent
+	| timestampOlder timestampRecent entry |
+	timestampOlder := DateAndTime now.
+	timestampRecent := timestampOlder + (Duration seconds: 5).
+	session registerClass: #TemporalTracked event: #added at: timestampOlder.
+	session registerClass: #TemporalTracked event: #selected at: timestampRecent.
+	entry := self cache at: #TemporalTracked.
+	self assert: (entry event) equals: #selected.
+	self assert: (entry lastSeen) equals: timestampRecent
 ]
 
 { #category : 'origins' }

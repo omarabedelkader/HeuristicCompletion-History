@@ -85,10 +85,7 @@ CooSessionTemporalVariable >> initialize [
 { #category : 'adding' }
 CooSessionTemporalVariable >> newVocabularyEntry [
 
-        ^ Dictionary new
-                at: #event put: nil;
-                at: #lastSeen put: nil;
-                yourself
+	^ CooCountingODescriptionItem new
 
 ]
 
@@ -99,8 +96,8 @@ CooSessionTemporalVariable >> registerClass: aClassReference event: anEventSymbo
         (vocabularyCache includesKey: aClassReference)
                 ifFalse: [ vocabularyCache at: aClassReference put: self newVocabularyEntry ].
         entry := vocabularyCache at: aClassReference.
-        entry at: #event put: anEventSymbol.
-        entry at: #lastSeen put: aDateAndTime
+        entry event: anEventSymbol.
+        entry lastSeen: aDateAndTime
 ]
 
 { #category : 'adding' }
