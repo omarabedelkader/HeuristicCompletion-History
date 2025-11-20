@@ -116,6 +116,11 @@ CooSessionTemporalVariable >> size [
 	^ vocabularyCache size
 ]
 
+{ #category : 'accessing' }
+CooSessionTemporalVariable >> vocabularyCache [
+	^ vocabularyCache 
+]
+
 { #category : 'matching' }
 CooSessionTemporalVariable >> words [
 

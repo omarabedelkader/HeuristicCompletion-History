@@ -54,16 +54,16 @@ CooNewTemporalCache >> addMessageInVocabulary: anAnn [
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
 	selectors add: anAnn method selector.
-	selectorDescriptions add: (CooMessageHistoryItem new 
-											selector: anAnn method selector; 
-											date: DateAndTime now ;
-											methodClassName: anAnn method methodClass name;
-											yourself ).
-											
+	selectorDescriptions add: (CooMessageHistoryItem new
+			 selector: anAnn method selector;
+			 date: DateAndTime now;
+			 methodClassName: anAnn method methodClass name;
+			 yourself)
+			
+			
+			
 	"we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
-	
-	
 ]
 
 { #category : 'initialization' }
@@ -88,4 +88,9 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 CooNewTemporalCache >> selectorMatching: atoken [
 
 	
+]
+
+{ #category : 'accessing' }
+CooNewTemporalCache >> selectors [
+	^ selectors
 ]
