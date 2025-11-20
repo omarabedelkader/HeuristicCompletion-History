@@ -5,7 +5,10 @@ Class {
 		'selector',
 		'date',
 		'methodClassName',
-		'event'
+		'event',
+		'ast',
+		'commit',
+		'deltaMessages'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Cache2',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -22,6 +25,16 @@ CooMessageHistoryItem >> date [
 CooMessageHistoryItem >> date: anObject [
 
 	date := anObject
+]
+
+{ #category : 'accessing' }
+CooMessageHistoryItem >> deltaMessages [
+	^ deltaMessages
+]
+
+{ #category : 'accessing' }
+CooMessageHistoryItem >> deltaMessages: aCollection [ 
+	deltaMessages := aCollection
 ]
 
 { #category : 'accessing' }

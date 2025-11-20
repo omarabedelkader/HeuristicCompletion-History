@@ -42,11 +42,16 @@ NewCooSessionMessageTest >> setUp [
 { #category : 'tests' }
 NewCooSessionMessageTest >> testAddModifiedMethodComputesMessageDiff [
 
-	| announcement |
-	announcement := CooMockMethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
+		| announcement |
+	announcement := CooMockMethodModified
+		                methodChangedFrom: self class >> #ourOriginalPrintString
+		                to: self class >> #ourModifiedPrintString
+		                oldProtocol: 'toto'.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session vocabularyCache selectorDescriptions first deltaMessages equals: #().
+	self 
+		assert: session vocabularyCache selectorDescriptions first deltaMessages asArray
+		equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests' }

@@ -80,9 +80,11 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 { #category : 'accessing - computed' }
 CooNewTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
 
-	^ ((aCooMockMethodModified method ast allChildren select: [ :each | each isMessage ]) collect: [ :each | each selector ])
+	^ ((aCooMockMethodModified method ast allChildren select: [ :each | each isMessage ])
+			collect: [ :each | each selector ])
 		  difference:
-		  ((aCooMockMethodModified oldMethod ast allChildren select: [ :each | each isMessage ]) collect: [ :each | each selector ])
+		  ((aCooMockMethodModified oldMethod ast allChildren select: [ :each | each isMessage ]) 
+				collect: [ :each | each selector ])
 ]
 
 { #category : 'initialization' }
@@ -99,8 +101,11 @@ CooNewTemporalCache >> initialize [
 CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
 	selectors add: aSelector.
-	selectorDescriptions add: (CooMessageHistoryItem new selector: aSelector; time: aDateAndTime ; yourself )
-		"I want to get the class I do not need the AST"
+	selectorDescriptions add: (CooMessageHistoryItem new
+			 selector: aSelector;
+			 time: aDateAndTime;
+			 ast: anAst;
+			 yourself) "I want to get the class I do not need the AST"
 ]
 
 { #category : 'accessing' }
