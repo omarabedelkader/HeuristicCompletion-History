@@ -41,13 +41,24 @@ CooNewTemporalCache class >> registerInterestToSystemAnnouncement [
 ]
 
 { #category : 'initialization' }
-CooNewTemporalCache >> addMessageInVocabulary: anAnn [
+CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
+	"self
+		registerSelector: anAnn selector
+		ast: anAnn newMethod ast
+		event: #modified
+		at: DateAndTime now"
+	| deltaMessage item |
+	deltaMessage := self computeDeltaMessageOf: anAnn.
+	selectors add: anAnn method selector.
 
-	self
-		registerSelector: anAnn selectedItem selector
-		ast: nil
-		event: #selected
-		at: DateAndTime now
+	item := (CooMessageHistoryItem new
+			 selector: anAnn method selector;
+			 date: DateAndTime now;
+			 event: #modified;
+			 methodClassName: anAnn method methodClass name;
+			 yourself).
+	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
+	selectorDescriptions add: item
 ]
 
 { #category : 'initialization' }
@@ -64,6 +75,14 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 			
 	"we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
+]
+
+{ #category : 'accessing - computed' }
+CooNewTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
+
+	^ ((aCooMockMethodModified method ast allChildren select: [ :each | each isMessage ]) collect: [ :each | each selector ])
+		  difference:
+		  ((aCooMockMethodModified oldMethod ast allChildren select: [ :each | each isMessage ]) collect: [ :each | each selector ])
 ]
 
 { #category : 'initialization' }
@@ -84,10 +103,10 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 		"I want to get the class I do not need the AST"
 ]
 
-{ #category : 'initialization' }
-CooNewTemporalCache >> selectorMatching: atoken [
+{ #category : 'accessing' }
+CooNewTemporalCache >> selectorDescriptions [
 
-	
+	^ selectorDescriptions
 ]
 
 { #category : 'accessing' }

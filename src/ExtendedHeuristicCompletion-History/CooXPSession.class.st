@@ -7,6 +7,12 @@ Class {
 }
 
 { #category : 'adding' }
+CooXPSession >> addModifiedMethodInVocabulary: anAnn [
+
+	vocabularyCache addModifiedMethodInVocabulary: anAnn 
+]
+
+{ #category : 'adding' }
 CooXPSession >> addNewMethodInVocabulary: anAnn [
 
 	vocabularyCache addNewMethodInVocabulary: anAnn
