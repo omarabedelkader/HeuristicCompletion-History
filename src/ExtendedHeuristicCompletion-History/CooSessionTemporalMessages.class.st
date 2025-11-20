@@ -185,7 +185,7 @@ CooSessionTemporalMessages >> updateEntry: anEntry withEvent: anEventSymbol [
 	| countKey |
 	countKey := self eventCountKeyFor: anEventSymbol.
 	countKey ifNil: [ ^ self ].
-	anEntry at: countKey put: (anEntry at: countKey ifAbsent: [ 0 ]) + 1
+	anEntry perform: countKey
 ]
 
 { #category : 'adding' }
