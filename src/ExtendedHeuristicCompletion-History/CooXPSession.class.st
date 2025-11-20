@@ -6,6 +6,14 @@ Class {
 	#tag : 'New'
 }
 
+{ #category : 'instance creation' }
+CooXPSession class >> withXPCache [
+
+	^ self new 
+		vocabularyCache: CooNewTemporalCache new; 
+		yourself
+]
+
 { #category : 'adding' }
 CooXPSession >> addModifiedMethodInVocabulary: anAnn [
 
@@ -21,4 +29,9 @@ CooXPSession >> addNewMethodInVocabulary: anAnn [
 { #category : 'accessing' }
 CooXPSession >> vocabularyCache [
 	^ vocabularyCache 
+]
+
+{ #category : 'matching' }
+CooXPSession >> words [
+	^ vocabularyCache selectors
 ]

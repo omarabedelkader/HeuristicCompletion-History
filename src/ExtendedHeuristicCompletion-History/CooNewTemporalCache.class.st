@@ -2,11 +2,12 @@
 When the user defines a new method. We add a description of such event in a record. 
 
 ### Open question
-- what do we do when the user remove a method? Removing all the entries based on the selector is not a good approach. 
-- It can be annoying to propose a removed method.
-- This is why we need an amortization mecanism (may here or in a sorter). 
-- May be we should have a added, modified list and a removed one?
+- what do we do when the user remove a method? Removing all the entries based on the selector is not a good approach. Answer we should remove the method and the selector (a group of method with the same name). 
 
+- do we need the separation selector * description? we could keep the description and do collect. 
+
+
+- May be should split this class into 2 one for the offline benchmark and one for the live aspect. 
 "
 Class {
 	#name : 'CooNewTemporalCache',
@@ -47,16 +48,16 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 		ast: anAnn newMethod ast
 		event: #modified
 		at: DateAndTime now"
+
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
-	selectors add: anAnn method selector.
-
-	item := (CooMessageHistoryItem new
-			 selector: anAnn method selector;
-			 date: DateAndTime now;
-			 event: #modified;
-			 methodClassName: anAnn method methodClass name;
-			 yourself).
+	
+	item := CooMessageHistoryItem new
+		        selector: anAnn method selector;
+		        date: DateAndTime now;
+		        event: #modified;
+		        methodClassName: anAnn method methodClass name;
+		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
 	selectorDescriptions add: item
 ]
@@ -64,16 +65,11 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 { #category : 'initialization' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
-	selectors add: anAnn method selector.
 	selectorDescriptions add: (CooMessageHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
 			 methodClassName: anAnn method methodClass name;
-			 yourself)
-			
-			
-			
-	"we could also decide that when a class gets a new method the name of the class is getting more important. 
+			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 ]
 
@@ -91,21 +87,18 @@ CooNewTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
 CooNewTemporalCache >> initialize [
 
 	super initialize.
-	selectors := OrderedCollection new.
 	selectorDescriptions := OrderedCollection new.
-	variables := OrderedCollection new. 
 	variablesDescriptions := OrderedCollection new
 ]
 
 { #category : 'initialization' }
 CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
-	selectors add: aSelector.
 	selectorDescriptions add: (CooMessageHistoryItem new
 			 selector: aSelector;
 			 time: aDateAndTime;
 			 ast: anAst;
-			 yourself) "I want to get the class I do not need the AST"
+			 yourself) 
 ]
 
 { #category : 'accessing' }
@@ -116,5 +109,6 @@ CooNewTemporalCache >> selectorDescriptions [
 
 { #category : 'accessing' }
 CooNewTemporalCache >> selectors [
-	^ selectors
+
+	^ selectorDescriptions collect: [ :each | each selector ]
 ]
