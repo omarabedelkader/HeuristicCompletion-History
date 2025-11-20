@@ -13,10 +13,8 @@ Class {
 	#name : 'CooNewTemporalCache',
 	#superclass : 'Object',
 	#instVars : [
-		'selectors',
-		'variables',
 		'selectorDescriptions',
-		'variablesDescriptions'
+		'variableDescriptions'
 	],
 	#classInstVars : [
 		'current'
@@ -61,8 +59,12 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 { #category : 'adding' }
 CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 
- 
-	self halt.
+	variableDescriptions add: (CooVariableHistoryItem new
+			 nameOfClass: ann classAdded name;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
+			 event: #added; 
+			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+	Focus of attention. So this can be computed latter based on such information. "
 ]
 
 { #category : 'accessing - computed' }
@@ -80,7 +82,7 @@ CooNewTemporalCache >> initialize [
 
 	super initialize.
 	selectorDescriptions := OrderedCollection new.
-	variablesDescriptions := OrderedCollection new
+	variableDescriptions := OrderedCollection new
 ]
 
 { #category : 'initialization' }
@@ -103,4 +105,16 @@ CooNewTemporalCache >> selectorDescriptions [
 CooNewTemporalCache >> selectors [
 
 	^ selectorDescriptions collect: [ :each | each selector ]
+]
+
+{ #category : 'accessing' }
+CooNewTemporalCache >> variableDescriptions [
+
+	^ variableDescriptions
+]
+
+{ #category : 'accessing' }
+CooNewTemporalCache >> variableNames [
+
+	^ variableDescriptions collect: [ :each | each className ]
 ]

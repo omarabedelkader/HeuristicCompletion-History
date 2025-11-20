@@ -48,6 +48,13 @@ CooMessageHistoryItem >> methodClassName: aClassName [
 ]
 
 { #category : 'accessing' }
+CooMessageHistoryItem >> printOn: aStream [
+
+	aStream nextPutAll: methodClassName.
+	aStream nextPutAll: ' >> ', selector
+]
+
+{ #category : 'accessing' }
 CooMessageHistoryItem >> selector [
 
 	^ selector

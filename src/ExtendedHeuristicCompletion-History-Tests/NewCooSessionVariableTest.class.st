@@ -10,12 +10,11 @@ Class {
 NewCooSessionVariableTest >> testAddNewVariableAnnouncementRegistersEntry [
 
 	| announcement entry |
-	announcement := CooMockClassAddedAnnouncement for: #TemporalMock.
+	announcement := CooMockClassAddedAnnouncement for: NewCooSessionVariableTest.
 	session addNewVariableInVocabulary: announcement.
 
 	entry := session vocabularyCache variableDescriptions first.
 
-	self assert: session vocabularyCache names size equals: 1.
-	self assert: entry event equals: #added.
-
+	self assert: session vocabularyCache variableNames size equals: 1.
+	self assert: entry event equals: #added
 ]
