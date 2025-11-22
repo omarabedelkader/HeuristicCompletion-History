@@ -7,3 +7,10 @@ Metacello new
   baseline: 'ExtendedHeuristicCompletionHistory';
   load.
 ```
+
+```smalltalk
+Metacello new
+  baseline: 'ExtendedHeuristicCompletionHistory';
+  repository: 'github://omarabedelkader/HeuristicCompletion-History/src' 
+  load.
+```
