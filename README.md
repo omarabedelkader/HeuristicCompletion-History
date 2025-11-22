@@ -11,6 +11,6 @@ Metacello new
 ```smalltalk
 Metacello new
   baseline: 'ExtendedHeuristicCompletionHistory';
-  repository: 'github://omarabedelkader/HeuristicCompletion-History/src';
+  repository: 'github://omarabedelkader/HeuristicCompletion-History:main/src';
   load.
 ```
