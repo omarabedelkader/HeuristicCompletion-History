@@ -1,3 +1,6 @@
+"
+I'm a simple datastructure like object that represents history event.
+"
 Class {
 	#name : 'CooHistoryItem',
 	#superclass : 'Object',

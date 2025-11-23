@@ -8,9 +8,9 @@ Class {
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Variables-Frequency',
+	#category : 'ExtendedHeuristicCompletion-History-Frequency',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Variables-Frequency'
+	#tag : 'Frequency'
 }
 
 { #category : 'requests' }

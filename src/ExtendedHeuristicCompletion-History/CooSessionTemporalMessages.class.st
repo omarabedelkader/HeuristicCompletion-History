@@ -25,9 +25,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Messages-Temporal',
+	#category : 'ExtendedHeuristicCompletion-History-Temporal',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Messages-Temporal'
+	#tag : 'Temporal'
 }
 
 { #category : 'accessing' }

@@ -22,15 +22,9 @@ Class {
 
 { #category : 'initialization' }
 CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
-	"self
-		registerSelector: anAnn selector
-		ast: anAnn newMethod ast
-		event: #modified
-		at: DateAndTime now"
 
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
-	
 	item := CooMessageHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;

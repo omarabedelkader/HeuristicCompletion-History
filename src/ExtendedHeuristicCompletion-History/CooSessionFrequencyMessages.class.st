@@ -11,9 +11,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Messages-Frequency',
+	#category : 'ExtendedHeuristicCompletion-History-Frequency',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Messages-Frequency'
+	#tag : 'Frequency'
 }
 
 { #category : 'actions' }
