@@ -1,3 +1,7 @@
+"
+I'm a little datastructure like object that hold information about the newly defined, modified methods.
+
+"
 Class {
 	#name : 'CooMessageHistoryItem',
 	#superclass : 'Object',

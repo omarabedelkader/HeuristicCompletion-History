@@ -1,13 +1,9 @@
 "
-When the user defines a new method. We add a description of such event in a record. 
+I'm recording structrure that records modified or added methods and classes.
+My behavior is to record everything. 
 
-### Open question
-- what do we do when the user remove a method? Removing all the entries based on the selector is not a good approach. Answer we should remove the method and the selector (a group of method with the same name). 
+I pay attention to not hold directly class or compiled method objects to avoid creating spurious references. 
 
-- do we need the separation selector * description? we could keep the description and do collect. 
-
-
-- May be should split this class into 2 one for the offline benchmark and one for the live aspect. 
 "
 Class {
 	#name : 'CooNewTemporalCache',
