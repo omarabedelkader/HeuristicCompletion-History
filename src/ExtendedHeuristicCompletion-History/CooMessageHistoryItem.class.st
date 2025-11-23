@@ -4,32 +4,16 @@ I'm a little datastructure like object that hold information about the newly def
 "
 Class {
 	#name : 'CooMessageHistoryItem',
-	#superclass : 'Object',
+	#superclass : 'CooHistoryItem',
 	#instVars : [
 		'selector',
-		'date',
-		'methodClassName',
-		'event',
 		'ast',
-		'commit',
 		'deltaMessages'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'New'
 }
-
-{ #category : 'accessing' }
-CooMessageHistoryItem >> date [
-
-	^ date
-]
-
-{ #category : 'accessing' }
-CooMessageHistoryItem >> date: anObject [
-
-	date := anObject
-]
 
 { #category : 'accessing' }
 CooMessageHistoryItem >> deltaMessages [
@@ -42,19 +26,9 @@ CooMessageHistoryItem >> deltaMessages: aCollection [
 ]
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> event: aString [ 
-	event := aString
-]
-
-{ #category : 'accessing' }
-CooMessageHistoryItem >> methodClassName: aClassName [
-	methodClassName := aClassName
-]
-
-{ #category : 'accessing' }
 CooMessageHistoryItem >> printOn: aStream [
 
-	aStream nextPutAll: methodClassName.
+	aStream nextPutAll: self nameOfClass.
 	aStream nextPutAll: ' >> ', selector
 ]
 

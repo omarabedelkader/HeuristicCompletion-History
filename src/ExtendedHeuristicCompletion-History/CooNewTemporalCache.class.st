@@ -35,7 +35,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
 		        event: #modified;
-		        methodClassName: anAnn method methodClass name;
+		        nameOfClass: anAnn method methodClass name;
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
 	selectorDescriptions add: item
@@ -47,7 +47,7 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 	selectorDescriptions add: (CooMessageHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
-			 methodClassName: anAnn method methodClass name;
+			 nameOfClass: anAnn method methodClass name;
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 ]

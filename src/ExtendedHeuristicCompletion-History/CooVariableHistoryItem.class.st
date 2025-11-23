@@ -4,13 +4,7 @@ I'm a little datastructure like class that hold information about added, modifie
 "
 Class {
 	#name : 'CooVariableHistoryItem',
-	#superclass : 'Object',
-	#instVars : [
-		'className',
-		'date',
-		'event',
-		'commit'
-	],
+	#superclass : 'CooHistoryItem',
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'New'
@@ -26,40 +20,4 @@ CooVariableHistoryItem >> commit [
 CooVariableHistoryItem >> commit: anObject [
 
 	commit := anObject
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> date [
-
-	^ date
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> date: anObject [
-
-	date := anObject
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> event [
-
-	^ event
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> event: anObject [
-
-	event := anObject
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> nameOfClass [
-
-	^ className
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> nameOfClass: aClassName [
-
-	className := aClassName
 ]
