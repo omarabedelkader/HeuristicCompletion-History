@@ -32,6 +32,12 @@ CooXPSession >> addNewVariableInVocabulary: aCooMockClassAddedAnnouncement [
 	vocabularyCache addNewVariableInVocabulary: aCooMockClassAddedAnnouncement 
 ]
 
+{ #category : 'adding' }
+CooXPSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
+
+	vocabularyCache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
+]
+
 { #category : 'accessing' }
 CooXPSession >> vocabularyCache [
 	^ vocabularyCache 

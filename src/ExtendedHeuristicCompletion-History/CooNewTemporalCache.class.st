@@ -20,7 +20,7 @@ Class {
 	#tag : 'New'
 }
 
-{ #category : 'initialization' }
+{ #category : 'adding' }
 CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
@@ -32,13 +32,13 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 		        nameOfClass: anAnn method methodClass name;
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
-	selectorDescriptions add: item
+	selectorDescriptions addFirst: item
 ]
 
-{ #category : 'initialization' }
+{ #category : 'adding' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
-	selectorDescriptions add: (CooMessageHistoryItem new
+	selectorDescriptions addFirst: (CooMessageHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
@@ -49,7 +49,7 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 { #category : 'adding' }
 CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 
-	variableDescriptions add: (CooVariableHistoryItem new
+	variableDescriptions addFirst: (CooVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
 			 event: #added; 
@@ -85,6 +85,18 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 			 yourself) 
 ]
 
+{ #category : 'removing' }
+CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [ 
+	
+	selectorDescriptions add: ( 
+		CooMessageHistoryItem new
+		        selector: anAnn method selector;
+		        date: DateAndTime now;
+		        event: #removed;
+		        nameOfClass: anAnn method methodClass name;
+		        yourself)
+]
+
 { #category : 'accessing' }
 CooNewTemporalCache >> selectorDescriptions [
 
@@ -94,7 +106,21 @@ CooNewTemporalCache >> selectorDescriptions [
 { #category : 'accessing' }
 CooNewTemporalCache >> selectors [
 
-	^ selectorDescriptions collect: [ :each | each selector ]
+	| selectors filters |
+	selectors := OrderedCollection new: selectorDescriptions size.
+	"this cries for a little hierarchy for message history item."
+	"an add CM1, add/modified CM1, add CM1, removed CM1 = {}"
+	
+	"The following does implement this semantics removed CM1, add CM1 = CM1"
+	
+	filters := OrderedCollection new.
+	selectorDescriptions do: [ :each | 
+		(each event = #removed)
+				ifTrue: [ filters add: each ]
+				ifFalse: [ (filters anySatisfy: [ :f | ((f selector = each selector ) 
+																		and: [ f nameOfClass = each nameOfClass ])])
+										ifFalse: [ selectors add: each selector ] ] ].
+	^ selectors	
 ]
 
 { #category : 'accessing' }
