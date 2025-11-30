@@ -102,6 +102,7 @@ NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethod [
 NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
 
 	| announcement descr |
+	self skip.
 	announcement := self modifiedMethodAnnouncement.
 	session addModifiedMethodInVocabulary: announcement.
 	

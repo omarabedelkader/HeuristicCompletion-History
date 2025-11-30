@@ -33,13 +33,45 @@ CooSession class >> install [
 	self deinstall.
 	self environment codeChangeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
 	self environment codeChangeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current.
-	self environment codeChangeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current
+	self environment codeChangeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current.
+	
+	self environment codeChangeAnnouncer
+		when: ClassAdded send: #addNewVariableInVocabulary: to: self current;
+		when: ClassRemoved send: #removeVariableFromVocabulary: to: self current
 ]
 
 { #category : 'instance creation' }
 CooSession class >> withCache: aCache [
 
 	^ self current vocabularyCache: aCache
+]
+
+{ #category : 'adding' }
+CooSession >> addModifiedMethodInVocabulary: anAnn [
+
+	vocabularyCache addModifiedMethodInVocabulary: anAnn 
+]
+
+{ #category : 'adding' }
+CooSession >> addNewMethodInVocabulary: anAnn [
+
+	vocabularyCache addNewMethodInVocabulary: anAnn
+]
+
+{ #category : 'adding' }
+CooSession >> addNewVariableInVocabulary: aClassAdded [ 
+	vocabularyCache addNewVariableInVocabulary: aClassAdded
+]
+
+{ #category : 'adding' }
+CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
+
+	vocabularyCache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
+]
+
+{ #category : 'adding' }
+CooSession >> removeVariableFromVocabulary: aClassRemoved [ 
+	vocabularyCache removeVariableFromVocabulary: aClassRemoved 
 ]
 
 { #category : 'accessing' }

@@ -15,24 +15,6 @@ CooXPSession class >> withXPCache [
 ]
 
 { #category : 'adding' }
-CooXPSession >> addModifiedMethodInVocabulary: anAnn [
-
-	vocabularyCache addModifiedMethodInVocabulary: anAnn 
-]
-
-{ #category : 'adding' }
-CooXPSession >> addNewMethodInVocabulary: anAnn [
-
-	vocabularyCache addNewMethodInVocabulary: anAnn
-]
-
-{ #category : 'adding' }
-CooXPSession >> addNewVariableInVocabulary: aCooMockClassAddedAnnouncement [ 
-
-	vocabularyCache addNewVariableInVocabulary: aCooMockClassAddedAnnouncement 
-]
-
-{ #category : 'adding' }
 CooXPSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
 
 	vocabularyCache removeMethodFromVocabulary: aMethodRemovedAnnouncement 

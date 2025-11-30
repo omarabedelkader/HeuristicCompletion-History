@@ -20,7 +20,7 @@ Class {
 	#tag : 'New'
 }
 
-{ #category : 'adding' }
+{ #category : 'method handling' }
 CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
@@ -35,7 +35,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 	selectorDescriptions addFirst: item
 ]
 
-{ #category : 'adding' }
+{ #category : 'method handling' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
 	selectorDescriptions addFirst: (CooMessageHistoryItem new
@@ -46,7 +46,7 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 	Focus of attention. So this can be computed latter based on such information. "
 ]
 
-{ #category : 'adding' }
+{ #category : 'class handling' }
 CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 
 	variableDescriptions addFirst: (CooVariableHistoryItem new
@@ -85,7 +85,7 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 			 yourself) 
 ]
 
-{ #category : 'removing' }
+{ #category : 'method handling' }
 CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [ 
 	
 	selectorDescriptions add: ( 
@@ -95,6 +95,16 @@ CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
 		        event: #removed;
 		        nameOfClass: anAnn method methodClass name;
 		        yourself)
+]
+
+{ #category : 'class handling' }
+CooNewTemporalCache >> removeVariableFromVocabulary: ann [
+
+	variableDescriptions addFirst: (CooVariableHistoryItem new
+			 nameOfClass: ann classAdded name;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
+			 event: #removed; 
+			 yourself) 
 ]
 
 { #category : 'accessing' }
