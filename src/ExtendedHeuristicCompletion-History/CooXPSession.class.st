@@ -13,19 +13,3 @@ CooXPSession class >> withXPCache [
 		vocabularyCache: CooNewTemporalCache new; 
 		yourself
 ]
-
-{ #category : 'adding' }
-CooXPSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
-
-	vocabularyCache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
-]
-
-{ #category : 'accessing' }
-CooXPSession >> vocabularyCache [
-	^ vocabularyCache 
-]
-
-{ #category : 'matching' }
-CooXPSession >> words [
-	^ vocabularyCache selectors
-]

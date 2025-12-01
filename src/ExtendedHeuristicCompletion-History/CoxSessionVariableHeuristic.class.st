@@ -20,24 +20,20 @@ CoxSessionVariableHeuristic >> appliesForNode: aNode inContext: aContext [
 ]
 
 { #category : 'requests' }
-CoxSessionVariableHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
+CoxSessionVariableHeuristic >> buildFetcherFor: aVariableNode 
+	inContext: aContext [
 	
-        ^ CoCollectionFetcher onCollection:
-                        (self session words collect: [ :each |
-                                | key node |
-                                each isAssociation
-                                        ifTrue: [ key := each key. node := each value ]
-                                        ifFalse: [ key := each. node := nil ].
-                                NECVariableEntry
-                                        contents: (key isString
-                                                ifTrue: [ key ]
-                                                ifFalse: [ key asString ])
-                                        node: node ])
+		| fetcher |
+		fetcher := CoCollectionFetcher new.
+      ^ fetcher
+				 collection: (self session variableNames collect: [ :each |
+                               (NECGlobalEntry contents: each node: aVariableNode) 
+											fetcher: fetcher ])
 ]
 
 { #category : 'accessing' }
 CoxSessionVariableHeuristic >> session [
-	^ session ifNil: [ session := CooSessionTemporalVariable current ]
+	^ session ifNil: [ session := CooXPSession current ]
 ]
 
 { #category : 'accessing' }
