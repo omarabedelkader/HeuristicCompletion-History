@@ -20,14 +20,48 @@ CoxSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
 
 { #category : 'requests' }
 CoxSessionMessagesHeuristic >> buildFetcherFor: aMessageNode 
+	inContext2: aContext [
+	
+		| fetcher matchingSelectors token |
+		matchingSelectors := OrderedCollection new.
+		"this is stupid to go over all the selectors but let us try I want to see if I get better results.
+		Normally this is not needed since there is a filter: 
+		look into configureFetcher: aFetcher forNode: aNode
+		" 
+		
+		token := aContext completionToken.
+		self session selectors do: [ :each | (each beginsWith: token) 
+				ifTrue: [ matchingSelectors 
+						add:  ((NECSelectorEntry contents: each node: aMessageNode) 
+											fetcher: fetcher ) ] ].
+		matchingSelectors traceCr.
+		
+		fetcher := CoCollectionFetcher new.
+    
+		^ fetcher collection: matchingSelectors
+]
+
+{ #category : 'requests' }
+CoxSessionMessagesHeuristic >> buildFetcherFor: aMessageNode 
 	inContext: aContext [
 	
-		| fetcher |
+		| fetcher matchingSelectors token |
+		matchingSelectors := OrderedCollection new.
+		"this is stupid to go over all the selectors but let us try I want to see if I get better results.
+		Normally this is not needed since there is a filter: 
+		look into configureFetcher: aFetcher forNode: aNode
+		" 
+		
+		token := aContext completionToken.
+		self session selectors do: [ :each | (each beginsWith: token) 
+				ifTrue: [ matchingSelectors 
+						add:  ((NECSelectorEntry contents: each node: aMessageNode) 
+											fetcher: fetcher ) ] ].
+		matchingSelectors traceCr.
+		
 		fetcher := CoCollectionFetcher new.
-      ^ fetcher
-				 collection: (self session selectors collect: [ :each |
-                               (NECSelectorEntry contents: each node: aMessageNode) 
-											fetcher: fetcher ])
+    
+		^ fetcher collection: matchingSelectors
 ]
 
 { #category : 'accessing' }

@@ -82,6 +82,7 @@ CooSession >> removeVariableFromVocabulary: aClassRemoved [
 
 { #category : 'matching' }
 CooSession >> selectors [
+	self haltOnce.
 	^ vocabularyCache selectors
 ]
 
