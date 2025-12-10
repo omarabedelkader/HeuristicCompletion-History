@@ -6,7 +6,7 @@ Class {
 }
 
 { #category : 'script' }
-BaselineOfExtendedHeuristicCompletionHistory class >> postLoad [
+BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
 
 	CompletionContext sorterClass: NoSorter
 ]
