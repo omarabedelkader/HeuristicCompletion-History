@@ -25,7 +25,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
-	item := CooMessageHistoryItem new
+	item := CooModifiedMessageHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
 		        event: #modified;
@@ -38,7 +38,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 { #category : 'method handling' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
-	selectorDescriptions addFirst: (CooMessageHistoryItem new
+	selectorDescriptions addFirst: (CooAddedMessageHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
@@ -49,7 +49,7 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 { #category : 'class handling' }
 CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 
-	variableDescriptions addFirst: (CooVariableHistoryItem new
+	variableDescriptions addFirst: (CooAddedVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
 			 event: #added; 
@@ -89,7 +89,7 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [ 
 	
 	selectorDescriptions add: ( 
-		CooMessageHistoryItem new
+		CooRemovedMessageHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
 		        event: #removed;
@@ -100,8 +100,8 @@ CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
 { #category : 'class handling' }
 CooNewTemporalCache >> removeVariableFromVocabulary: ann [
 
-	variableDescriptions addFirst: (CooVariableHistoryItem new
-			 nameOfClass: ann classAdded name;
+	variableDescriptions addFirst: (CooRemovedVariableHistoryItem new
+			 nameOfClass: ann classRemoved name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
 			 event: #removed; 
 			 yourself) 

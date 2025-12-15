@@ -7,7 +7,6 @@ Class {
 	#superclass : 'CooHistoryItem',
 	#instVars : [
 		'selector',
-		'ast',
 		'deltaMessages'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-New',
