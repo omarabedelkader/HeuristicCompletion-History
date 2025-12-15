@@ -9,6 +9,13 @@ Class {
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 
 	<baseline>
+	spec postLoadDoIt: #postLoad.
 	spec for: #common do: [ spec package: 'ExtendedHeuristicCompletion-History' ].
 				spec package: 'ExtendedHeuristicCompletion-History-Tests' with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+]
+
+{ #category : 'script' }
+BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
+
+	CompletionContext sorterClass: NoSorter
 ]
