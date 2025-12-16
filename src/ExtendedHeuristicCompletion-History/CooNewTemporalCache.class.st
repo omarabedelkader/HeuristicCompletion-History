@@ -25,7 +25,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
-	item := CooModifiedMessageHistoryItem new
+	item := CooModifiedMethodHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
 		        event: #modified;
@@ -38,7 +38,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 { #category : 'method handling' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
-	selectorDescriptions addFirst: (CooAddedMessageHistoryItem new
+	selectorDescriptions addFirst: (CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
@@ -78,7 +78,7 @@ CooNewTemporalCache >> initialize [
 { #category : 'initialization' }
 CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
-	selectorDescriptions add: (CooMessageHistoryItem new
+	selectorDescriptions add: (CooMethodHistoryItem new
 			 selector: aSelector;
 			 time: aDateAndTime;
 			 ast: anAst;
@@ -89,7 +89,7 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [ 
 	
 	selectorDescriptions add: ( 
-		CooRemovedMessageHistoryItem new
+		CooRemovedMethodHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
 		        event: #removed;

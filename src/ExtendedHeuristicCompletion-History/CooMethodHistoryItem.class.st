@@ -3,7 +3,7 @@ I'm a little datastructure like object that hold information about the newly def
 
 "
 Class {
-	#name : 'CooMessageHistoryItem',
+	#name : 'CooMethodHistoryItem',
 	#superclass : 'CooHistoryItem',
 	#instVars : [
 		'selector',
@@ -15,30 +15,30 @@ Class {
 }
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> deltaMessages [
+CooMethodHistoryItem >> deltaMessages [
 	^ deltaMessages
 ]
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> deltaMessages: aCollection [ 
+CooMethodHistoryItem >> deltaMessages: aCollection [ 
 	deltaMessages := aCollection
 ]
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> printOn: aStream [
+CooMethodHistoryItem >> printOn: aStream [
 
 	aStream nextPutAll: self nameOfClass.
 	aStream nextPutAll: ' >> ', selector
 ]
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> selector [
+CooMethodHistoryItem >> selector [
 
 	^ selector
 ]
 
 { #category : 'accessing' }
-CooMessageHistoryItem >> selector: anObject [
+CooMethodHistoryItem >> selector: anObject [
 
 	selector := anObject
 ]

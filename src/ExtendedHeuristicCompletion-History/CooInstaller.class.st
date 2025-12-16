@@ -29,7 +29,7 @@ CooInstaller >> installSessionInSystem [
 { #category : 'as yet unclassified' }
 CooInstaller >> whereToHookInToGetEntries [
 
-	self halt just move the caret "
+	"
 	When we will want to know what the user saw and selected. ...
 	
 	The following method contains the full information: the selected item (entry) and the entries found by the 

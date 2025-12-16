@@ -1,6 +1,6 @@
 Class {
-	#name : 'CooModifiedMessageHistoryItem',
-	#superclass : 'CooMessageHistoryItem',
+	#name : 'CooAddedMethodHistoryItem',
+	#superclass : 'CooMethodHistoryItem',
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'New'
