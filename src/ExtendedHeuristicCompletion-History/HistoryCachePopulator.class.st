@@ -157,7 +157,7 @@ HistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp
 	
 	ast := self tryParseAST: anAddition leftContents.
 	
-	aCollection add: (CooODescriptionItem new
+	aCollection add: (CooAddedMethodHistoryItem new
 		selector:selector;
 		ast: ast;
 		event: #added;
@@ -176,12 +176,12 @@ HistoryCachePopulator >> processModification: aModification into: aCollection ti
 	ast := self tryParseAST: aModification leftContents.
 	
 	aCollection add: 
-	(CooODescriptionItem new
-		selector:selector;
-		ast: ast;
-		event: #modified;
-		timestamp: aTimestamp;
-		yourself)
+		(CooModifiedMethodHistoryItem new
+			selector:selector;
+			ast: ast;
+			event: #modified;
+			timestamp: aTimestamp;
+			yourself)
 
 ]
 

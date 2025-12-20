@@ -7,12 +7,23 @@ Class {
 	#superclass : 'CooHistoryItem',
 	#instVars : [
 		'selector',
-		'deltaMessages'
+		'deltaMessages',
+		'ast'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'New'
 }
+
+{ #category : 'accessing' }
+CooMethodHistoryItem >> ast [
+	^ ast
+]
+
+{ #category : 'accessing' }
+CooMethodHistoryItem >> ast: anOCMethodNode [ 
+	ast := anOCMethodNode 
+]
 
 { #category : 'accessing' }
 CooMethodHistoryItem >> deltaMessages [

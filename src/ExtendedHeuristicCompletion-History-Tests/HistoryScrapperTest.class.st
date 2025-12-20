@@ -1,9 +1,9 @@
 Class {
 	#name : 'HistoryScrapperTest',
 	#superclass : 'TestCase',
-	#category : 'ExtendedHeuristicCompletion-History-Tests-Github-Scrapper',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-NewHistoryScrapperTests',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'Github-Scrapper'
+	#tag : 'NewHistoryScrapperTests'
 }
 
 { #category : 'tests' }

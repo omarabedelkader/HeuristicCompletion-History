@@ -10,9 +10,9 @@ Class {
 		'frequencySession',
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
+	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Fetching-Github'
+	#tag : 'New'
 }
 
 { #category : 'instance creation' }
@@ -103,7 +103,8 @@ NewHistoryCachePopulator >> populateCaches [
 		| methodInfos |
 		methodInfos := self extractMethodsFromCommit: commit.
 		methodInfos do: [ :info |
-			self populateCachesWithMethodInfo: info ].
+			"for now we do not manage variable"
+			session addMethodItem: info ].
 		totalMethods := totalMethods + methodInfos size.
 		
 		(index \\ 10 = 0) ifTrue: [
@@ -123,7 +124,7 @@ NewHistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 	selector := aMethodInfo selector.
 	ast := aMethodInfo ast.
 	event := aMethodInfo event.
-	timestamp := aMethodInfo timestamp.
+	timestamp := aMethodInfo date.
 	
 	session
 		registerSelector: selector
@@ -148,7 +149,7 @@ NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timest
 		selector:selector;
 		ast: ast;
 		event: #added;
-		timestamp: aTimestamp;
+		date: aTimestamp;
 		yourself)
 ]
 
@@ -162,11 +163,11 @@ NewHistoryCachePopulator >> processModification: aModification into: aCollection
 	
 	ast := self tryParseAST: aModification leftContents.
 	
-	aCollection add:  (CooAddedMethodHistoryItem new
+	aCollection add: (CooModifiedMethodHistoryItem new
 		selector:selector;
 		ast: ast;
 		event: #modified;
-		timestamp: aTimestamp;
+		date: aTimestamp;
 		yourself)
 
 ]

@@ -1,22 +1,22 @@
 Class {
-	#name : 'HistoryCachePopulatorTest',
+	#name : 'NewHistoryCachePopulatorTest',
 	#superclass : 'TestCase',
 	#instVars : [
 		'populator'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Tests-Github-Scrapper',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-NewHistoryScrapperTests',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'Github-Scrapper'
+	#tag : 'NewHistoryScrapperTests'
 }
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> setUp [
+NewHistoryCachePopulatorTest >> setUp [
     super setUp.
-    populator := HistoryCachePopulator new
+    populator := NewHistoryCachePopulator new
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
+NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
@@ -25,7 +25,7 @@ HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
+NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
@@ -33,26 +33,23 @@ HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
-    | temporal frequency info |
-    temporal := HistoryMockSession new.
-    frequency := HistoryMockSession new.
-    populator temporalSession: temporal.
-    populator frequencySession: frequency.
-    info := CooODescriptionItem new
+NewHistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
+    | session info |
+    session := HistoryMockSession new.
+    populator session: session.
+
+    info := CooAddedMethodHistoryItem new
 		selector: #sample;
-		event: #added;
 		timestamp: DateAndTime now;
 		yourself.
 		
     populator populateCachesWithMethodInfo: info.
-    self assert: temporal registrations size equals: 1.
-    self assert: frequency registrations size equals: 1.
-    self assert: ((temporal registrations first) selector) equals: #sample
+    self assert: session registrations size equals: 1.
+    self assert: ((session registrations first) selector) equals: #sample
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
+NewHistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
     | collection addition timestamp info |
     collection := OrderedCollection new.
     addition := HistoryMockDiffOperation additionForSelector: #bar leftContents: 'bar ^ 2'.
@@ -67,7 +64,7 @@ HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
+NewHistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
     | collection modification timestamp info |
     collection := OrderedCollection new.
     modification := HistoryMockDiffOperation

@@ -21,6 +21,12 @@ Class {
 }
 
 { #category : 'method handling' }
+CooNewTemporalCache >> addMethodItem: anItem [
+
+	selectorDescriptions addFirst: anItem
+]
+
+{ #category : 'method handling' }
 CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
@@ -32,13 +38,13 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 		        nameOfClass: anAnn method methodClass name;
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
-	selectorDescriptions addFirst: item
+	self addMethodItem: item
 ]
 
 { #category : 'method handling' }
 CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 
-	selectorDescriptions addFirst: (CooAddedMethodHistoryItem new
+	self addMethodItem: (CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
 			 date: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
@@ -49,12 +55,18 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 { #category : 'class handling' }
 CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 
-	variableDescriptions addFirst: (CooAddedVariableHistoryItem new
+	self addVariableItem: (CooAddedVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
 			 event: #added; 
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
+]
+
+{ #category : 'class handling' }
+CooNewTemporalCache >> addVariableItem: anItem [
+
+	variableDescriptions addFirst: anItem
 ]
 
 { #category : 'accessing - computed' }
@@ -88,7 +100,7 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 { #category : 'method handling' }
 CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [ 
 	
-	selectorDescriptions add: ( 
+	self addMethodItem: ( 
 		CooRemovedMethodHistoryItem new
 		        selector: anAnn method selector;
 		        date: DateAndTime now;
@@ -100,7 +112,7 @@ CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
 { #category : 'class handling' }
 CooNewTemporalCache >> removeVariableFromVocabulary: ann [
 
-	variableDescriptions addFirst: (CooRemovedVariableHistoryItem new
+	self addVariableItem: (CooRemovedVariableHistoryItem new
 			 nameOfClass: ann classRemoved name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
 			 event: #removed; 

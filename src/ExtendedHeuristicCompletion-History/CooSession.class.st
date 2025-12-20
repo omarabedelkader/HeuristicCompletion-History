@@ -2,7 +2,7 @@ Class {
 	#name : 'CooSession',
 	#superclass : 'Object',
 	#instVars : [
-		'vocabularyCache'
+		'cache'
 	],
 	#classVars : [
 		'Current'
@@ -49,55 +49,61 @@ CooSession class >> withCache: aCache [
 { #category : 'adding' }
 CooSession >> addModifiedMethodInVocabulary: anAnn [
 
-	vocabularyCache addModifiedMethodInVocabulary: anAnn 
+	cache addModifiedMethodInVocabulary: anAnn 
 ]
 
 { #category : 'adding' }
 CooSession >> addNewMethodInVocabulary: anAnn [
 
-	vocabularyCache addNewMethodInVocabulary: anAnn
+	cache addNewMethodInVocabulary: anAnn
 ]
 
 { #category : 'adding' }
 CooSession >> addNewVariableInVocabulary: aClassAdded [ 
-	vocabularyCache addNewVariableInVocabulary: aClassAdded
+	cache addNewVariableInVocabulary: aClassAdded
+]
+
+{ #category : 'origins' }
+CooSession >> cache [
+
+	^ cache 
 ]
 
 { #category : 'initialization' }
 CooSession >> initialize [ 
 	super initialize.
-	vocabularyCache := CooNewTemporalCache new.
+	cache := CooNewTemporalCache new.
 ]
 
 { #category : 'adding' }
 CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
 
-	vocabularyCache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
+	cache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
 ]
 
 { #category : 'adding' }
 CooSession >> removeVariableFromVocabulary: aClassRemoved [ 
-	vocabularyCache removeVariableFromVocabulary: aClassRemoved 
+	cache removeVariableFromVocabulary: aClassRemoved 
 ]
 
 { #category : 'matching' }
 CooSession >> selectors [
-	self haltOnce.
-	^ vocabularyCache selectors
+	
+	^ cache selectors
 ]
 
 { #category : 'matching' }
 CooSession >> variableNames [
-	^ vocabularyCache variableNames
+	^ cache variableNames
 ]
 
 { #category : 'accessing' }
 CooSession >> vocabularyCache [
-	^ vocabularyCache 
+	^ cache 
 ]
 
 { #category : 'accessing' }
 CooSession >> vocabularyCache: aCache [
 
-	vocabularyCache := aCache
+	cache := aCache
 ]
