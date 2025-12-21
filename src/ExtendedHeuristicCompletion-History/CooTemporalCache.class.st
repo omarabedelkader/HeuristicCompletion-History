@@ -6,8 +6,8 @@ I pay attention to not hold directly class or compiled method objects to avoid c
 
 "
 Class {
-	#name : 'CooNewTemporalCache',
-	#superclass : 'Object',
+	#name : 'CooTemporalCache',
+	#superclass : 'CooCache',
 	#instVars : [
 		'selectorDescriptions',
 		'variableDescriptions'
@@ -21,13 +21,13 @@ Class {
 }
 
 { #category : 'method handling' }
-CooNewTemporalCache >> addMethodItem: anItem [
+CooTemporalCache >> addMethodItem: anItem [
 
 	selectorDescriptions addFirst: anItem
 ]
 
 { #category : 'method handling' }
-CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
+CooTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
@@ -41,7 +41,7 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 ]
 
 { #category : 'method handling' }
-CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
+CooTemporalCache >> addNewMethodInVocabulary: anAnn [
 
 	self addMethodItem: (CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -52,7 +52,7 @@ CooNewTemporalCache >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'class handling' }
-CooNewTemporalCache >> addNewVariableInVocabulary: ann [
+CooTemporalCache >> addNewVariableInVocabulary: ann [
 
 	self addVariableItem: (CooAddedVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
@@ -63,13 +63,13 @@ CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 ]
 
 { #category : 'class handling' }
-CooNewTemporalCache >> addVariableItem: anItem [
+CooTemporalCache >> addVariableItem: anItem [
 
 	variableDescriptions addFirst: anItem
 ]
 
 { #category : 'accessing - computed' }
-CooNewTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
+CooTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
 
 	^ ((aCooMockMethodModified method ast allChildren select: [ :each | each isMessage ])
 			collect: [ :each | each selector ])
@@ -79,7 +79,7 @@ CooNewTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
 ]
 
 { #category : 'initialization' }
-CooNewTemporalCache >> initialize [
+CooTemporalCache >> initialize [
 
 	super initialize.
 	selectorDescriptions := OrderedCollection new.
@@ -87,7 +87,7 @@ CooNewTemporalCache >> initialize [
 ]
 
 { #category : 'initialization' }
-CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
+CooTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
 	selectorDescriptions add: (CooMethodHistoryItem new
 			 selector: aSelector;
@@ -97,7 +97,7 @@ CooNewTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymb
 ]
 
 { #category : 'method handling' }
-CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
+CooTemporalCache >> removeMethodFromVocabulary: anAnn [
 
 	self addMethodItem: (CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -107,7 +107,7 @@ CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
 ]
 
 { #category : 'class handling' }
-CooNewTemporalCache >> removeVariableFromVocabulary: ann [
+CooTemporalCache >> removeVariableFromVocabulary: ann [
 
 	self addVariableItem: (CooRemovedVariableHistoryItem new
 			 nameOfClass: ann classRemoved name;
@@ -118,13 +118,13 @@ CooNewTemporalCache >> removeVariableFromVocabulary: ann [
 ]
 
 { #category : 'accessing' }
-CooNewTemporalCache >> selectorDescriptions [
+CooTemporalCache >> selectorDescriptions [
 
 	^ selectorDescriptions
 ]
 
 { #category : 'accessing' }
-CooNewTemporalCache >> selectors [
+CooTemporalCache >> selectors [
 
 	| selectors filters |
 	selectors := OrderedCollection new: selectorDescriptions size.
@@ -144,13 +144,13 @@ CooNewTemporalCache >> selectors [
 ]
 
 { #category : 'accessing' }
-CooNewTemporalCache >> variableDescriptions [
+CooTemporalCache >> variableDescriptions [
 
 	^ variableDescriptions
 ]
 
 { #category : 'accessing' }
-CooNewTemporalCache >> variableNames [
+CooTemporalCache >> variableNames [
 
 	^ variableDescriptions collect: [ :each | each className ]
 ]

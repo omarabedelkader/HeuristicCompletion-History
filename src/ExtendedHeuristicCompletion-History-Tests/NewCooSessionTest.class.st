@@ -19,5 +19,5 @@ NewCooSessionTest >> cache [
 NewCooSessionTest >> setUp [
 
 	super setUp.
-	session := CooXPSession withCache: CooNewTemporalCache new
+	session := CooXPSession withCache: CooTemporalCache new
 ]

@@ -72,7 +72,7 @@ CooSession >> cache [
 { #category : 'initialization' }
 CooSession >> initialize [ 
 	super initialize.
-	cache := CooNewTemporalCache new.
+	cache := CooTemporalCache new.
 ]
 
 { #category : 'adding' }

@@ -1,5 +1,5 @@
 Class {
-	#name : 'NewHistoryCachePopulatorTest',
+	#name : 'HistoryCachePopulatorTest',
 	#superclass : 'TestCase',
 	#instVars : [
 		'populator'
@@ -10,13 +10,13 @@ Class {
 }
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> setUp [
+HistoryCachePopulatorTest >> setUp [
     super setUp.
     populator := NewHistoryCachePopulator new
 ]
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
+HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
@@ -25,7 +25,7 @@ NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 ]
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
+HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
@@ -33,7 +33,7 @@ NewHistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 ]
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
+HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
 
 	| session info |
 	session := HistoryMockSession new.
@@ -50,7 +50,7 @@ NewHistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessi
 ]
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
+HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 
 	| collection addition timestamp info |
 	collection := OrderedCollection new.
@@ -65,7 +65,7 @@ NewHistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 ]
 
 { #category : 'running' }
-NewHistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
+HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
 
 	| collection modification timestamp info |
 	collection := OrderedCollection new.
