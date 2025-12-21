@@ -9,15 +9,3 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'New'
 }
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> commit [
-
-	^ commit
-]
-
-{ #category : 'accessing' }
-CooVariableHistoryItem >> commit: anObject [
-
-	commit := anObject
-]

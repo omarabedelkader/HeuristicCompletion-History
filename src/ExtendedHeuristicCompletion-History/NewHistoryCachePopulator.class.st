@@ -119,57 +119,54 @@ NewHistoryCachePopulator >> populateCaches [
 { #category : 'compute population' }
 NewHistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 	"Add a method to both temporal and frequency caches."
-	
+
 	| selector ast event timestamp |
 	selector := aMethodInfo selector.
 	ast := aMethodInfo ast.
 	event := aMethodInfo event.
-	timestamp := aMethodInfo date.
-	
+	timestamp := aMethodInfo timestamp.
+
 	session
 		registerSelector: selector
 		ast: ast
 		event: event
-		at: timestamp.
-	
-	
+		at: timestamp
 ]
 
 { #category : 'compute population' }
 NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp: aTimestamp [
 	"Process a method addition and add it to the collection."
-	
+
 	| selector ast |
 	selector := self extractMethodFromDiffNode: anAddition.
 	selector ifNil: [ ^ self ].
-	
+
 	ast := self tryParseAST: anAddition leftContents.
-	
+
 	aCollection add: (CooAddedMethodHistoryItem new
-		selector:selector;
-		ast: ast;
-		event: #added;
-		date: aTimestamp;
-		yourself)
+			 selector: selector;
+			 ast: ast;
+			 event: #added;
+			 timestamp: aTimestamp;
+			 yourself)
 ]
 
 { #category : 'compute population' }
 NewHistoryCachePopulator >> processModification: aModification into: aCollection timestamp: aTimestamp [
 	"Process a method modification and add it to the collection."
-	
+
 	| selector ast |
 	selector := self extractMethodFromDiffNode: aModification.
 	selector ifNil: [ ^ self ].
-	
-	ast := self tryParseAST: aModification leftContents.
-	
-	aCollection add: (CooModifiedMethodHistoryItem new
-		selector:selector;
-		ast: ast;
-		event: #modified;
-		date: aTimestamp;
-		yourself)
 
+	ast := self tryParseAST: aModification leftContents.
+
+	aCollection add: (CooModifiedMethodHistoryItem new
+			 selector: selector;
+			 ast: ast;
+			 event: #modified;
+			 timestamp: aTimestamp;
+			 yourself)
 ]
 
 { #category : 'accessing' }

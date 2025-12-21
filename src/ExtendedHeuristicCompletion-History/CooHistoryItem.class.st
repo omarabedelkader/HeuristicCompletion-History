@@ -6,11 +6,11 @@ Class {
 	#name : 'CooHistoryItem',
 	#superclass : 'Object',
 	#instVars : [
-		'date',
 		'commit',
 		'event',
 		'className',
-		'live'
+		'live',
+		'timestamp'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -19,14 +19,14 @@ Class {
 
 { #category : 'accessing' }
 CooHistoryItem >> date [
-
-	^ date
+	self deprecated: 'use timestamp' transformWith: '`@rec date' -> '`@rec timestamp'.
+	^ timestamp
 ]
 
 { #category : 'accessing' }
-CooHistoryItem >> date: anObject [
-
-	date := anObject
+CooHistoryItem >> date: avar [
+	self deprecated: 'use timestamp' transformWith: '`@rec date: `@var' -> '`@rec timestamp: `@var'.
+	timestamp := avar
 ]
 
 { #category : 'accessing' }
@@ -57,4 +57,16 @@ CooHistoryItem >> nameOfClass [
 CooHistoryItem >> nameOfClass: aClassName [
 
 	className := aClassName
+]
+
+{ #category : 'accessing' }
+CooHistoryItem >> timestamp [
+
+	^ timestamp
+]
+
+{ #category : 'accessing' }
+CooHistoryItem >> timestamp: aTimestamp [
+
+	timestamp := aTimestamp
 ]
