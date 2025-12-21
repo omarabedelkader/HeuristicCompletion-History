@@ -7,7 +7,6 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'commit',
-		'event',
 		'className',
 		'live',
 		'timestamp'
