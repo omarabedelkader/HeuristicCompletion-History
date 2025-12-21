@@ -61,7 +61,6 @@ HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
     self assert: collection size equals: 1.
     info := collection first.
     self assert: (info selector) equals: #bar.
-    self assert: (info event) equals: #added.
     self assert: (info timestamp) equals: timestamp.
     self deny: (info ast) isNil
 ]
@@ -79,6 +78,5 @@ HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
     self assert: collection size equals: 1.
     info := collection first.
     self assert: (info selector) equals: #baz.
-    self assert: (info event) equals: #modified.
     self assert: (info timestamp) equals: timestamp
 ]

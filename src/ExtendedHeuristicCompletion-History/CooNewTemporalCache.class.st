@@ -34,7 +34,6 @@ CooNewTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 	item := CooModifiedMethodHistoryItem new
 		        selector: anAnn method selector;
 		        timestamp: DateAndTime now;
-		        event: #modified;
 		        nameOfClass: anAnn method methodClass name;
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].

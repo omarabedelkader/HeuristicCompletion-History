@@ -93,7 +93,6 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 	entry := session vocabularyCache variableDescriptions first.
 
 	self assert: session vocabularyCache variableNames size equals: 1.
-	self assert: entry event equals: #added
 ]
 
 { #category : 'tests' }

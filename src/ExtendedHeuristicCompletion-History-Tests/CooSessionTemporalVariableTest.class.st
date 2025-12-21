@@ -30,7 +30,6 @@ CooSessionTemporalVariableTest >> testAddNewVariableAnnouncementRegistersEntry [
 	association := #TemporalMock -> #TemporalMock.
 	entry := self cache at: association.
 	self assert: session size equals: 1.
-	self assert: (entry event) equals: #added.
 	self assert: (entry lastSeen) notNil
 ]
 
@@ -42,7 +41,6 @@ CooSessionTemporalVariableTest >> testAddVocabularyRecordsMetadata [
     session addVocabulary: 'TemporalFoo' at: timestamp.
     entry := self cache at: 'TemporalFoo'.
     self assert: session size equals: 1.
-    self assert: (entry event) equals: #added.
     self assert: (entry lastSeen) equals: timestamp
 ]
 
@@ -55,7 +53,6 @@ CooSessionTemporalVariableTest >> testRegisterClassUpdatesExistingEntry [
 	session registerClass: #TemporalTracked event: #added at: timestampOlder.
 	session registerClass: #TemporalTracked event: #selected at: timestampRecent.
 	entry := self cache at: #TemporalTracked.
-	self assert: (entry event) equals: #selected.
 	self assert: (entry lastSeen) equals: timestampRecent
 ]
 
@@ -80,7 +77,6 @@ CooSessionTemporalVariableTest >> testSelectionAnnouncementUpdatesEntry [
 	session addVariableInVocabulary: announcement.
 	entry := self cache at: CooMockVariable.
 	self assert: session size equals:  1.
-	self assert: (entry event) equals: #selected.
 	self assert: (entry lastSeen) notNil
 ]
 

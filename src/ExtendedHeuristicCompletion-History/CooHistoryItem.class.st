@@ -48,6 +48,11 @@ CooHistoryItem >> initialize [
 ]
 
 { #category : 'accessing' }
+CooHistoryItem >> live: aBoolean [ 
+	live := aBoolean 
+]
+
+{ #category : 'accessing' }
 CooHistoryItem >> nameOfClass [
 
 	^ className

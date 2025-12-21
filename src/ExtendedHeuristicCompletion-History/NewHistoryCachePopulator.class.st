@@ -122,8 +122,7 @@ NewHistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 
 	| selector ast event timestamp |
 	selector := aMethodInfo selector.
-	ast := aMethodInfo ast.
-	event := aMethodInfo event.
+	ast := aMethodInfo ast.	
 	timestamp := aMethodInfo timestamp.
 
 	session
@@ -144,11 +143,11 @@ NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timest
 	ast := self tryParseAST: anAddition leftContents.
 
 	aCollection add: (CooAddedMethodHistoryItem new
-			 selector: selector;
-			 ast: ast;
-			 event: #added;
-			 timestamp: aTimestamp;
-			 yourself)
+		selector: selector;
+		ast: ast;
+		live: false;
+		timestamp: aTimestamp;
+		yourself)
 ]
 
 { #category : 'compute population' }
@@ -164,7 +163,7 @@ NewHistoryCachePopulator >> processModification: aModification into: aCollection
 	aCollection add: (CooModifiedMethodHistoryItem new
 			 selector: selector;
 			 ast: ast;
-			 event: #modified;
+			 live: false;
 			 timestamp: aTimestamp;
 			 yourself)
 ]
