@@ -182,6 +182,11 @@ NewHistoryCachePopulator >> scrapper: aHistoryScrapper [
 	scrapper := aHistoryScrapper
 ]
 
+{ #category : 'accessing' }
+NewHistoryCachePopulator >> session: aHistoryMockSession [ 
+	session := aHistoryMockSession
+]
+
 { #category : 'compute population' }
 NewHistoryCachePopulator >> tryParseAST: sourceCode [
 	"Try to parse source code into an AST, return nil on failure."

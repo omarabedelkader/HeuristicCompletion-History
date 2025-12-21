@@ -1,5 +1,5 @@
 Class {
-	#name : 'NewCooSessionMessageTest',
+	#name : 'NewCooSessionTemporalTest',
 	#superclass : 'NewCooSessionTest',
 	#category : 'ExtendedHeuristicCompletion-History-Tests-NewTestForHistory',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
@@ -7,13 +7,13 @@ Class {
 }
 
 { #category : 'running' }
-NewCooSessionMessageTest >> cache [
+NewCooSessionTemporalTest >> cache [
 
 	^ session vocabularyCache
 ]
 
 { #category : 'running' }
-NewCooSessionMessageTest >> modifiedMethodAnnouncement [
+NewCooSessionTemporalTest >> modifiedMethodAnnouncement [
 
 	^ CooMockMethodModified
 		  methodChangedFrom: self class >> #ourOriginalPrintString
@@ -22,7 +22,7 @@ NewCooSessionMessageTest >> modifiedMethodAnnouncement [
 ]
 
 { #category : 'tests - compute' }
-NewCooSessionMessageTest >> ourModifiedPrintString [
+NewCooSessionTemporalTest >> ourModifiedPrintString [
 	"Answer a String whose characters are a description of the receiver.
 	If you want to print without a character limit, use fullPrintString."
 
@@ -31,7 +31,7 @@ NewCooSessionMessageTest >> ourModifiedPrintString [
 ]
 
 { #category : 'tests - compute' }
-NewCooSessionMessageTest >> ourOriginalPrintString [
+NewCooSessionTemporalTest >> ourOriginalPrintString [
 	"Answer a String whose characters are a description of the receiver.
 	If you want to print without a character limit, use fullPrintString."
 
@@ -39,22 +39,22 @@ NewCooSessionMessageTest >> ourOriginalPrintString [
 ]
 
 { #category : 'running' }
-NewCooSessionMessageTest >> removedMethodAnnouncement [
+NewCooSessionTemporalTest >> removedMethodAnnouncement [
 
 	^ CooMockMethodRemoved new
-		  methodOrigin: NewCooSessionMessageTest;
-		  method: NewCooSessionMessageTest >> #ourModifiedPrintString
+		  methodOrigin: NewCooSessionTemporalTest;
+		  method: NewCooSessionTemporalTest >> #ourModifiedPrintString
 ]
 
 { #category : 'running' }
-NewCooSessionMessageTest >> setUp [
+NewCooSessionTemporalTest >> setUp [
 
 	super setUp.
 	session := CooXPSession withCache: CooNewTemporalCache new
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testAddModifiedMethodComputesMessageDiff [
+NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 
 	| announcement |
 	announcement := self modifiedMethodAnnouncement.
@@ -64,7 +64,7 @@ NewCooSessionMessageTest >> testAddModifiedMethodComputesMessageDiff [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testAddModifiedMethodRegistersEntry [
+NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 
 	| announcement |
 	announcement := CooMockMethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
@@ -74,7 +74,7 @@ NewCooSessionMessageTest >> testAddModifiedMethodRegistersEntry [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testAddNewMethodRegistersEntry [
+NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 
 	| announcement |
 	announcement := CooMockMethodAdded for: Point >> #degrees.
@@ -84,7 +84,20 @@ NewCooSessionMessageTest >> testAddNewMethodRegistersEntry [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethod [
+NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
+
+	| announcement entry |
+	announcement := CooMockClassAddedAnnouncement for: NewCooSessionTemporalTest.
+	session addNewVariableInVocabulary: announcement.
+
+	entry := session vocabularyCache variableDescriptions first.
+
+	self assert: session vocabularyCache variableNames size equals: 1.
+	self assert: entry event equals: #added
+]
+
+{ #category : 'tests' }
+NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 	| announcement |
 	announcement := self removedMethodAnnouncement.
 	session removeMethodFromVocabulary: announcement.
@@ -99,7 +112,7 @@ NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethod [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
+NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
 
 	| announcement descr |
 	self skip.
@@ -117,7 +130,7 @@ NewCooSessionMessageTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
 ]
 
 { #category : 'tests - compute' }
-NewCooSessionMessageTest >> testComputeMessages [
+NewCooSessionTemporalTest >> testComputeMessages [
 
 	| announcement |
 	announcement := CooMockMethodModified
@@ -129,7 +142,7 @@ NewCooSessionMessageTest >> testComputeMessages [
 ]
 
 { #category : 'tests - compute' }
-NewCooSessionMessageTest >> testComputeMessagesOfSimilarMethods [
+NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 
 	| announcement |
 	announcement := CooMockMethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
@@ -138,7 +151,7 @@ NewCooSessionMessageTest >> testComputeMessagesOfSimilarMethods [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testMethodRemovedDoesNotRemoveOtherMethods [
+NewCooSessionTemporalTest >> testMethodRemovedDoesNotRemoveOtherMethods [
 
 	| announcement |
 	self skip. "should define it first"
@@ -154,7 +167,7 @@ NewCooSessionMessageTest >> testMethodRemovedDoesNotRemoveOtherMethods [
 ]
 
 { #category : 'tests' }
-NewCooSessionMessageTest >> testMethodRemovedRemovedTheMethodFromSelectors [
+NewCooSessionTemporalTest >> testMethodRemovedRemovedTheMethodFromSelectors [
 
 	| announcement descr |
 	announcement := self removedMethodAnnouncement.

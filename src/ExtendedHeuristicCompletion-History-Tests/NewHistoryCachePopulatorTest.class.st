@@ -40,7 +40,7 @@ NewHistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessi
 
     info := CooAddedMethodHistoryItem new
 		selector: #sample;
-		timestamp: DateAndTime now;
+		date: DateAndTime now;
 		yourself.
 		
     populator populateCachesWithMethodInfo: info.
@@ -57,10 +57,10 @@ NewHistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
     populator processAddition: addition into: collection timestamp: timestamp.
     self assert: collection size equals: 1.
     info := collection first.
-    self assert: (info selector) equals: #bar.
-    self assert: (info event) equals: #added.
-    self assert: (info timestamp) equals: timestamp.
-    self deny: (info ast) isNil
+    self assert: info selector equals: #bar.
+    self assert: info event equals: #added.
+    self assert: info date equals: timestamp.
+    self deny: info ast isNil
 ]
 
 { #category : 'running' }
@@ -75,7 +75,7 @@ NewHistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadat
     populator processModification: modification into: collection timestamp: timestamp.
     self assert: collection size equals: 1.
     info := collection first.
-    self assert: (info selector) equals: #baz.
-    self assert: (info event) equals: #modified.
-    self assert: (info timestamp) equals: timestamp
+    self assert: info selector equals: #baz.
+    self assert: info event equals: #modified.
+    self assert: info date equals: timestamp
 ]

@@ -1,5 +1,6 @@
 "
 I'm a simple datastructure like object that represents history event.
+live means that I have been created during a live session and not during a replay.
 "
 Class {
 	#name : 'CooHistoryItem',
@@ -8,7 +9,8 @@ Class {
 		'date',
 		'commit',
 		'event',
-		'className'
+		'className',
+		'live'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-New',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -36,6 +38,13 @@ CooHistoryItem >> event [
 { #category : 'accessing' }
 CooHistoryItem >> event: aString [ 
 	event := aString
+]
+
+{ #category : 'initialization' }
+CooHistoryItem >> initialize [ 
+
+	super initialize.
+	live := true
 ]
 
 { #category : 'accessing' }
