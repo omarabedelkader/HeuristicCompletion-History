@@ -10,9 +10,9 @@ Class {
 		'deltaMessages',
 		'ast'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Model',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Model'
 }
 
 { #category : 'accessing' }

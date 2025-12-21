@@ -15,9 +15,9 @@ Class {
 	#classInstVars : [
 		'current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Session'
 }
 
 { #category : 'method handling' }
@@ -57,7 +57,7 @@ CooNewTemporalCache >> addNewVariableInVocabulary: ann [
 	self addVariableItem: (CooAddedVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
-			 event: #added;
+		
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 ]
@@ -102,7 +102,6 @@ CooNewTemporalCache >> removeMethodFromVocabulary: anAnn [
 	self addMethodItem: (CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
 			 timestamp: DateAndTime now;
-			 event: #removed;
 			 nameOfClass: anAnn method methodClass name;
 			 yourself)
 ]
@@ -112,9 +111,10 @@ CooNewTemporalCache >> removeVariableFromVocabulary: ann [
 
 	self addVariableItem: (CooRemovedVariableHistoryItem new
 			 nameOfClass: ann classRemoved name;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"date: DateAndTime now;
-			 event: #removed; 
-			 yourself) 
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
+			timestamp: DateAndTime now;
+
+			 yourself)
 ]
 
 { #category : 'accessing' }

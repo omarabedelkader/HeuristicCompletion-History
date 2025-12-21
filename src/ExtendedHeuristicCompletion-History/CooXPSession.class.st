@@ -1,15 +1,7 @@
 Class {
 	#name : 'CooXPSession',
 	#superclass : 'CooSession',
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Session'
 }
-
-{ #category : 'instance creation' }
-CooXPSession class >> withXPCache [
-
-	^ self new 
-		vocabularyCache: CooNewTemporalCache new; 
-		yourself
-]

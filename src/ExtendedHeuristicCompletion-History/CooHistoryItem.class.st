@@ -12,9 +12,9 @@ Class {
 		'live',
 		'timestamp'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Model',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Model'
 }
 
 { #category : 'accessing' }
@@ -27,17 +27,6 @@ CooHistoryItem >> date [
 CooHistoryItem >> date: avar [
 	self deprecated: 'use timestamp' transformWith: '`@rec date: `@var' -> '`@rec timestamp: `@var'.
 	timestamp := avar
-]
-
-{ #category : 'accessing' }
-CooHistoryItem >> event [
-
-	^ event
-]
-
-{ #category : 'accessing' }
-CooHistoryItem >> event: aString [ 
-	event := aString
 ]
 
 { #category : 'initialization' }

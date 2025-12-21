@@ -1,5 +1,5 @@
 "
-I am an heuristic that autocompletes messages based on a session vocabulary.
+I am an heuristic that autocompletes messages based on a session defined and modified methods.
 "
 Class {
 	#name : 'CoxSessionMessagesHeuristic',
@@ -7,9 +7,9 @@ Class {
 	#instVars : [
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Session'
 }
 
 { #category : 'requests' }

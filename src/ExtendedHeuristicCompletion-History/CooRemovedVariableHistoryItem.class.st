@@ -1,7 +1,13 @@
 Class {
 	#name : 'CooRemovedVariableHistoryItem',
 	#superclass : 'CooVariableHistoryItem',
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Model',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Model'
 }
+
+{ #category : 'accessing' }
+CooRemovedVariableHistoryItem >> event [ 
+
+	^ #removed
+]

@@ -6,13 +6,11 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'scrapper',
-		'temporalSession',
-		'frequencySession',
 		'session'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Fetching-Github'
 }
 
 { #category : 'instance creation' }
@@ -104,7 +102,7 @@ NewHistoryCachePopulator >> populateCaches [
 		methodInfos := self extractMethodsFromCommit: commit.
 		methodInfos do: [ :info |
 			"for now we do not manage variable"
-			session addMethodItem: info ].
+			session cache addMethodItem: info ].
 		totalMethods := totalMethods + methodInfos size.
 		
 		(index \\ 10 = 0) ifTrue: [

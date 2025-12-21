@@ -7,9 +7,9 @@ Class {
 	#classVars : [
 		'Current'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Session'
 }
 
 { #category : 'accessing' }

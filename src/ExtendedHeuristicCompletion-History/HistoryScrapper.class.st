@@ -79,9 +79,9 @@ Class {
 		'repositoryURL',
 		'commitCount'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Fetching-Github'
 }
 
 { #category : 'instance creation' }

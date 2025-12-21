@@ -1,7 +1,13 @@
 Class {
 	#name : 'CooAddedVariableHistoryItem',
 	#superclass : 'CooVariableHistoryItem',
-	#category : 'ExtendedHeuristicCompletion-History-New',
+	#category : 'ExtendedHeuristicCompletion-History-Model',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'New'
+	#tag : 'Model'
 }
+
+{ #category : 'accessing' }
+CooAddedVariableHistoryItem >> event [ 
+
+	^ #added
+]
