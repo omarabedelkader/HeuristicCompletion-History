@@ -5,3 +5,9 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'Session'
 }
+
+{ #category : 'accessing' }
+CooCache >> size [ 
+
+	^ 0
+]

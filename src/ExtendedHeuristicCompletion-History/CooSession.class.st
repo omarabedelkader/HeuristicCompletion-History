@@ -59,17 +59,20 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'adding' }
-CooSession >> addNewVariableInVocabulary: aClassAdded [ 
+CooSession >> addNewVariableInVocabulary: aClassAdded [
+
 	cache addNewVariableInVocabulary: aClassAdded
 ]
 
 { #category : 'accessing' }
 CooSession >> cache [
+
 	^ cache 
 ]
 
 { #category : 'initialization' }
-CooSession >> initialize [ 
+CooSession >> initialize [
+
 	super initialize.
 	cache := CooTemporalCache new.
 ]
@@ -81,7 +84,8 @@ CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [
 ]
 
 { #category : 'adding' }
-CooSession >> removeVariableFromVocabulary: aClassRemoved [ 
+CooSession >> removeVariableFromVocabulary: aClassRemoved [
+
 	cache removeVariableFromVocabulary: aClassRemoved 
 ]
 
@@ -91,13 +95,21 @@ CooSession >> selectors [
 	^ cache selectors
 ]
 
+{ #category : 'accessing' }
+CooSession >> size [ 
+
+	^ cache size
+]
+
 { #category : 'matching' }
 CooSession >> variableNames [
+
 	^ cache variableNames
 ]
 
 { #category : 'accessing' }
 CooSession >> vocabularyCache [
+
 	^ cache 
 ]
 

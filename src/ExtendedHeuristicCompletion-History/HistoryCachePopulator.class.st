@@ -2,7 +2,7 @@
 This class builds and updates temporal and frequency caches by scraping Git commits, extracting changed methods, and registering their metadata.
 "
 Class {
-	#name : 'NewHistoryCachePopulator',
+	#name : 'HistoryCachePopulator',
 	#superclass : 'Object',
 	#instVars : [
 		'scrapper',
@@ -14,7 +14,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-NewHistoryCachePopulator class >> populateFromRepo: aURLString [
+HistoryCachePopulator class >> populateFromRepo: aURLString [
 	"Populate caches from the given repository URL.
 	Usage: HistoryCachePopulator populateFromRepo: 'https://github.com/pharo-spec/Spec'"
 	
@@ -25,7 +25,7 @@ NewHistoryCachePopulator class >> populateFromRepo: aURLString [
 ]
 
 { #category : 'instance creation' }
-NewHistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
+HistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
 	"Populate caches from a specific number of commits.
 	Usage: HistoryCachePopulator populateFromRepo: 'https://github.com/pharo-spec/Spec' commits: 50"
 	
@@ -36,7 +36,7 @@ NewHistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber 
 ]
 
 { #category : 'examples' }
-NewHistoryCachePopulator class >> spec10 [ 
+HistoryCachePopulator class >> spec10 [ 
 
 	<script>
 	(self populateFromRepo: 'https://github.com/pharo-spec/Spec' commits: 10) inspect
@@ -44,13 +44,14 @@ NewHistoryCachePopulator class >> spec10 [
 ]
 
 { #category : 'examples' }
-NewHistoryCachePopulator class >> toplo [
+HistoryCachePopulator class >> toplo [
 	<script>
-		(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git') inspect 
+	
+	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 1) inspect 
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> extractMethodFromDiffNode: aDiffNode [
+HistoryCachePopulator >> extractMethodFromDiffNode: aDiffNode [
 	"Extract method information from a diff node if it's a method change."
 	
 	| definition |
@@ -63,7 +64,7 @@ NewHistoryCachePopulator >> extractMethodFromDiffNode: aDiffNode [
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> extractMethodsFromCommit: aCommit [
+HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 	"Extract all method selectors and their ASTs from a commit's diff."
 	
 	| diff methodInfos |
@@ -81,14 +82,14 @@ NewHistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 ]
 
 { #category : 'initialization' }
-NewHistoryCachePopulator >> initialize [
+HistoryCachePopulator >> initialize [
 	super initialize.
 	session := CooSession current.
 	
 ]
 
 { #category : 'main API' }
-NewHistoryCachePopulator >> populateCaches [
+HistoryCachePopulator >> populateCaches [
 	"Main method to populate both temporal and frequency caches from Git history."
 	
 	| commits totalMethods |
@@ -110,12 +111,11 @@ NewHistoryCachePopulator >> populateCaches [
 	
 	Transcript 
 		show: 'Done! Populated caches with ', totalMethods asString, ' methods from ', commits size asString, ' commits.'; cr;
-		show: '  Temporal cache size: ', self temporalSession size asString; cr;
-		show: '  Frequency cache size: ', self frequencySession size asString; cr
+		show: '  Temporal cache size: ', session size asString; cr
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
+HistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 	"Add a method to both temporal and frequency caches."
 
 	| selector ast event timestamp |
@@ -131,7 +131,7 @@ NewHistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp: aTimestamp [
+HistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp: aTimestamp [
 	"Process a method addition and add it to the collection."
 
 	| selector ast |
@@ -142,6 +142,7 @@ NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timest
 
 	aCollection add: (CooAddedMethodHistoryItem new
 		selector: selector;
+		nameOfClass: anAddition definition className;
 		ast: ast;
 		live: false;
 		timestamp: aTimestamp;
@@ -149,40 +150,42 @@ NewHistoryCachePopulator >> processAddition: anAddition into: aCollection timest
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> processModification: aModification into: aCollection timestamp: aTimestamp [
+HistoryCachePopulator >> processModification: aModification into: aCollection timestamp: aTimestamp [
 	"Process a method modification and add it to the collection."
 
 	| selector ast |
 	selector := self extractMethodFromDiffNode: aModification.
 	selector ifNil: [ ^ self ].
+	
 
 	ast := self tryParseAST: aModification leftContents.
-
+	
 	aCollection add: (CooModifiedMethodHistoryItem new
-			 selector: selector;
-			 ast: ast;
-			 live: false;
-			 timestamp: aTimestamp;
-			 yourself)
+		selector: selector;
+		nameOfClass: aModification definition className;
+		ast: ast;
+		live: false;
+		timestamp: aTimestamp;
+		yourself)
 ]
 
 { #category : 'accessing' }
-NewHistoryCachePopulator >> scrapper [
+HistoryCachePopulator >> scrapper [
 	^ scrapper
 ]
 
 { #category : 'accessing' }
-NewHistoryCachePopulator >> scrapper: aHistoryScrapper [
+HistoryCachePopulator >> scrapper: aHistoryScrapper [
 	scrapper := aHistoryScrapper
 ]
 
 { #category : 'accessing' }
-NewHistoryCachePopulator >> session: aHistoryMockSession [ 
+HistoryCachePopulator >> session: aHistoryMockSession [ 
 	session := aHistoryMockSession
 ]
 
 { #category : 'compute population' }
-NewHistoryCachePopulator >> tryParseAST: sourceCode [
+HistoryCachePopulator >> tryParseAST: sourceCode [
 	"Try to parse source code into an AST, return nil on failure."
 	
 	sourceCode ifNil: [ ^ nil ].

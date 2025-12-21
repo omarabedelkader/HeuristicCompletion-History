@@ -2,7 +2,8 @@ Class {
 	#name : 'HistoryMockMethodDefinition',
 	#superclass : 'Object',
 	#instVars : [
-		'selector'
+		'selector',
+		'className'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Tests-Gitscrapper-Mock',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
@@ -14,6 +15,17 @@ HistoryMockMethodDefinition class >> selector: aSymbol [
     ^ self new
         selector: aSymbol;
         yourself
+]
+
+{ #category : 'accessing' }
+HistoryMockMethodDefinition >> className [ 
+    ^ className
+]
+
+{ #category : 'accessing' }
+HistoryMockMethodDefinition >> className: aString [
+
+	className := aString
 ]
 
 { #category : 'accessing' }

@@ -6,7 +6,8 @@ Class {
 		'leftContents',
 		'rightContents',
 		'description',
-		'kind'
+		'kind',
+		'className'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Tests-Gitscrapper-Mock',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
@@ -39,6 +40,11 @@ HistoryMockDiffOperation >> accept: aVisitor [
     self isAddition ifTrue: [ ^ aVisitor visitAddition: self ].
     self isModification ifTrue: [ ^ aVisitor visitModification: self ].
     ^ self
+]
+
+{ #category : 'accessing' }
+HistoryMockDiffOperation >> className: aString [ 
+	definition className: aString
 ]
 
 { #category : 'visiting' }

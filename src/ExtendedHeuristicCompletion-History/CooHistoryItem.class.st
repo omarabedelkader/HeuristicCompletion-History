@@ -52,6 +52,16 @@ CooHistoryItem >> nameOfClass: aClassName [
 	className := aClassName
 ]
 
+{ #category : 'printing' }
+CooHistoryItem >> printOn: aStream [
+
+	super printOn: aStream. 
+	aStream space. 
+	className 
+		ifNotNil: [ aStream nextPutAll: className ]
+		ifNil: [ aStream nextPutAll: 'No class name!' ]
+]
+
 { #category : 'accessing' }
 CooHistoryItem >> timestamp [
 

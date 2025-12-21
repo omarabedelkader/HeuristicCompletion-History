@@ -12,7 +12,7 @@ Class {
 { #category : 'running' }
 HistoryCachePopulatorTest >> setUp [
     super setUp.
-    populator := NewHistoryCachePopulator new
+    populator := HistoryCachePopulator new
 ]
 
 { #category : 'running' }
@@ -70,10 +70,12 @@ HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
 	| collection modification timestamp info |
 	collection := OrderedCollection new.
 	modification := HistoryMockDiffOperation modificationForSelector: #baz leftContents: 'baz ^ 3' rightContents: 'baz ^ 2'.
+	modification className: #AAA.
 	timestamp := DateAndTime now.
 	populator processModification: modification into: collection timestamp: timestamp.
 	self assert: collection size equals: 1.
 	info := collection first.
 	self assert: info selector equals: #baz.
+	self assert: info nameOfClass equals: #AAA.
 	self assert: info timestamp equals: timestamp
 ]

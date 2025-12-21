@@ -38,8 +38,9 @@ CooMethodHistoryItem >> deltaMessages: aCollection [
 { #category : 'accessing' }
 CooMethodHistoryItem >> printOn: aStream [
 
-	aStream nextPutAll: self nameOfClass.
-	aStream nextPutAll: ' >> ', selector
+	super printOn: aStream. 
+	self ifNotNil: [  
+		aStream nextPutAll: ' >> ', selector ]
 ]
 
 { #category : 'accessing' }

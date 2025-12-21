@@ -147,6 +147,12 @@ CooTemporalCache >> selectors [
 ]
 
 { #category : 'accessing' }
+CooTemporalCache >> size [ 
+
+	^ selectorDescriptions size
+]
+
+{ #category : 'accessing' }
 CooTemporalCache >> variableDescriptions [
 
 	^ variableDescriptions
