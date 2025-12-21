@@ -1,9 +1,9 @@
 Class {
 	#name : 'NewCooSessionTemporalTest',
 	#superclass : 'NewCooSessionTest',
-	#category : 'ExtendedHeuristicCompletion-History-Tests-NewTestForHistory',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-Session',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'NewTestForHistory'
+	#tag : 'Session'
 }
 
 { #category : 'running' }
@@ -48,6 +48,8 @@ NewCooSessionTemporalTest >> removedMethodAnnouncement [
 NewCooSessionTemporalTest >> setUp [
 
 	super setUp.
+	"Pay attention for now running the tests will empty the session cache."
+	
 	session := CooXPSession withCache: CooTemporalCache new
 ]
 

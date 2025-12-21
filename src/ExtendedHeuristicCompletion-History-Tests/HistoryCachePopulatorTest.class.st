@@ -4,9 +4,9 @@ Class {
 	#instVars : [
 		'populator'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Tests-NewHistoryScrapperTests',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-Gitscrapper',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'NewHistoryScrapperTests'
+	#tag : 'Gitscrapper'
 }
 
 { #category : 'running' }

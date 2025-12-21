@@ -4,9 +4,9 @@ Class {
 	#instVars : [
 		'visitedNodes'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Tests-Github-Scrapper-Mock',
+	#category : 'ExtendedHeuristicCompletion-History-Tests-Gitscrapper-Mock',
 	#package : 'ExtendedHeuristicCompletion-History-Tests',
-	#tag : 'Github-Scrapper-Mock'
+	#tag : 'Gitscrapper-Mock'
 }
 
 { #category : 'accessing' }
