@@ -7,12 +7,6 @@ Class {
 }
 
 { #category : 'running' }
-NewCooSessionTemporalTest >> cache [
-
-	^ session vocabularyCache
-]
-
-{ #category : 'running' }
 NewCooSessionTemporalTest >> modifiedMethodAnnouncement [
 
 	^ CooMockMethodModified
@@ -24,7 +18,9 @@ NewCooSessionTemporalTest >> modifiedMethodAnnouncement [
 { #category : 'tests - compute' }
 NewCooSessionTemporalTest >> ourModifiedPrintString [
 	"Answer a String whose characters are a description of the receiver.
-	If you want to print without a character limit, use fullPrintString."
+	If you want to print without a character limit, use fullPrintString.
+	
+	The following body is garbage"
 
 	self testComputeMessages.
 	^ self printStringLimitedTo: 50000
@@ -33,7 +29,9 @@ NewCooSessionTemporalTest >> ourModifiedPrintString [
 { #category : 'tests - compute' }
 NewCooSessionTemporalTest >> ourOriginalPrintString [
 	"Answer a String whose characters are a description of the receiver.
-	If you want to print without a character limit, use fullPrintString."
+	If you want to print without a character limit, use fullPrintString.
+	
+	The following body is garbage it is just to compute the diff between two method versions."
 
 	^ self printStringLimitedTo: 50000
 ]
@@ -147,22 +145,6 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	announcement := CooMockMethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
 	self assert: (CooTemporalCache new computeDeltaMessageOf: announcement) isEmpty
-]
-
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testMethodRemovedDoesNotRemoveOtherMethods [
-
-	| announcement |
-	self skip. "should define it first"
-	
-	announcement := self removedMethodAnnouncement.
-	session addModifiedMethodInVocabulary: announcement.
-	
-	announcement := self modifiedMethodAnnouncement.
-	session addModifiedMethodInVocabulary: announcement.
-	
-	
-
 ]
 
 { #category : 'tests' }

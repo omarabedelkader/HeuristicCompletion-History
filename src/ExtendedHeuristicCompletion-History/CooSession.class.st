@@ -63,9 +63,8 @@ CooSession >> addNewVariableInVocabulary: aClassAdded [
 	cache addNewVariableInVocabulary: aClassAdded
 ]
 
-{ #category : 'origins' }
+{ #category : 'accessing' }
 CooSession >> cache [
-
 	^ cache 
 ]
 

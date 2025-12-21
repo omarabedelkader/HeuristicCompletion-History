@@ -139,7 +139,10 @@ CooTemporalCache >> selectors [
 				ifTrue: [ filters add: each ]
 				ifFalse: [ (filters anySatisfy: [ :f | ((f selector = each selector ) 
 																		and: [ f nameOfClass = each nameOfClass ])])
-										ifFalse: [ selectors add: each selector ] ] ].
+										ifFalse: [ 
+											each selector ifNotNil: [
+												"we should find how this is possible to get a description with a nil selector." 
+											selectors add: each selector ] ] ] ].
 	^ selectors	
 ]
 

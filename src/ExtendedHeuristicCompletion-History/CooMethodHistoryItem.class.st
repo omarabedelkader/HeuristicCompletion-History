@@ -51,5 +51,6 @@ CooMethodHistoryItem >> selector [
 { #category : 'accessing' }
 CooMethodHistoryItem >> selector: anObject [
 
+	anObject ifNil: [ ^ self halt ].
 	selector := anObject
 ]

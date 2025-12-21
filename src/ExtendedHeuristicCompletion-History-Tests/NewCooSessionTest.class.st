@@ -12,7 +12,7 @@ Class {
 { #category : 'origins' }
 NewCooSessionTest >> cache [
 
-	^ session vocabularyCache
+	^ session cache
 ]
 
 { #category : 'running' }
