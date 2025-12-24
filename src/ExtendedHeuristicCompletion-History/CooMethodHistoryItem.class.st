@@ -35,6 +35,13 @@ CooMethodHistoryItem >> deltaMessages: aCollection [
 	deltaMessages := aCollection
 ]
 
+{ #category : 'initialization' }
+CooMethodHistoryItem >> initialize [ 
+
+	super initialize.
+	deltaMessages := #()
+]
+
 { #category : 'accessing' }
 CooMethodHistoryItem >> printOn: aStream [
 

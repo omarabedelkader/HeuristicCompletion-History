@@ -56,8 +56,11 @@ CooHistoryItem >> nameOfClass: aClassName [
 CooHistoryItem >> printOn: aStream [
 
 	super printOn: aStream. 
+	live 
+		ifTrue: [ aStream nextPutAll: '(Liv)' ]
+		ifFalse: [ aStream nextPutAll: '(Rep)' ].
 	aStream space. 
-	className 
+	className
 		ifNotNil: [ aStream nextPutAll: className ]
 		ifNil: [ aStream nextPutAll: 'No class name!' ]
 ]

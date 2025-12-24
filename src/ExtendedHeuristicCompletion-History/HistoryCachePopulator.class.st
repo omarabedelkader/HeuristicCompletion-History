@@ -28,6 +28,7 @@ HistoryCachePopulator class >> populateFromRepo: aURLString [
 HistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
 	"Populate caches from a specific number of commits.
 	Usage: HistoryCachePopulator populateFromRepo: 'https://github.com/pharo-spec/Spec' commits: 50"
+	"Pay attention that the string should be the same as the one you cloned."
 	
 	^ self new
 		scrapper: (HistoryScrapper fetchRepo: aURLString commits: aNumber);
@@ -51,16 +52,18 @@ HistoryCachePopulator class >> toplo [
 ]
 
 { #category : 'compute population' }
-HistoryCachePopulator >> extractMethodFromDiffNode: aDiffNode [
-	"Extract method information from a diff node if it's a method change."
-	
-	| definition |
-	definition := aDiffNode definition.
-	(definition isKindOf: IceMethodDefinition) ifFalse: [ ^ nil ].
-	
-	"We will have probably to handle class definition in a second time"
-	
-	^ definition selector
+HistoryCachePopulator >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [ 
+	"This is a copy of the logic defined in the CooTemporalCache or subclasses.
+	For now there is not relationship between the history populator and the cache. 
+	We may push the creation of items from the populator to the cache
+	but we should be able to indicate that an item is recreated from a git repo or
+	 based on the user interaction.
+	"
+	^ ((aNewMethodAst allChildren select: [ :each | each isMessage ])
+			collect: [ :each | each selector ])
+		  difference:
+		  ((anOldMethodAst allChildren select: [ :each | each isMessage ]) 
+				collect: [ :each | each selector ])
 ]
 
 { #category : 'compute population' }
@@ -134,39 +137,51 @@ HistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
 HistoryCachePopulator >> processAddition: anAddition into: aCollection timestamp: aTimestamp [
 	"Process a method addition and add it to the collection."
 
-	| selector ast |
-	selector := self extractMethodFromDiffNode: anAddition.
+	| selector ast item deltaMessage |
+	selector := self selectorFromNode: anAddition.
 	selector ifNil: [ ^ self ].
 
 	ast := self tryParseAST: anAddition leftContents.
-
-	aCollection add: (CooAddedMethodHistoryItem new
+	deltaMessage := ast allChildren 
+		select: [ :each | each isMessage ] thenCollect: [ :each | each selector ].
+	
+	
+	item := (CooAddedMethodHistoryItem new
 		selector: selector;
 		nameOfClass: anAddition definition className;
 		ast: ast;
 		live: false;
 		timestamp: aTimestamp;
-		yourself)
+		yourself).
+	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
+	aCollection add: item
+	
 ]
 
 { #category : 'compute population' }
 HistoryCachePopulator >> processModification: aModification into: aCollection timestamp: aTimestamp [
 	"Process a method modification and add it to the collection."
 
-	| selector ast |
-	selector := self extractMethodFromDiffNode: aModification.
+	| selector newAst oldAst deltaMessages item | 
+	selector := self selectorFromNode: aModification.
 	selector ifNil: [ ^ self ].
-	
 
-	ast := self tryParseAST: aModification leftContents.
+	newAst := self tryParseAST: aModification leftContents.
+	oldAst := self tryParseAST: aModification rightContents.
 	
-	aCollection add: (CooModifiedMethodHistoryItem new
+	( newAst isNotNil & oldAst isNotNil )
+		ifTrue: [ deltaMessages := self computeDeltaMessageBetween: newAst andOld: oldAst ]
+		ifFalse: [  deltaMessages :=  #() ].
+	
+	item := (CooModifiedMethodHistoryItem new
 		selector: selector;
 		nameOfClass: aModification definition className;
-		ast: ast;
+		ast: newAst;
 		live: false;
 		timestamp: aTimestamp;
-		yourself)
+		yourself).
+	item deltaMessages: deltaMessages.
+	aCollection add: item
 ]
 
 { #category : 'accessing' }
@@ -177,6 +192,19 @@ HistoryCachePopulator >> scrapper [
 { #category : 'accessing' }
 HistoryCachePopulator >> scrapper: aHistoryScrapper [
 	scrapper := aHistoryScrapper
+]
+
+{ #category : 'compute population' }
+HistoryCachePopulator >> selectorFromNode: aDiffNode [
+	"Extract method information from a diff node if it's a method change."
+	
+	| definition |
+	definition := aDiffNode definition.
+	(definition isKindOf: IceMethodDefinition) ifFalse: [ ^ nil ].
+	
+	"We will have probably to handle class definition in a second time"
+	
+	^ definition selector
 ]
 
 { #category : 'accessing' }

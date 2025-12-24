@@ -21,7 +21,7 @@ HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
     operation definition: Object new.
-    self assert: (populator extractMethodFromDiffNode: operation) isNil
+    self assert: (populator selectorFromNode: operation) isNil
 ]
 
 { #category : 'running' }
@@ -29,7 +29,7 @@ HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 
     | operation |
     operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
-    self assert: (populator extractMethodFromDiffNode: operation) equals: #foo
+    self assert: (populator selectorFromNode: operation) equals: #foo
 ]
 
 { #category : 'running' }

@@ -68,16 +68,6 @@ CooTemporalCache >> addVariableItem: anItem [
 	variableDescriptions addFirst: anItem
 ]
 
-{ #category : 'accessing - computed' }
-CooTemporalCache >> computeDeltaMessageOf: aCooMockMethodModified [
-
-	^ ((aCooMockMethodModified method ast allChildren select: [ :each | each isMessage ])
-			collect: [ :each | each selector ])
-		  difference:
-		  ((aCooMockMethodModified oldMethod ast allChildren select: [ :each | each isMessage ]) 
-				collect: [ :each | each selector ])
-]
-
 { #category : 'initialization' }
 CooTemporalCache >> initialize [
 
