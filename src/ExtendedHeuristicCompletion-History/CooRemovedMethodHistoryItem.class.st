@@ -1,9 +1,9 @@
 Class {
 	#name : 'CooRemovedMethodHistoryItem',
 	#superclass : 'CooMethodHistoryItem',
-	#category : 'ExtendedHeuristicCompletion-History-Model',
+	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Model'
+	#tag : 'StructuralModel'
 }
 
 { #category : 'accessing' }

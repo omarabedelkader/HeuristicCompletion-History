@@ -11,9 +11,9 @@ Class {
 		'live',
 		'timestamp'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Model',
+	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Model'
+	#tag : 'StructuralModel'
 }
 
 { #category : 'accessing' }

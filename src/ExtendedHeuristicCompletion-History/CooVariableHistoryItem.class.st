@@ -5,7 +5,7 @@ I'm a little datastructure like class that hold information about added, modifie
 Class {
 	#name : 'CooVariableHistoryItem',
 	#superclass : 'CooHistoryItem',
-	#category : 'ExtendedHeuristicCompletion-History-Model',
+	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Model'
+	#tag : 'StructuralModel'
 }

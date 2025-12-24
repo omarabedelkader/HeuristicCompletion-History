@@ -2,7 +2,8 @@ Class {
 	#name : 'CooSession',
 	#superclass : 'Object',
 	#instVars : [
-		'cache'
+		'cache',
+		'completionItems'
 	],
 	#classVars : [
 		'Current'
@@ -30,20 +31,52 @@ CooSession class >> deinstall [
 CooSession class >> install [
 
 	<script>
-	self deinstall.
-	self environment codeChangeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
-	self environment codeChangeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current.
-	self environment codeChangeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current.
+	| codeAnnouncer |
 	
-	self environment codeChangeAnnouncer
+
+	self deinstall.
+
+	"We should kill this idea of shorter it does not help."
+	CompletionContext sorterClass: NoSorter.
+	
+	"First handling changes of structural code entities: classes and methods so far"
+	
+	codeAnnouncer := self environment codeChangeAnnouncer.
+	codeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
+	codeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current.
+	codeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current.
+	
+	codeAnnouncer
 		when: ClassAdded send: #addNewVariableInVocabulary: to: self current;
-		when: ClassRemoved send: #removeVariableFromVocabulary: to: self current
+		when: ClassRemoved send: #removeVariableFromVocabulary: to: self current.
+		
+	"now for the user choices
+	We should probably handle the fact that the user may not select and cancel the prompt."	
+		
+	codeAnnouncer 
+		when: CompletionItemSelected
+		send: #addCompletionItem: 
+		to: self current. 
 ]
 
 { #category : 'instance creation' }
 CooSession class >> withCache: aCache [
 
 	^ self current vocabularyCache: aCache
+]
+
+{ #category : 'interaction items' }
+CooSession >> addCompletionItem: aCompletionEntryItem [
+
+	| item |
+	item := CooInteractionItem new.
+	item token: aCompletionEntryItem token.
+	item selectedItem: aCompletionEntryItem selectedItem. 
+	item index:  aCompletionEntryItem index.
+	item choices: (aCompletionEntryItem entries collect: [ :each | each contents ]).
+	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher ]).
+	
+	completionItems addFirst: item. 
 ]
 
 { #category : 'adding' }
@@ -75,6 +108,7 @@ CooSession >> initialize [
 
 	super initialize.
 	cache := CooTemporalCache new.
+	completionItems := OrderedCollection new.
 ]
 
 { #category : 'adding' }
