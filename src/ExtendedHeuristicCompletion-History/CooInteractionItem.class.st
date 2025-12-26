@@ -17,7 +17,8 @@ Class {
 		'fetchers',
 		'selectedItem',
 		'token',
-		'index'
+		'index',
+		'timestamp'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-UserInteractionModel',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -65,7 +66,7 @@ CooInteractionItem >> initialize [
 
 	super initialize.
 	"not sure that nil is not better we should revisit this when we will look at the cancel"
-	
+	timestamp := DateAndTime now.
 	choices := #().
 	fetchers := #()
 ]
