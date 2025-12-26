@@ -28,6 +28,12 @@ CooSession class >> deinstall [
 ]
 
 { #category : 'actions' }
+CooSession class >> initialize [
+
+	self install
+]
+
+{ #category : 'actions' }
 CooSession class >> install [
 
 	<script>
