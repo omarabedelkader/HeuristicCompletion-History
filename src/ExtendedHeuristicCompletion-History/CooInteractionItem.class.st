@@ -71,6 +71,20 @@ CooInteractionItem >> initialize [
 	fetchers := #()
 ]
 
+{ #category : 'printing' }
+CooInteractionItem >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream
+		space;
+		nextPutAll: self token;
+		space;
+		nextPutAll: '(';
+		print: index asString;
+		nextPutAll: ') ';
+		nextPutAll: self selectedItem
+]
+
 { #category : 'accessing' }
 CooInteractionItem >> selectedItem [
 
