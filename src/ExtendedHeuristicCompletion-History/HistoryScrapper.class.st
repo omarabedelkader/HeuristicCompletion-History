@@ -120,7 +120,7 @@ HistoryScrapper class >> spec10 [
 { #category : 'example' }
 HistoryScrapper class >> toplo [
 	<script>
-	^ self fetchRepo: 'git@github.com:pharo-graphics/Toplo.git' commits: 10
+	^ self fetchRepo: 'git@github.com:omarabedelkader/ChatPharo.git' commits: 10
 ]
 
 { #category : 'actions' }
@@ -128,12 +128,8 @@ HistoryScrapper >> cloneRepositoryToTemporaryLocationFrom: url [
 	"Clone the repository to a temporary location."
 
 	| creator |
-	""
-	Transcript
-		show: 'Cloning repository to: ' , location pathString;
-		cr.
 		
-	location := FileLocator tmp  / 'iceberg-repos' / (url copyAfterLast: $/).
+	location := FileLocator temp / 'iceberg-repos' / (url copyAfterLast: $/).
 	location parent ensureCreateDirectory.
 	creator := IceRepositoryCreator new
 		           url: url;
@@ -183,11 +179,7 @@ HistoryScrapper >> initializeRepository [
 		detect: [ :repo | 
 			repo remotes anySatisfy: [ :remote | 
 				remote url = url or: [ remote url = (url , '.git') ] ] ]
-		ifNone: [ "self cloneRepositoryFrom: url" 
-			"Ok it was a clone to a temporary repo, so we may try.
-			we should not blindly remove the files because the person may have
-			not pushed the changes."
-			nil
+		ifNone: [ self cloneRepositoryToTemporaryLocationFrom: url
 			].
 	repository ifNil: [ ^ self ].
 	self registerRepositoryIfNeeded
