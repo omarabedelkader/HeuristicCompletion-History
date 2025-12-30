@@ -78,12 +78,10 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	item := CooInteractionItem new.
 	item token: aCompletionEntryItem token.
 	item choices: (aCompletionEntryItem entries collect: [ :each | each contents ]).
-	item index: aCompletionEntryItem index.
-	
-	"Could be computed instead of storing it."
+	item index: aCompletionEntryItem index. "Could be computed instead of storing it."
 	item selectedItem: (item choices at: item index).
 
-	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher ]).
+	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
 	completionItems addFirst: item
 ]
