@@ -33,6 +33,7 @@ CooTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 	deltaMessage := self computeDeltaMessageOf: anAnn.
 	item := CooModifiedMethodHistoryItem new
 		        selector: anAnn method selector;
+		        live: true;
 		        timestamp: DateAndTime now;
 		        nameOfClass: anAnn method methodClass name;
 		        yourself.
@@ -45,6 +46,7 @@ CooTemporalCache >> addNewMethodInVocabulary: anAnn [
 
 	self addMethodItem: (CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
+			 live: true;
 			 timestamp: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
@@ -56,8 +58,8 @@ CooTemporalCache >> addNewVariableInVocabulary: ann [
 
 	self addVariableItem: (CooAddedVariableHistoryItem new
 			 nameOfClass: ann classAdded name;
+			live: true;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
-		
 			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 ]
@@ -91,6 +93,7 @@ CooTemporalCache >> removeMethodFromVocabulary: anAnn [
 
 	self addMethodItem: (CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
+			live: true;
 			 timestamp: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
 			 yourself)
@@ -102,6 +105,7 @@ CooTemporalCache >> removeVariableFromVocabulary: ann [
 	self addVariableItem: (CooRemovedVariableHistoryItem new
 			 nameOfClass: ann classRemoved name;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
+			live: true;
 			timestamp: DateAndTime now;
 
 			 yourself)

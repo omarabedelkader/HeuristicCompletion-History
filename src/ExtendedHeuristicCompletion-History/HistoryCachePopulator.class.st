@@ -13,6 +13,13 @@ Class {
 	#tag : 'Fetching-Github'
 }
 
+{ #category : 'examples' }
+HistoryCachePopulator class >> comix [
+
+	<script>
+	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 1) inspect
+]
+
 { #category : 'instance creation' }
 HistoryCachePopulator class >> populateFromRepo: aURLString [
 	"Populate caches from the given repository URL.

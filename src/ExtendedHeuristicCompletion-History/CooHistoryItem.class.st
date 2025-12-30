@@ -29,10 +29,10 @@ CooHistoryItem >> date: avar [
 ]
 
 { #category : 'initialization' }
-CooHistoryItem >> initialize [ 
+CooHistoryItem >> initialize [
 
 	super initialize.
-	live := true
+	live := false
 ]
 
 { #category : 'accessing' }
