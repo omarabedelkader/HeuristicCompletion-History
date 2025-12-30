@@ -3,7 +3,7 @@ A heuristic that offers variable name completions based on the most recently use
 
 "
 Class {
-	#name : 'CoxSessionVariableHeuristic',
+	#name : 'CooSessionVariableHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',
 	#instVars : [
 		'session'
@@ -14,13 +14,13 @@ Class {
 }
 
 { #category : 'requests' }
-CoxSessionVariableHeuristic >> appliesForNode: aNode inContext: aContext [
+CooSessionVariableHeuristic >> appliesForNode: aNode inContext: aContext [
 
 	^ aNode isVariable
 ]
 
 { #category : 'requests' }
-CoxSessionVariableHeuristic >> buildFetcherFor: aVariableNode 
+CooSessionVariableHeuristic >> buildFetcherFor: aVariableNode 
 	inContext: aContext [
 	
 		| fetcher |
@@ -32,11 +32,11 @@ CoxSessionVariableHeuristic >> buildFetcherFor: aVariableNode
 ]
 
 { #category : 'accessing' }
-CoxSessionVariableHeuristic >> session [
+CooSessionVariableHeuristic >> session [
 	^ session ifNil: [ session := CooXPSession current ]
 ]
 
 { #category : 'accessing' }
-CoxSessionVariableHeuristic >> session: anObject [
+CooSessionVariableHeuristic >> session: anObject [
 	session := anObject
 ]

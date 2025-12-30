@@ -2,7 +2,7 @@
 I am an heuristic that autocompletes messages based on a session defined and modified methods.
 "
 Class {
-	#name : 'CoxSessionMessagesHeuristic',
+	#name : 'CooSessionMessagesHeuristic',
 	#superclass : 'CoASTNodeFetcherHeuristic',
 	#instVars : [
 		'session'
@@ -13,13 +13,13 @@ Class {
 }
 
 { #category : 'requests' }
-CoxSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
+CooSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
 
 	^ aNode isMethod or: [ aNode isMessage ]
 ]
 
 { #category : 'requests' }
-CoxSessionMessagesHeuristic >> buildFetcherFor: aMessageNode 
+CooSessionMessagesHeuristic >> buildFetcherFor: aMessageNode 
 	inContext: aContext [
 	
 		| fetcher matchingSelectors token |
@@ -40,11 +40,11 @@ CoxSessionMessagesHeuristic >> buildFetcherFor: aMessageNode
 ]
 
 { #category : 'accessing' }
-CoxSessionMessagesHeuristic >> session [
+CooSessionMessagesHeuristic >> session [
 	^ session ifNil: [ session := CooXPSession current ]
 ]
 
 { #category : 'accessing' }
-CoxSessionMessagesHeuristic >> session: anObject [
+CooSessionMessagesHeuristic >> session: anObject [
 	session := anObject
 ]
