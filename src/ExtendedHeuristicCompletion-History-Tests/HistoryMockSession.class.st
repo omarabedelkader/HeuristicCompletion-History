@@ -18,10 +18,9 @@ HistoryMockSession >> initialize [
 { #category : 'accessing' }
 HistoryMockSession >> registerSelector: aSelector ast: anAst event: anEvent at: aTimestamp [
 
-	registrations add: (CooODescriptionItem new
+	registrations add: (CooAddedMethodHistoryItem new
 			 selector: aSelector;
 			 ast: anAst;
-			 event: anEvent;
 			 timestamp: aTimestamp;
 			 yourself)
 ]
