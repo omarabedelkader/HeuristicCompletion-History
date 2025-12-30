@@ -78,6 +78,14 @@ CooTemporalCache >> initialize [
 	variableDescriptions := OrderedCollection new
 ]
 
+{ #category : 'printing' }
+CooTemporalCache >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream space ; nextPutAll: 'mths: '; print: selectorDescriptions size.
+	aStream space ; nextPutAll: 'cls '; print: variableDescriptions size.
+]
+
 { #category : 'initialization' }
 CooTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 

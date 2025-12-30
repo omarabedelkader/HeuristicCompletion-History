@@ -66,6 +66,14 @@ CooSession class >> install [
 ]
 
 { #category : 'instance creation' }
+CooSession class >> resetCache [ 
+	<script>
+	
+	self current resetCache
+		
+]
+
+{ #category : 'instance creation' }
 CooSession class >> withCache: aCache [
 
 	^ self current vocabularyCache: aCache
@@ -114,7 +122,7 @@ CooSession >> cache [
 CooSession >> initialize [
 
 	super initialize.
-	cache := CooTemporalCache new.
+	self resetCache.
 	completionItems := OrderedCollection new.
 ]
 
@@ -128,6 +136,13 @@ CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [
 CooSession >> removeVariableFromVocabulary: aClassRemoved [
 
 	cache removeVariableFromVocabulary: aClassRemoved 
+]
+
+{ #category : 'initialization' }
+CooSession >> resetCache [
+
+	cache := CooTemporalCache new.
+	
 ]
 
 { #category : 'matching' }

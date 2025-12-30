@@ -17,7 +17,7 @@ Class {
 HistoryCachePopulator class >> comix [
 
 	<script>
-	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 1) inspect
+	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
 ]
 
 { #category : 'instance creation' }
