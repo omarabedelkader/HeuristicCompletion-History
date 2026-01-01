@@ -1,9 +1,18 @@
+"
+I collect information about class and method definitions.
+Their treatments is delegated to strategies implementing different behavior. 
+
+In addition I'm collection information about the user selection in the ecompletion items. 
+For now I do not delegate such behavior but just implement locally the same algorithm than the NECUsageTracker
+e.g. I keep a frequence for the choices and I inject those in front of the selector or variable names.
+"
 Class {
 	#name : 'CooSession',
 	#superclass : 'Object',
 	#instVars : [
 		'cache',
-		'completionItems'
+		'completionItems',
+		'completionFrequences'
 	],
 	#classVars : [
 		'Current'
@@ -91,7 +100,8 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 
 	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
-	completionItems addFirst: item
+	completionItems addFirst: item.
+	self incrementUsageFor: (item choices at: item index).
 ]
 
 { #category : 'adding' }
@@ -118,12 +128,26 @@ CooSession >> cache [
 	^ cache 
 ]
 
+{ #category : 'interaction items' }
+CooSession >> incrementUsageFor: aString [
+	"using a dictionary is probably not efficient because after we will sort the key based on their frequency"
+	
+	completionFrequences at: aString ifAbsentPut: [ 0 ].
+	completionFrequences at: aString put: (completionFrequences at: aString) + 1.
+	
+	"The following expression acts as a flattener over the previous choices. 
+	This way the user is not forced to leave with selection made in the last century."
+	completionFrequences keysAndValuesDo: [ :k :v | k = aString 
+			ifFalse: [ completionFrequences at: k put: (completionFrequences at: k) * 0.5 ]]
+]
+
 { #category : 'initialization' }
 CooSession >> initialize [
 
 	super initialize.
 	self resetCache.
 	completionItems := OrderedCollection new.
+	completionFrequences := Dictionary new.
 ]
 
 { #category : 'adding' }
@@ -148,13 +172,29 @@ CooSession >> resetCache [
 { #category : 'matching' }
 CooSession >> selectors [
 	
-	^ cache selectors
+	^ (self sortedRecentChoices first: 5),  cache selectors
 ]
 
 { #category : 'accessing' }
 CooSession >> size [ 
 
 	^ cache size
+]
+
+{ #category : 'matching' }
+CooSession >> sortedRecentChoices [
+	
+	| sorted |
+	sorted := SortedCollection sortBlock: [ :a :b |
+			(a value = b value)
+				ifTrue: [ a key < b key ]
+				ifFalse: [ a value > b value ] ].
+	sorted addAll: completionFrequences associations.
+	 
+	^ sorted collect: [ :each | each key ].
+
+	
+	
 ]
 
 { #category : 'matching' }
