@@ -62,5 +62,7 @@ CooMostRecentFrequencyHandler >> sortedRecentChoices [
 { #category : 'tracking' }
 CooMostRecentFrequencyHandler >> sortedUserVocabulary [
 
-	^ (self sortedRecentChoices first: 5)
+	| lst |
+	lst := self sortedRecentChoices.
+	^ lst first: (lst size min: 5)
 ]
