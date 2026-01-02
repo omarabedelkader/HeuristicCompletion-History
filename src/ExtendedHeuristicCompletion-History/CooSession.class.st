@@ -12,7 +12,7 @@ Class {
 	#instVars : [
 		'cache',
 		'completionItems',
-		'completionFrequences'
+		'userSelectionHandler'
 	],
 	#classVars : [
 		'Current'
@@ -101,7 +101,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
 	completionItems addFirst: item.
-	self incrementUsageFor: (item choices at: item index).
+	userSelectionHandler handleNewSelectionItem: item addedTo: completionItems
 ]
 
 { #category : 'adding' }
@@ -128,26 +128,14 @@ CooSession >> cache [
 	^ cache 
 ]
 
-{ #category : 'interaction items' }
-CooSession >> incrementUsageFor: aString [
-	"using a dictionary is probably not efficient because after we will sort the key based on their frequency"
-	
-	completionFrequences at: aString ifAbsentPut: [ 0 ].
-	completionFrequences at: aString put: (completionFrequences at: aString) + 1.
-	
-	"The following expression acts as a flattener over the previous choices. 
-	This way the user is not forced to leave with selection made in the last century."
-	completionFrequences keysAndValuesDo: [ :k :v | k = aString 
-			ifFalse: [ completionFrequences at: k put: (completionFrequences at: k) * 0.5 ]]
-]
-
 { #category : 'initialization' }
 CooSession >> initialize [
 
 	super initialize.
 	self resetCache.
 	completionItems := OrderedCollection new.
-	completionFrequences := Dictionary new.
+	
+	userSelectionHandler := CooMostRecentFrequencyHandler new.
 ]
 
 { #category : 'adding' }
@@ -172,7 +160,7 @@ CooSession >> resetCache [
 { #category : 'matching' }
 CooSession >> selectors [
 	
-	^ (self sortedRecentChoices first: 5),  cache selectors
+	^ userSelectionHandler sortedUserVocabulary,  cache selectors
 ]
 
 { #category : 'accessing' }
@@ -181,20 +169,10 @@ CooSession >> size [
 	^ cache size
 ]
 
-{ #category : 'matching' }
-CooSession >> sortedRecentChoices [
-	
-	| sorted |
-	sorted := SortedCollection sortBlock: [ :a :b |
-			(a value = b value)
-				ifTrue: [ a key < b key ]
-				ifFalse: [ a value > b value ] ].
-	sorted addAll: completionFrequences associations.
-	 
-	^ sorted collect: [ :each | each key ].
+{ #category : 'accessing' }
+CooSession >> useSelectionHandler: aUserSelectionHandler [
 
-	
-	
+	userSelectionHandler := aUserSelectionHandler
 ]
 
 { #category : 'matching' }
