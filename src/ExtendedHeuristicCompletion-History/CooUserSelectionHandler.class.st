@@ -9,8 +9,14 @@ Class {
 	#tag : 'Session'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'api' }
 CooUserSelectionHandler >> handleNewSelectionItem: aSelectionItem addedTo: aCollection [
+
+	^ self subclassResponsibility 
+]
+
+{ #category : 'api' }
+CooUserSelectionHandler >> sortedUserVocabulary [
 
 	^ self subclassResponsibility 
 ]
