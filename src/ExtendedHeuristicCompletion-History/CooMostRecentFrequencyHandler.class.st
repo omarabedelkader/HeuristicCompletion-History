@@ -70,7 +70,7 @@ CooMostRecentFrequencyHandler >> sortedRecentChoices [
 ]
 
 { #category : 'tracking' }
-CooMostRecentFrequencyHandler >> sortedUserVocabulary [
+CooMostRecentFrequencyHandler >> sortedUserEntries [
 
 	| lst |
 	lst := self sortedRecentChoices.

@@ -11,9 +11,10 @@ I delegate the treatment of such information to a dedicated strategy. The protoc
 I then compose the results coming from the structural program definitions and the user selection using the message `sortedUserVocabulary`
 
 ```
-selectors
+selectorEntries
+	""Return a list of message selector entries computed from the user interaction and the modification of program.""
 	
-	^ userSelectionHandler sortedUserVocabulary,  cache selectors
+	^ userSelectionHandler sortedUserEntries,  programEntityHandler selectorEntries
 ```
 "
 Class {
@@ -184,7 +185,7 @@ CooSession >> resetCache [
 CooSession >> selectorEntries [
 	"Return a list of message selector entries computed from the user interaction and the modification of program."
 	
-	^ userSelectionHandler sortedUserVocabulary,  programEntityHandler selectorEntries
+	^ userSelectionHandler sortedUserEntries,  programEntityHandler selectorEntries
 ]
 
 { #category : 'accessing' }

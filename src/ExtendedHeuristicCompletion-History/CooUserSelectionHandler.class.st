@@ -16,7 +16,7 @@ CooUserSelectionHandler >> handleNewSelectionItem: aSelectionItem addedTo: aColl
 ]
 
 { #category : 'api' }
-CooUserSelectionHandler >> sortedUserVocabulary [
+CooUserSelectionHandler >> sortedUserEntries [
 
 	^ self subclassResponsibility 
 ]
