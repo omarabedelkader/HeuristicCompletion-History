@@ -1,13 +1,13 @@
 Class {
-	#name : 'CooRemovedVariableHistoryItem',
-	#superclass : 'CooVariableHistoryItem',
+	#name : 'CooRemovedClassHistoryItem',
+	#superclass : 'CooClassHistoryItem',
 	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'StructuralModel'
 }
 
 { #category : 'accessing' }
-CooRemovedVariableHistoryItem >> event [ 
+CooRemovedClassHistoryItem >> event [ 
 
 	^ #removed
 ]

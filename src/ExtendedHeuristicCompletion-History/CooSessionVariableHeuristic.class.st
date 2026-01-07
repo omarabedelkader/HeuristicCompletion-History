@@ -26,14 +26,14 @@ CooSessionVariableHeuristic >> buildFetcherFor: aVariableNode
 		| fetcher |
 		fetcher := CoCollectionFetcher new.
       ^ fetcher
-				 collection: (self session variableNames collect: [ :each |
+				 collection: (self session classEntries collect: [ :each |
                                (NECGlobalEntry contents: each node: aVariableNode) 
 											fetcher: fetcher ])
 ]
 
 { #category : 'accessing' }
 CooSessionVariableHeuristic >> session [
-	^ session ifNil: [ session := CooXPSession current ]
+	^ session ifNil: [ session := CooSession current ]
 ]
 
 { #category : 'accessing' }

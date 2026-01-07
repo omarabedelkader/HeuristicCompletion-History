@@ -10,7 +10,7 @@ Class {
 	#superclass : 'CooCache',
 	#instVars : [
 		'selectorDescriptions',
-		'variableDescriptions'
+		'classDescriptions'
 	],
 	#classInstVars : [
 		'current'
@@ -19,6 +19,12 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'Session'
 }
+
+{ #category : 'class handling' }
+CooTemporalCache >> addClassItem: anItem [
+
+	classDescriptions addFirst: anItem
+]
 
 { #category : 'method handling' }
 CooTemporalCache >> addMethodItem: anItem [
@@ -41,6 +47,17 @@ CooTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 	self addMethodItem: item
 ]
 
+{ #category : 'class handling' }
+CooTemporalCache >> addNewClassInVocabulary: ann [
+
+	self addClassItem: (CooAddedClassHistoryItem new
+			 nameOfClass: ann classAdded name;
+			live: true;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
+			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+	Focus of attention. So this can be computed latter based on such information. "
+]
+
 { #category : 'method handling' }
 CooTemporalCache >> addNewMethodInVocabulary: anAnn [
 
@@ -54,20 +71,15 @@ CooTemporalCache >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'class handling' }
-CooTemporalCache >> addNewVariableInVocabulary: ann [
-
-	self addVariableItem: (CooAddedVariableHistoryItem new
-			 nameOfClass: ann classAdded name;
-			live: true;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
-			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
-	Focus of attention. So this can be computed latter based on such information. "
-]
-
-{ #category : 'class handling' }
 CooTemporalCache >> addVariableItem: anItem [
 
-	variableDescriptions addFirst: anItem
+	classDescriptions addFirst: anItem
+]
+
+{ #category : 'accessing' }
+CooTemporalCache >> classEntries [
+
+	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each className node: nil) fetcher: CooTemporalCache ]
 ]
 
 { #category : 'initialization' }
@@ -75,7 +87,7 @@ CooTemporalCache >> initialize [
 
 	super initialize.
 	selectorDescriptions := OrderedCollection new.
-	variableDescriptions := OrderedCollection new
+	classDescriptions := OrderedCollection new
 ]
 
 { #category : 'printing' }
@@ -83,7 +95,7 @@ CooTemporalCache >> printOn: aStream [
 
 	super printOn: aStream.
 	aStream space ; nextPutAll: 'mths: '; print: selectorDescriptions size.
-	aStream space ; nextPutAll: 'cls '; print: variableDescriptions size.
+	aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
 ]
 
 { #category : 'initialization' }
@@ -94,6 +106,18 @@ CooTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol 
 			 time: aDateAndTime;
 			 ast: anAst;
 			 yourself) 
+]
+
+{ #category : 'class handling' }
+CooTemporalCache >> removeClassFromVocabulary: ann [
+
+	self addClassItem: (CooRemovedClassHistoryItem new
+			 nameOfClass: ann classRemoved name;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
+			live: true;
+			timestamp: DateAndTime now;
+
+			 yourself)
 ]
 
 { #category : 'method handling' }
@@ -107,18 +131,6 @@ CooTemporalCache >> removeMethodFromVocabulary: anAnn [
 			 yourself)
 ]
 
-{ #category : 'class handling' }
-CooTemporalCache >> removeVariableFromVocabulary: ann [
-
-	self addVariableItem: (CooRemovedVariableHistoryItem new
-			 nameOfClass: ann classRemoved name;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
-			live: true;
-			timestamp: DateAndTime now;
-
-			 yourself)
-]
-
 { #category : 'accessing' }
 CooTemporalCache >> selectorDescriptions [
 
@@ -126,7 +138,7 @@ CooTemporalCache >> selectorDescriptions [
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> selectors [
+CooTemporalCache >> selectorEntries [
 
 	| selectors filters |
 	selectors := OrderedCollection new: selectorDescriptions size.
@@ -145,7 +157,7 @@ CooTemporalCache >> selectors [
 											each selector ifNotNil: [
 												"we should find how this is possible to get a description with a nil selector." 
 											selectors add: each selector ] ] ] ].
-	^ selectors	
+	^ selectors	collect: [ :each | (NECSelectorEntry contents: each  node: nil) fetcher: self ]
 ]
 
 { #category : 'accessing' }
@@ -157,11 +169,5 @@ CooTemporalCache >> size [
 { #category : 'accessing' }
 CooTemporalCache >> variableDescriptions [
 
-	^ variableDescriptions
-]
-
-{ #category : 'accessing' }
-CooTemporalCache >> variableNames [
-
-	^ variableDescriptions collect: [ :each | each className ]
+	^ classDescriptions
 ]

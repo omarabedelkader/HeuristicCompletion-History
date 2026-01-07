@@ -3,7 +3,7 @@ I'm a little datastructure like class that hold information about added, modifie
 
 "
 Class {
-	#name : 'CooVariableHistoryItem',
+	#name : 'CooClassHistoryItem',
 	#superclass : 'CooHistoryItem',
 	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',

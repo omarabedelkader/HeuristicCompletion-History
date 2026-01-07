@@ -22,26 +22,25 @@ CooSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
 CooSessionMessagesHeuristic >> buildFetcherFor: aMessageNode 
 	inContext: aContext [
 	
-		| fetcher matchingSelectors token |
-		matchingSelectors := OrderedCollection new.
+		| fetcher matchingEntries token |
+		matchingEntries := OrderedCollection new.
 		"this is stupid to go over all the selectors but let us try I want to see if I get better results.
 		Normally this is not needed since there is a filter: 
 		look into configureFetcher: aFetcher forNode: aNode
 		" 
 		
 		token := aContext completionToken.
-		self session selectors do: [ :each | (each beginsWith: token) 
-				ifTrue: [ matchingSelectors 
-						add:  ((NECSelectorEntry contents: each node: aMessageNode) 
-											fetcher: fetcher ) ] ].
+		self session selectorEntries do: [ :each | 
+				(each beginsWith: token) 
+					ifTrue: [ matchingEntries add: (each node: aMessageNode; yourself) ] ].
 
 		fetcher := CoCollectionFetcher new.    
-		^ fetcher collection: matchingSelectors
+		^ fetcher collection: matchingEntries
 ]
 
 { #category : 'accessing' }
 CooSessionMessagesHeuristic >> session [
-	^ session ifNil: [ session := CooXPSession current ]
+	^ session ifNil: [ session := CooSession current ]
 ]
 
 { #category : 'accessing' }

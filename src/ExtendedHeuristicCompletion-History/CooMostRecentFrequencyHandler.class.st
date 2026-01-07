@@ -21,18 +21,24 @@ Class {
 { #category : 'tracking' }
 CooMostRecentFrequencyHandler >> handleNewSelectionItem: aSelectionItem addedTo: aCollection [
 
-	self incrementUsageFor: aSelectionItem selectedItemString
+	self incrementUsageFor: aSelectionItem selectedItemEntry
 ]
 
 { #category : 'tracking' }
-CooMostRecentFrequencyHandler >> incrementUsageFor: aString [
+CooMostRecentFrequencyHandler >> incrementUsageFor: anEntry [
 	"using a dictionary is probably not efficient because after we will sort the key based on their frequency"
+	"we keep the entry and not just its contents because entries are typed so we can later filter the one for global or method"
 
-	completionFrequences at: aString ifAbsentPut: [ 0 ].
-	completionFrequences at: aString put: (completionFrequences at: aString) + 1. "The following expression acts as a flattener over the previous choices. 
+	| key |
+	key := anEntry contents.
+	completionFrequences at: key ifAbsentPut: [ 0 -> anEntry ].
+	completionFrequences at: key put: ((completionFrequences at: key) key + 1 -> anEntry). 
+	
+	
+	"The following expression acts as a flattener over the previous choices. 
 	This way the user is not forced to leave with selection made in the last century."
 	completionFrequences keysAndValuesDo: [ :k :v |
-		k = aString ifFalse: [ completionFrequences at: k put: (completionFrequences at: k) * 0.5 ] ]
+		k = key ifFalse: [ completionFrequences at: k put: ((completionFrequences at: k) key * 0.5 -> anEntry )] ]
 ]
 
 { #category : 'initialization' }
@@ -48,12 +54,16 @@ CooMostRecentFrequencyHandler >> sortedRecentChoices [
 	
 	| sorted |
 	sorted := SortedCollection sortBlock: [ :a :b |
-			(a value = b value)
+			(a value key = b value key)
 				ifTrue: [ a key < b key ]
-				ifFalse: [ a value > b value ] ].
+				ifFalse: [ a value key > b value key] ].
 	sorted addAll: completionFrequences associations.
 	 
-	^ sorted collect: [ :each | each key ].
+	"now we will return the entry with the original fetcher as the one that filled up the completion
+	but in fact here this is the mostRecenetFrequenceHandler that in fact sort the entries.
+	So may be we could wrap the information to say 
+			(MostRecent.... (original one)). Alternatively we could add a primary fetcher and a secondary in the nec entry."
+	^ sorted collect: [ :each | each value value ].
 
 	
 	

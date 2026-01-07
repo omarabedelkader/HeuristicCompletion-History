@@ -1,13 +1,13 @@
 Class {
-	#name : 'CooAddedVariableHistoryItem',
-	#superclass : 'CooVariableHistoryItem',
+	#name : 'CooAddedClassHistoryItem',
+	#superclass : 'CooClassHistoryItem',
 	#category : 'ExtendedHeuristicCompletion-History-StructuralModel',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'StructuralModel'
 }
 
 { #category : 'accessing' }
-CooAddedVariableHistoryItem >> event [ 
+CooAddedClassHistoryItem >> event [ 
 
 	^ #added
 ]

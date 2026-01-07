@@ -98,6 +98,11 @@ CooInteractionItem >> selectedItem: anObject [
 ]
 
 { #category : 'accessing' }
+CooInteractionItem >> selectedItemEntry [
+	^ choices at: self index
+]
+
+{ #category : 'accessing' }
 CooInteractionItem >> selectedItemString [
 
 	^ choices at: self index

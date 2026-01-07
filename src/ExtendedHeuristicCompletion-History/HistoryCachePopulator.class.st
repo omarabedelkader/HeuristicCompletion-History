@@ -113,7 +113,7 @@ HistoryCachePopulator >> populateCaches [
 		methodInfos := self extractMethodsFromCommit: commit.
 		methodInfos do: [ :info |
 			"for now we do not manage variable"
-			session cache addMethodItem: info ].
+			session programEntityHandler addMethodItem: info ].
 		totalMethods := totalMethods + methodInfos size.
 		
 		(index \\ 10 = 0) ifTrue: [

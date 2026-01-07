@@ -1,18 +1,28 @@
 "
-I collect information about class and method definitions.
-Their treatments is delegated to strategies implementing different behavior. 
+I collect and treat information about development sessions. I take two sources of information: the definition/modification of program elements (class added, removed,...) and the choices made by the developer when selecting a completion item in the proposed list.
 
-In addition I'm collection information about the user selection in the ecompletion items. 
-For now I do not delegate such behavior but just implement locally the same algorithm than the NECUsageTracker
-e.g. I keep a frequence for the choices and I inject those in front of the selector or variable names.
+I collect information about class and method definitions.
+Their treatments are delegated to strategies implementing different behavior and acessible via the `cache` message.
+
+
+In addition I'm collecting information about the user selection in the ecompletion items. 
+I delegate the treatment of such information to a dedicated strategy. The protocol of communication between me and the strategy is the following one:  The message `handleNewSelectionItem: item addedTo: completionItems` is sent to the strategy the item and the full collection of recorded item included the newly added one. 
+
+I then compose the results coming from the structural program definitions and the user selection using the message `sortedUserVocabulary`
+
+```
+selectors
+	
+	^ userSelectionHandler sortedUserVocabulary,  cache selectors
+```
 "
 Class {
 	#name : 'CooSession',
 	#superclass : 'Object',
 	#instVars : [
-		'cache',
 		'completionItems',
-		'userSelectionHandler'
+		'userSelectionHandler',
+		'programEntityHandler'
 	],
 	#classVars : [
 		'Current'
@@ -60,10 +70,10 @@ CooSession class >> install [
 	codeAnnouncer when: MethodAdded send: #addNewMethodInVocabulary: to: self current.
 	codeAnnouncer when: MethodModified send: #addModifiedMethodInVocabulary: to: self current.
 	codeAnnouncer when: MethodRemoved send: #removeMethodFromVocabulary: to: self current.
-	
+		
 	codeAnnouncer
-		when: ClassAdded send: #addNewVariableInVocabulary: to: self current;
-		when: ClassRemoved send: #removeVariableFromVocabulary: to: self current.
+		when: ClassAdded send: #addNewClassInVocabulary: to: self current;
+		when: ClassRemoved send: #removeClassFromVocabulary: to: self current.
 		
 	"now for the user choices
 	We should probably handle the fact that the user may not select and cancel the prompt."	
@@ -72,6 +82,8 @@ CooSession class >> install [
 		when: CompletionItemSelected
 		send: #addCompletionItem: 
 		to: self current. 
+		
+	(CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') addFirst: CooSessionMessagesHeuristic new
 ]
 
 { #category : 'instance creation' }
@@ -85,7 +97,7 @@ CooSession class >> resetCache [
 { #category : 'instance creation' }
 CooSession class >> withCache: aCache [
 
-	^ self current vocabularyCache: aCache
+	^ self current programEntityHandler: aCache
 ]
 
 { #category : 'interaction items' }
@@ -94,10 +106,9 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	| item |
 	item := CooInteractionItem new.
 	item token: aCompletionEntryItem token.
-	item choices: (aCompletionEntryItem entries collect: [ :each | each contents ]).
+	item choices: aCompletionEntryItem entries.
 	item index: aCompletionEntryItem index. "Could be computed instead of storing it."
 	item selectedItem: (item choices at: item index).
-
 	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
 	completionItems addFirst: item.
@@ -107,25 +118,25 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 { #category : 'adding' }
 CooSession >> addModifiedMethodInVocabulary: anAnn [
 
-	cache addModifiedMethodInVocabulary: anAnn 
+	programEntityHandler addModifiedMethodInVocabulary: anAnn 
+]
+
+{ #category : 'adding' }
+CooSession >> addNewClassInVocabulary: aClassAdded [
+
+	programEntityHandler addNewClassInVocabulary: aClassAdded
 ]
 
 { #category : 'adding' }
 CooSession >> addNewMethodInVocabulary: anAnn [
 
-	cache addNewMethodInVocabulary: anAnn
+	programEntityHandler addNewMethodInVocabulary: anAnn
 ]
 
-{ #category : 'adding' }
-CooSession >> addNewVariableInVocabulary: aClassAdded [
+{ #category : 'matching' }
+CooSession >> classEntries [
 
-	cache addNewVariableInVocabulary: aClassAdded
-]
-
-{ #category : 'accessing' }
-CooSession >> cache [
-
-	^ cache 
+	^ programEntityHandler classEntries
 ]
 
 { #category : 'initialization' }
@@ -138,57 +149,52 @@ CooSession >> initialize [
 	userSelectionHandler := CooMostRecentFrequencyHandler new.
 ]
 
-{ #category : 'adding' }
-CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
+{ #category : 'accessing' }
+CooSession >> programEntityHandler [
 
-	cache removeMethodFromVocabulary: aMethodRemovedAnnouncement 
+	^ programEntityHandler 
+]
+
+{ #category : 'accessing' }
+CooSession >> programEntityHandler: aCache [
+
+	programEntityHandler := aCache
 ]
 
 { #category : 'adding' }
-CooSession >> removeVariableFromVocabulary: aClassRemoved [
+CooSession >> removeClassFromVocabulary: aClassRemoved [
 
-	cache removeVariableFromVocabulary: aClassRemoved 
+	programEntityHandler removeClassFromVocabulary: aClassRemoved 
+]
+
+{ #category : 'adding' }
+CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
+
+	programEntityHandler removeMethodFromVocabulary: aMethodRemovedAnnouncement 
 ]
 
 { #category : 'initialization' }
 CooSession >> resetCache [
 
-	cache := CooTemporalCache new.
+	programEntityHandler := CooTemporalCache new.
 	
 ]
 
 { #category : 'matching' }
-CooSession >> selectors [
+CooSession >> selectorEntries [
+	"Return a list of message selector entries computed from the user interaction and the modification of program."
 	
-	^ userSelectionHandler sortedUserVocabulary,  cache selectors
+	^ userSelectionHandler sortedUserVocabulary,  programEntityHandler selectorEntries
 ]
 
 { #category : 'accessing' }
 CooSession >> size [ 
 
-	^ cache size
+	^ programEntityHandler size
 ]
 
 { #category : 'accessing' }
 CooSession >> useSelectionHandler: aUserSelectionHandler [
 
 	userSelectionHandler := aUserSelectionHandler
-]
-
-{ #category : 'matching' }
-CooSession >> variableNames [
-
-	^ cache variableNames
-]
-
-{ #category : 'accessing' }
-CooSession >> vocabularyCache [
-
-	^ cache 
-]
-
-{ #category : 'accessing' }
-CooSession >> vocabularyCache: aCache [
-
-	cache := aCache
 ]

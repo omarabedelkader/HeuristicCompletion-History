@@ -10,9 +10,9 @@ Class {
 }
 
 { #category : 'origins' }
-NewCooSessionTest >> cache [
+NewCooSessionTest >> programEntityHandler [
 
-	^ session cache
+	^ session programEntityHandler
 ]
 
 { #category : 'running' }

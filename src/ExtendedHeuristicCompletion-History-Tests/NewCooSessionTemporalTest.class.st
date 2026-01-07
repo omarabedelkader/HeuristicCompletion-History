@@ -60,7 +60,7 @@ NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 	announcement := self modifiedMethodAnnouncement.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session vocabularyCache selectorDescriptions first deltaMessages asArray equals: #( #testComputeMessages )
+	self assert: session programEntityHandler selectorDescriptions first deltaMessages asArray equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests' }
@@ -70,7 +70,7 @@ NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 	announcement := CooMockMethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session vocabularyCache selectors size equals: 1
+	self assert: session programEntityHandler selectorEntries size equals: 1
 ]
 
 { #category : 'tests' }
@@ -80,7 +80,7 @@ NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 	announcement := CooMockMethodAdded for: Point >> #degrees.
 
 	session addNewMethodInVocabulary: announcement.
-	self assert: session vocabularyCache selectors size equals: 1
+	self assert: session programEntityHandler selectorEntries size equals: 1
 ]
 
 { #category : 'tests' }
@@ -90,9 +90,9 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 	announcement := CooMockClassAddedAnnouncement for: NewCooSessionTemporalTest.
 	session addNewVariableInVocabulary: announcement.
 
-	entry := session vocabularyCache variableDescriptions first.
+	entry := session programEntityHandler variableDescriptions first.
 
-	self assert: session vocabularyCache variableNames size equals: 1.
+	self assert: session programEntityHandler classEntries size equals: 1.
 ]
 
 { #category : 'tests' }
@@ -106,7 +106,7 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 	
 	
 	self 
-		assert: session vocabularyCache selectorDescriptions first deltaMessages asArray
+		assert: session programEntityHandler selectorDescriptions first deltaMessages asArray
 		equals: #( #testComputeMessages )
 ]
 
@@ -121,11 +121,11 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
 	announcement := self removedMethodAnnouncement.
 	session removeMethodFromVocabulary: announcement.
 	
-	descr := session vocabularyCache selectorDescriptions.
+	descr := session programEntityHandler selectorDescriptions.
 	self assert: descr size equals: 2.
 	self assert: descr first selector equals: #ourModifiedPrintString. 
 	self assert: descr second selector equals: #ourModifiedPrintString. 
-	self assert: session vocabularyCache selectors isEmpty
+	self assert: session programEntityHandler selectorEntries isEmpty
 ]
 
 { #category : 'tests - compute' }
@@ -156,8 +156,8 @@ NewCooSessionTemporalTest >> testMethodRemovedRemovedTheMethodFromSelectors [
 	announcement := self removedMethodAnnouncement.
 
 	session removeMethodFromVocabulary: announcement.
-	descr := session vocabularyCache selectorDescriptions.
+	descr := session programEntityHandler selectorDescriptions.
 	self assert: descr size equals: 1.
 	self assert: descr first selector equals: #ourModifiedPrintString. "but we removed the first one."
-	self assert: session vocabularyCache selectors isEmpty
+	self assert: session programEntityHandler selectorEntries isEmpty
 ]
