@@ -1,6 +1,6 @@
 Class {
-	#name : 'CooLRUCache',
-	#superclass : 'CooCache',
+	#name : 'CooLRUHandler',
+	#superclass : 'CooProgramEntityHandler',
 	#instVars : [
 		'selectorLRU'
 	],
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : 'initialization' }
-CooLRUCache >> initialize [ 
+CooLRUHandler >> initialize [ 
 
 	super initialize.
 	selectorLRU := LRUCache new maximumWeight: 1000

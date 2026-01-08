@@ -50,7 +50,7 @@ NewCooSessionTemporalTest >> setUp [
 	super setUp.
 	"Pay attention for now running the tests will empty the session cache."
 	
-	session := CooXPSession withCache: CooTemporalCache new
+	session := CooXPSession withCache: CooTemporalHandler new
 ]
 
 { #category : 'tests' }
@@ -137,7 +137,7 @@ NewCooSessionTemporalTest >> testComputeMessages [
 		                to: self class >> #ourModifiedPrintString
 		                oldProtocol: 'toto'.
 
-	self assert: (CooTemporalCache new computeDeltaMessageOf: announcement) asArray equals: #( #testComputeMessages )
+	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) asArray equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests - compute' }
@@ -146,7 +146,7 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	| announcement |
 	announcement := CooMockMethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
-	self assert: (CooTemporalCache new computeDeltaMessageOf: announcement) isEmpty
+	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) isEmpty
 ]
 
 { #category : 'tests' }

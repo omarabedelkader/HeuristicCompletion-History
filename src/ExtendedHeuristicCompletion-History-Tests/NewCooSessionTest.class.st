@@ -19,5 +19,5 @@ NewCooSessionTest >> programEntityHandler [
 NewCooSessionTest >> setUp [
 
 	super setUp.
-	session := CooXPSession withCache: CooTemporalCache new
+	session := CooXPSession withCache: CooTemporalHandler new
 ]

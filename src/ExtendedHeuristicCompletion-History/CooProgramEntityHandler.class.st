@@ -1,5 +1,5 @@
 Class {
-	#name : 'CooCache',
+	#name : 'CooProgramEntityHandler',
 	#superclass : 'Object',
 	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -7,7 +7,7 @@ Class {
 }
 
 { #category : 'accessing - computed' }
-CooCache >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
+CooProgramEntityHandler >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
 
 	^ ((aNewMethodAst allChildren select: [ :each | each isMessage ])
 			collect: [ :each | each selector ])
@@ -17,7 +17,7 @@ CooCache >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
 ]
 
 { #category : 'accessing - computed' }
-CooCache >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
+CooProgramEntityHandler >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 
 	^ self 
 		computeDeltaMessageBetween: aMethodModifiedAnnouncement method ast
@@ -26,7 +26,7 @@ CooCache >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 ]
 
 { #category : 'accessing' }
-CooCache >> size [ 
+CooProgramEntityHandler >> size [ 
 
 	^ 0
 ]

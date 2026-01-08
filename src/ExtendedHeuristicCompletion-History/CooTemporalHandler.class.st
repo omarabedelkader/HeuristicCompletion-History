@@ -6,8 +6,8 @@ I pay attention to not hold directly class or compiled method objects to avoid c
 
 "
 Class {
-	#name : 'CooTemporalCache',
-	#superclass : 'CooCache',
+	#name : 'CooTemporalHandler',
+	#superclass : 'CooProgramEntityHandler',
 	#instVars : [
 		'selectorDescriptions',
 		'classDescriptions'
@@ -21,19 +21,19 @@ Class {
 }
 
 { #category : 'class handling' }
-CooTemporalCache >> addClassItem: anItem [
+CooTemporalHandler >> addClassItem: anItem [
 
 	classDescriptions addFirst: anItem
 ]
 
 { #category : 'method handling' }
-CooTemporalCache >> addMethodItem: anItem [
+CooTemporalHandler >> addMethodItem: anItem [
 
 	selectorDescriptions addFirst: anItem
 ]
 
 { #category : 'method handling' }
-CooTemporalCache >> addModifiedMethodInVocabulary: anAnn [
+CooTemporalHandler >> addModifiedMethodInVocabulary: anAnn [
 
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
@@ -48,7 +48,7 @@ CooTemporalCache >> addModifiedMethodInVocabulary: anAnn [
 ]
 
 { #category : 'class handling' }
-CooTemporalCache >> addNewClassInVocabulary: ann [
+CooTemporalHandler >> addNewClassInVocabulary: ann [
 
 	self addClassItem: (CooAddedClassHistoryItem new
 			 nameOfClass: ann classAdded name;
@@ -59,7 +59,7 @@ CooTemporalCache >> addNewClassInVocabulary: ann [
 ]
 
 { #category : 'method handling' }
-CooTemporalCache >> addNewMethodInVocabulary: anAnn [
+CooTemporalHandler >> addNewMethodInVocabulary: anAnn [
 
 	self addMethodItem: (CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -71,19 +71,19 @@ CooTemporalCache >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'class handling' }
-CooTemporalCache >> addVariableItem: anItem [
+CooTemporalHandler >> addVariableItem: anItem [
 
 	classDescriptions addFirst: anItem
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> classEntries [
+CooTemporalHandler >> classEntries [
 
-	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each className node: nil) fetcher: CooTemporalCache ]
+	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each className node: nil) fetcher: CooTemporalHandler ]
 ]
 
 { #category : 'initialization' }
-CooTemporalCache >> initialize [
+CooTemporalHandler >> initialize [
 
 	super initialize.
 	selectorDescriptions := OrderedCollection new.
@@ -91,7 +91,7 @@ CooTemporalCache >> initialize [
 ]
 
 { #category : 'printing' }
-CooTemporalCache >> printOn: aStream [
+CooTemporalHandler >> printOn: aStream [
 
 	super printOn: aStream.
 	aStream space ; nextPutAll: 'mths: '; print: selectorDescriptions size.
@@ -99,7 +99,7 @@ CooTemporalCache >> printOn: aStream [
 ]
 
 { #category : 'initialization' }
-CooTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
+CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
 	selectorDescriptions add: (CooMethodHistoryItem new
 			 selector: aSelector;
@@ -109,7 +109,7 @@ CooTemporalCache >> registerSelector: aSelector ast: anAst event: anEventSymbol 
 ]
 
 { #category : 'class handling' }
-CooTemporalCache >> removeClassFromVocabulary: ann [
+CooTemporalHandler >> removeClassFromVocabulary: ann [
 
 	self addClassItem: (CooRemovedClassHistoryItem new
 			 nameOfClass: ann classRemoved name;
@@ -121,7 +121,7 @@ CooTemporalCache >> removeClassFromVocabulary: ann [
 ]
 
 { #category : 'method handling' }
-CooTemporalCache >> removeMethodFromVocabulary: anAnn [
+CooTemporalHandler >> removeMethodFromVocabulary: anAnn [
 
 	self addMethodItem: (CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -132,13 +132,13 @@ CooTemporalCache >> removeMethodFromVocabulary: anAnn [
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> selectorDescriptions [
+CooTemporalHandler >> selectorDescriptions [
 
 	^ selectorDescriptions
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> selectorEntries [
+CooTemporalHandler >> selectorEntries [
 
 	| selectors filters |
 	selectors := OrderedCollection new: selectorDescriptions size.
@@ -161,13 +161,13 @@ CooTemporalCache >> selectorEntries [
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> size [ 
+CooTemporalHandler >> size [ 
 
 	^ selectorDescriptions size
 ]
 
 { #category : 'accessing' }
-CooTemporalCache >> variableDescriptions [
+CooTemporalHandler >> variableDescriptions [
 
 	^ classDescriptions
 ]

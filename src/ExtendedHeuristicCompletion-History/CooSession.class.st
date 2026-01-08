@@ -176,7 +176,7 @@ CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [
 { #category : 'initialization' }
 CooSession >> resetCache [
 
-	programEntityHandler := CooTemporalCache new.
+	programEntityHandler := CooTemporalHandler new.
 	
 ]
 
