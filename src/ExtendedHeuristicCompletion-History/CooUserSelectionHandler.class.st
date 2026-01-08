@@ -12,7 +12,7 @@ Class {
 { #category : 'api' }
 CooUserSelectionHandler >> handleNewSelectionItem: aSelectionItem addedTo: aCollection [
 
-	^ self subclassResponsibility 
+	^ self
 ]
 
 { #category : 'api' }

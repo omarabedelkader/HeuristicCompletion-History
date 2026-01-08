@@ -23,7 +23,9 @@ Class {
 	#instVars : [
 		'completionItems',
 		'userSelectionHandler',
-		'programEntityHandler'
+		'programEntityHandler',
+		'selectorDescriptions',
+		'classDescriptions'
 	],
 	#classVars : [
 		'Current'
@@ -44,7 +46,14 @@ CooSession class >> deinstall [
 
 	<script>
 	self environment codeChangeAnnouncer unsubscribe: self current.
-	Current := nil
+	Current := nil.
+	
+	((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
+		ifTrue: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') removeFirst ].
+		
+	((CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') first class = CooSessionVariableHeuristic )
+		ifTrue: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') removeFirst ].
+	
 ]
 
 { #category : 'actions' }
@@ -59,7 +68,6 @@ CooSession class >> install [
 	<script>
 	| codeAnnouncer |
 	
-
 	self deinstall.
 
 	"We should kill this idea of shorter it does not help."
@@ -84,14 +92,20 @@ CooSession class >> install [
 		send: #addCompletionItem: 
 		to: self current. 
 		
-	(CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') addFirst: CooSessionMessagesHeuristic new
+	((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
+		ifFalse: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') addFirst: CooSessionMessagesHeuristic new ].
+		
+	((CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') first class = CooSessionVariableHeuristic)
+		ifFalse: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') addFirst: CooSessionVariableHeuristic new ].	
+
+
 ]
 
 { #category : 'instance creation' }
-CooSession class >> resetCache [ 
+CooSession class >> resetProgramEntities [ 
 	<script>
 	
-	self current resetCache
+	self current resetProgramEntities
 		
 ]
 
@@ -99,6 +113,13 @@ CooSession class >> resetCache [
 CooSession class >> withCache: aCache [
 
 	^ self current programEntityHandler: aCache
+]
+
+{ #category : 'class handling' }
+CooSession >> addClassItem: anItem [
+	
+	classDescriptions addFirst: anItem.
+	programEntityHandler handleNewClassItem: anItem addedTo: classDescriptions
 ]
 
 { #category : 'interaction items' }
@@ -114,39 +135,112 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
 	completionItems addFirst: item.
+	
+	"Instead of poking the handler during each addition we could pass it all the info when 
+	requesting a list of entries."
 	userSelectionHandler handleNewSelectionItem: item addedTo: completionItems
 ]
 
-{ #category : 'adding' }
+{ #category : 'method handling' }
+CooSession >> addMethodItem: anItem [
+
+	selectorDescriptions addFirst: anItem.
+]
+
+{ #category : 'method handling' }
 CooSession >> addModifiedMethodInVocabulary: anAnn [
 
-	programEntityHandler addModifiedMethodInVocabulary: anAnn 
+	| deltaMessage item |
+	deltaMessage := self computeDeltaMessageOf: anAnn.
+	item := CooModifiedMethodHistoryItem new
+		        selector: anAnn method selector;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: anAnn method methodClass name;
+		        yourself.
+	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
+	self addMethodItem: item
 ]
 
-{ #category : 'adding' }
-CooSession >> addNewClassInVocabulary: aClassAdded [
+{ #category : 'class handling' }
+CooSession >> addNewClassInVocabulary: ann [
 
-	programEntityHandler addNewClassInVocabulary: aClassAdded
+	self addClassItem: (CooAddedClassHistoryItem new
+			 nameOfClass: ann classAdded name;
+			live: true;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
+			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+	Focus of attention. So this can be computed latter based on such information. "
 ]
 
-{ #category : 'adding' }
+{ #category : 'method handling' }
 CooSession >> addNewMethodInVocabulary: anAnn [
 
-	programEntityHandler addNewMethodInVocabulary: anAnn
+	self addMethodItem: (CooAddedMethodHistoryItem new
+			 selector: anAnn method selector;
+			 live: true;
+			 timestamp: DateAndTime now;
+			 nameOfClass: anAnn method methodClass name;
+			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+	Focus of attention. So this can be computed latter based on such information. "
 ]
 
 { #category : 'matching' }
 CooSession >> classEntries [
 
-	^ programEntityHandler classEntries
+	self halt.
+	^ (programEntityHandler classDescriptions: classDescriptions) classEntries
+]
+
+{ #category : 'helpers' }
+CooSession >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
+
+	^ ((aNewMethodAst allChildren select: [ :each | each isMessage ])
+			collect: [ :each | each selector ])
+		  difference:
+		  ((anOldMethodAst allChildren select: [ :each | each isMessage ]) 
+				collect: [ :each | each selector ])
+]
+
+{ #category : 'helpers' }
+CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
+
+	^ self 
+		computeDeltaMessageBetween: aMethodModifiedAnnouncement method ast
+		andOld: aMethodModifiedAnnouncement oldMethod ast 
+	
 ]
 
 { #category : 'initialization' }
 CooSession >> initialize [
 
 	super initialize.
-	self resetCache.
+	self resetProgramEntities.
 	self resetInteractionItems.
+]
+
+{ #category : 'configuration' }
+CooSession >> mostRecentFrequentSelectionHandling [
+
+	userSelectionHandler := CooMostRecentFrequencyHandler new.
+]
+
+{ #category : 'configuration' }
+CooSession >> noUserSelectionHandling [
+
+	userSelectionHandler := CooNullUserSelectionHandler new.
+]
+
+{ #category : 'printing' }
+CooSession >> printOn: aStream [
+
+
+	super printOn: aStream.
+	aStream space ; nextPutAll: (programEntityHandler class name allButFirst: 3).
+	aStream space ; nextPutAll: 'mths '; print: selectorDescriptions size.
+	aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
+	aStream space ; nextPutAll: (userSelectionHandler class name allButFirst: 3).
+	aStream space ; nextPutAll: 'interaction'; print: completionItems size.
 ]
 
 { #category : 'accessing' }
@@ -161,23 +255,31 @@ CooSession >> programEntityHandler: aCache [
 	programEntityHandler := aCache
 ]
 
-{ #category : 'adding' }
-CooSession >> removeClassFromVocabulary: aClassRemoved [
+{ #category : 'class handling' }
+CooSession >> removeClassFromVocabulary: ann [
 
-	programEntityHandler removeClassFromVocabulary: aClassRemoved 
+	| removedClassName |
+	removedClassName := ann classRemoved name.
+	(removedClassName beginsWith: 'AnObsolete')
+		ifTrue: [ removedClassName := removedClassName allButFirst: 'AnObsolete' size ].
+	self addClassItem: (CooRemovedClassHistoryItem new
+			 nameOfClass: removedClassName;
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
+			live: true;
+			timestamp: DateAndTime now;
+
+			 yourself)
 ]
 
-{ #category : 'adding' }
-CooSession >> removeMethodFromVocabulary: aMethodRemovedAnnouncement [ 
+{ #category : 'method handling' }
+CooSession >> removeMethodFromVocabulary: anAnn [
 
-	programEntityHandler removeMethodFromVocabulary: aMethodRemovedAnnouncement 
-]
-
-{ #category : 'initialization' }
-CooSession >> resetCache [
-
-	programEntityHandler := CooTemporalHandler new.
-	
+	self addMethodItem: (CooRemovedMethodHistoryItem new
+			 selector: anAnn method selector;
+			live: true;
+			 timestamp: DateAndTime now;
+			 nameOfClass: anAnn method methodClass name;
+			 yourself)
 ]
 
 { #category : 'initialization' }
@@ -187,11 +289,21 @@ CooSession >> resetInteractionItems [
 	userSelectionHandler := CooMostRecentFrequencyHandler new.
 ]
 
+{ #category : 'initialization' }
+CooSession >> resetProgramEntities [
+
+	selectorDescriptions := OrderedCollection new.
+	classDescriptions := OrderedCollection new.
+	programEntityHandler := CooTemporalHandler new.
+	
+]
+
 { #category : 'matching' }
 CooSession >> selectorEntries [
 	"Return a list of message selector entries computed from the user interaction and the modification of program."
 	
-	^ userSelectionHandler sortedUserEntries,  programEntityHandler selectorEntries
+	^ userSelectionHandler sortedUserEntries,  
+		(programEntityHandler selectorDescriptions: selectorDescriptions ) selectorEntries 
 ]
 
 { #category : 'accessing' }

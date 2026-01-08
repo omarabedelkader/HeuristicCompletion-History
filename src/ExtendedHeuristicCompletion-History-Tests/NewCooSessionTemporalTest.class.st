@@ -90,7 +90,7 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 	announcement := CooMockClassAddedAnnouncement for: NewCooSessionTemporalTest.
 	session addNewVariableInVocabulary: announcement.
 
-	entry := session programEntityHandler variableDescriptions first.
+	entry := session programEntityHandler classDescriptions first.
 
 	self assert: session programEntityHandler classEntries size equals: 1.
 ]

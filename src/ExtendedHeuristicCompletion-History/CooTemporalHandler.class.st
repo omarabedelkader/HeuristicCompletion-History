@@ -8,10 +8,6 @@ I pay attention to not hold directly class or compiled method objects to avoid c
 Class {
 	#name : 'CooTemporalHandler',
 	#superclass : 'CooProgramEntityHandler',
-	#instVars : [
-		'selectorDescriptions',
-		'classDescriptions'
-	],
 	#classInstVars : [
 		'current'
 	],
@@ -20,82 +16,31 @@ Class {
 	#tag : 'Session'
 }
 
-{ #category : 'class handling' }
-CooTemporalHandler >> addClassItem: anItem [
-
-	classDescriptions addFirst: anItem
-]
-
-{ #category : 'method handling' }
-CooTemporalHandler >> addMethodItem: anItem [
-
-	selectorDescriptions addFirst: anItem
-]
-
-{ #category : 'method handling' }
-CooTemporalHandler >> addModifiedMethodInVocabulary: anAnn [
-
-	| deltaMessage item |
-	deltaMessage := self computeDeltaMessageOf: anAnn.
-	item := CooModifiedMethodHistoryItem new
-		        selector: anAnn method selector;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        nameOfClass: anAnn method methodClass name;
-		        yourself.
-	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
-	self addMethodItem: item
-]
-
-{ #category : 'class handling' }
-CooTemporalHandler >> addNewClassInVocabulary: ann [
-
-	self addClassItem: (CooAddedClassHistoryItem new
-			 nameOfClass: ann classAdded name;
-			live: true;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
-			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
-	Focus of attention. So this can be computed latter based on such information. "
-]
-
-{ #category : 'method handling' }
-CooTemporalHandler >> addNewMethodInVocabulary: anAnn [
-
-	self addMethodItem: (CooAddedMethodHistoryItem new
-			 selector: anAnn method selector;
-			 live: true;
-			 timestamp: DateAndTime now;
-			 nameOfClass: anAnn method methodClass name;
-			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
-	Focus of attention. So this can be computed latter based on such information. "
-]
-
-{ #category : 'class handling' }
-CooTemporalHandler >> addVariableItem: anItem [
-
-	classDescriptions addFirst: anItem
-]
-
 { #category : 'accessing' }
 CooTemporalHandler >> classEntries [
-
+	"Clearly we should manage what happen when we remove a class
+	
+	
+	"
+	self halt.
 	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each className node: nil) fetcher: CooTemporalHandler ]
 ]
 
-{ #category : 'initialization' }
-CooTemporalHandler >> initialize [
+{ #category : 'as yet unclassified' }
+CooTemporalHandler >> handleNewClassItem: anItem addedTo: aCollection [
+	"here we will have to manage the incremental management of the new event see comments in selectorentries."
+]
 
-	super initialize.
-	selectorDescriptions := OrderedCollection new.
-	classDescriptions := OrderedCollection new
+{ #category : 'as yet unclassified' }
+CooTemporalHandler >> handleNewMethodItem: anItem addedTo: aCollection [
+	"here we will have to manage the incremental management of the new event see comments in selectorentries."
 ]
 
 { #category : 'printing' }
 CooTemporalHandler >> printOn: aStream [
 
 	super printOn: aStream.
-	aStream space ; nextPutAll: 'mths: '; print: selectorDescriptions size.
-	aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
+
 ]
 
 { #category : 'initialization' }
@@ -108,41 +53,16 @@ CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbo
 			 yourself) 
 ]
 
-{ #category : 'class handling' }
-CooTemporalHandler >> removeClassFromVocabulary: ann [
-
-	self addClassItem: (CooRemovedClassHistoryItem new
-			 nameOfClass: ann classRemoved name;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
-			live: true;
-			timestamp: DateAndTime now;
-
-			 yourself)
-]
-
-{ #category : 'method handling' }
-CooTemporalHandler >> removeMethodFromVocabulary: anAnn [
-
-	self addMethodItem: (CooRemovedMethodHistoryItem new
-			 selector: anAnn method selector;
-			live: true;
-			 timestamp: DateAndTime now;
-			 nameOfClass: anAnn method methodClass name;
-			 yourself)
-]
-
-{ #category : 'accessing' }
-CooTemporalHandler >> selectorDescriptions [
-
-	^ selectorDescriptions
-]
-
 { #category : 'accessing' }
 CooTemporalHandler >> selectorEntries [
-
+	"
+	For now we perform the interpretation of program entities modifications once for all when requested. 
+	It means that this is inefficient since we redo all the times the same treatment all the time.
+	
+	"
+	
 	| selectors filters |
 	selectors := OrderedCollection new: selectorDescriptions size.
-	"this cries for a little hierarchy for message history item."
 	"an add CM1, add/modified CM1, add CM1, removed CM1 = {}"
 	
 	"The following does implement this semantics removed CM1, add CM1 = CM1"
@@ -164,10 +84,4 @@ CooTemporalHandler >> selectorEntries [
 CooTemporalHandler >> size [ 
 
 	^ selectorDescriptions size
-]
-
-{ #category : 'accessing' }
-CooTemporalHandler >> variableDescriptions [
-
-	^ classDescriptions
 ]
