@@ -77,12 +77,12 @@ CooInteractionItem >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		space;
-		nextPutAll: self token;
+		nextPutAll: token;
 		space;
 		nextPutAll: '(';
 		print: index asString;
 		nextPutAll: ') ';
-		nextPutAll: self selectedItem
+		nextPutAll: selectedItem contents
 ]
 
 { #category : 'accessing' }

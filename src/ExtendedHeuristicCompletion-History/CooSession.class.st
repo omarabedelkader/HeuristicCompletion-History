@@ -105,11 +105,12 @@ CooSession class >> withCache: aCache [
 CooSession >> addCompletionItem: aCompletionEntryItem [
 
 	| item |
+
 	item := CooInteractionItem new.
 	item token: aCompletionEntryItem token.
 	item choices: aCompletionEntryItem entries.
 	item index: aCompletionEntryItem index. "Could be computed instead of storing it."
-	item selectedItem: (item choices at: item index).
+	item selectedItem: aCompletionEntryItem selectedItem.
 	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
 
 	completionItems addFirst: item.
@@ -145,9 +146,7 @@ CooSession >> initialize [
 
 	super initialize.
 	self resetCache.
-	completionItems := OrderedCollection new.
-	
-	userSelectionHandler := CooMostRecentFrequencyHandler new.
+	self resetInteractionItems.
 ]
 
 { #category : 'accessing' }
@@ -179,6 +178,13 @@ CooSession >> resetCache [
 
 	programEntityHandler := CooTemporalCache new.
 	
+]
+
+{ #category : 'initialization' }
+CooSession >> resetInteractionItems [
+	
+	completionItems := OrderedCollection new.
+	userSelectionHandler := CooMostRecentFrequencyHandler new.
 ]
 
 { #category : 'matching' }
