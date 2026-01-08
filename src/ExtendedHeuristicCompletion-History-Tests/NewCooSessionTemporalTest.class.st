@@ -60,7 +60,7 @@ NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 	announcement := self modifiedMethodAnnouncement.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session programEntityHandler selectorDescriptions first deltaMessages asArray equals: #( #testComputeMessages )
+	self assert: session programEntityHandler methodDescriptions first deltaMessages asArray equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests' }
@@ -106,7 +106,7 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 	
 	
 	self 
-		assert: session programEntityHandler selectorDescriptions first deltaMessages asArray
+		assert: session programEntityHandler methodDescriptions first deltaMessages asArray
 		equals: #( #testComputeMessages )
 ]
 
@@ -121,7 +121,7 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
 	announcement := self removedMethodAnnouncement.
 	session removeMethodFromVocabulary: announcement.
 	
-	descr := session programEntityHandler selectorDescriptions.
+	descr := session programEntityHandler methodDescriptions.
 	self assert: descr size equals: 2.
 	self assert: descr first selector equals: #ourModifiedPrintString. 
 	self assert: descr second selector equals: #ourModifiedPrintString. 
@@ -156,7 +156,7 @@ NewCooSessionTemporalTest >> testMethodRemovedRemovedTheMethodFromSelectors [
 	announcement := self removedMethodAnnouncement.
 
 	session removeMethodFromVocabulary: announcement.
-	descr := session programEntityHandler selectorDescriptions.
+	descr := session programEntityHandler methodDescriptions.
 	self assert: descr size equals: 1.
 	self assert: descr first selector equals: #ourModifiedPrintString. "but we removed the first one."
 	self assert: session programEntityHandler selectorEntries isEmpty

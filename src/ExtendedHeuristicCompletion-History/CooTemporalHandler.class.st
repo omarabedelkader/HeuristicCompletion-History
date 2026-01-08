@@ -40,7 +40,13 @@ CooTemporalHandler >> handleNewClassItem: anItem addedTo: aCollection [
 
 { #category : 'as yet unclassified' }
 CooTemporalHandler >> handleNewMethodItem: anItem addedTo: aCollection [
-	"here we will have to manage the incremental management of the new event see comments in selectorentries."
+	
+	(anItem event = #removed)
+		ifTrue: [ 
+			"when a method is removed we remove all the method addition and modification of that method"
+			methodDescriptions := methodDescriptions copy reject: [ :each | each nameOfClass = anItem nameOfClass and: [ each selector = anItem selector ] ] ]
+		ifFalse: [  classDescriptions addFirst: anItem ]
+	
 ]
 
 { #category : 'as yet unclassified' }
@@ -48,7 +54,7 @@ CooTemporalHandler >> initialize [
 
 	super initialize.
 	classDescriptions := OrderedCollection new.
-	selectorDescriptions := OrderedCollection new.
+	methodDescriptions := OrderedCollection new.
 ]
 
 { #category : 'printing' }
@@ -61,7 +67,7 @@ CooTemporalHandler >> printOn: aStream [
 { #category : 'initialization' }
 CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbol at: aDateAndTime [
 
-	selectorDescriptions add: (CooMethodHistoryItem new
+	methodDescriptions add: (CooMethodHistoryItem new
 			 selector: aSelector;
 			 time: aDateAndTime;
 			 ast: anAst;
@@ -70,33 +76,12 @@ CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbo
 
 { #category : 'accessing' }
 CooTemporalHandler >> selectorEntries [
-	"
-	For now we perform the interpretation of program entities modifications once for all when requested. 
-	It means that this is inefficient since we redo all the times the same treatment all the time.
 	
-	"
-	
-	| selectors filters |
-	selectors := OrderedCollection new: selectorDescriptions size.
-	"an add CM1, add/modified CM1, add CM1, removed CM1 = {}"
-	
-	"The following does implement this semantics removed CM1, add CM1 = CM1"
-	
-	filters := OrderedCollection new.
-	selectorDescriptions do: [ :each | 
-		(each event = #removed)
-				ifTrue: [ filters add: each ]
-				ifFalse: [ (filters anySatisfy: [ :f | ((f selector = each selector ) 
-																		and: [ f nameOfClass = each nameOfClass ])])
-										ifFalse: [ 
-											each selector ifNotNil: [
-												"we should find how this is possible to get a description with a nil selector." 
-											selectors add: each selector ] ] ] ].
-	^ selectors	collect: [ :each | (NECSelectorEntry contents: each  node: nil) fetcher: self ]
+	^ methodDescriptions 	collect: [ :each | (NECSelectorEntry contents: each selector node: nil) fetcher: 'TemporalHandler' ]
 ]
 
 { #category : 'accessing' }
 CooTemporalHandler >> size [ 
 
-	^ selectorDescriptions size
+	^ methodDescriptions size
 ]

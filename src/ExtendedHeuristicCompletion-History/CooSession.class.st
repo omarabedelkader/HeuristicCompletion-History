@@ -24,8 +24,8 @@ Class {
 		'completionItems',
 		'userSelectionHandler',
 		'programEntityHandler',
-		'selectorDescriptions',
-		'classDescriptions'
+		'classDescriptions',
+		'methodDescriptions'
 	],
 	#classVars : [
 		'Current'
@@ -144,7 +144,8 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 { #category : 'method handling' }
 CooSession >> addMethodItem: anItem [
 
-	selectorDescriptions addFirst: anItem.
+	methodDescriptions addFirst: anItem.
+	programEntityHandler handleNewMethodItem: anItem addedTo: methodDescriptions
 ]
 
 { #category : 'method handling' }
@@ -236,7 +237,7 @@ CooSession >> printOn: aStream [
 
 	super printOn: aStream.
 	aStream space ; nextPutAll: (programEntityHandler class name allButFirst: 3).
-	aStream space ; nextPutAll: 'mths '; print: selectorDescriptions size.
+	aStream space ; nextPutAll: 'mths '; print: methodDescriptions size.
 	aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
 	aStream space ; nextPutAll: (userSelectionHandler class name allButFirst: 3).
 	aStream space ; nextPutAll: 'interaction'; print: completionItems size.
@@ -275,10 +276,10 @@ CooSession >> removeMethodFromVocabulary: anAnn [
 
 	self addMethodItem: (CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
-			live: true;
+			 live: true;
 			 timestamp: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
-			 yourself)
+			 yourself) 
 ]
 
 { #category : 'initialization' }
@@ -291,7 +292,7 @@ CooSession >> resetInteractionItems [
 { #category : 'initialization' }
 CooSession >> resetProgramEntities [
 
-	selectorDescriptions := OrderedCollection new.
+	methodDescriptions := OrderedCollection new.
 	classDescriptions := OrderedCollection new.
 	programEntityHandler := CooTemporalHandler new.
 	
@@ -301,8 +302,7 @@ CooSession >> resetProgramEntities [
 CooSession >> selectorEntries [
 	"Return a list of message selector entries computed from the user interaction and the modification of program."
 	
-	^ userSelectionHandler sortedUserEntries,  
-		(programEntityHandler selectorDescriptions: selectorDescriptions ) selectorEntries 
+	^ userSelectionHandler sortedUserEntries, programEntityHandler selectorEntries 
 ]
 
 { #category : 'accessing' }

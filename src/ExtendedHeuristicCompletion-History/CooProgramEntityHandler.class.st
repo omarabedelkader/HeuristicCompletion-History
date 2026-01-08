@@ -3,7 +3,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'classDescriptions',
-		'selectorDescriptions'
+		'methodDescriptions'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -42,15 +42,15 @@ CooProgramEntityHandler >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 ]
 
 { #category : 'accessing' }
-CooProgramEntityHandler >> selectorDescriptions [
+CooProgramEntityHandler >> methodDescriptions [
 
-	^ selectorDescriptions
+	^ methodDescriptions
 ]
 
 { #category : 'accessing' }
-CooProgramEntityHandler >> selectorDescriptions: aCollection [
+CooProgramEntityHandler >> methodDescriptions: aCollection [
 
-	selectorDescriptions := aCollection
+	methodDescriptions := aCollection
 ]
 
 { #category : 'accessing' }
