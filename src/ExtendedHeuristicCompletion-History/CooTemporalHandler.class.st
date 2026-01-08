@@ -29,11 +29,26 @@ CooTemporalHandler >> classEntries [
 { #category : 'as yet unclassified' }
 CooTemporalHandler >> handleNewClassItem: anItem addedTo: aCollection [
 	"here we will have to manage the incremental management of the new event see comments in selectorentries."
+	
+	(anItem event = #removed)
+		ifTrue: [ 
+			"when a class was removed we remove all the class addition with the same name"
+			classDescriptions := classDescriptions copy reject: [ :each | each nameOfClass = anItem nameOfClass] ]
+		ifFalse: [  classDescriptions addFirst: anItem ]
+	
 ]
 
 { #category : 'as yet unclassified' }
 CooTemporalHandler >> handleNewMethodItem: anItem addedTo: aCollection [
 	"here we will have to manage the incremental management of the new event see comments in selectorentries."
+]
+
+{ #category : 'as yet unclassified' }
+CooTemporalHandler >> initialize [
+
+	super initialize.
+	classDescriptions := OrderedCollection new.
+	selectorDescriptions := OrderedCollection new.
 ]
 
 { #category : 'printing' }

@@ -188,7 +188,7 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 { #category : 'matching' }
 CooSession >> classEntries [
 
-	^ (programEntityHandler classDescriptions: classDescriptions) classEntries
+	^ programEntityHandler classEntries
 ]
 
 { #category : 'helpers' }
