@@ -160,6 +160,7 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 		        nameOfClass: anAnn method methodClass name;
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
+	
 	self addMethodItem: item
 ]
 
@@ -262,6 +263,7 @@ CooSession >> removeClassFromVocabulary: ann [
 	removedClassName := ann classRemoved name.
 	(removedClassName beginsWith: 'AnObsolete')
 		ifTrue: [ removedClassName := removedClassName allButFirst: 'AnObsolete' size ].
+		
 	self addClassItem: (CooRemovedClassHistoryItem new
 			 nameOfClass: removedClassName;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"

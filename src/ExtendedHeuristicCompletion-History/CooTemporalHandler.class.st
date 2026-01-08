@@ -26,7 +26,7 @@ CooTemporalHandler >> classEntries [
 	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each nameOfClass node: nil) fetcher: CooTemporalHandler ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'api' }
 CooTemporalHandler >> handleNewClassItem: anItem addedTo: aCollection [
 	"here we will have to manage the incremental management of the new event see comments in selectorentries."
 	
@@ -38,18 +38,18 @@ CooTemporalHandler >> handleNewClassItem: anItem addedTo: aCollection [
 	
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'api' }
 CooTemporalHandler >> handleNewMethodItem: anItem addedTo: aCollection [
 	
 	(anItem event = #removed)
 		ifTrue: [ 
 			"when a method is removed we remove all the method addition and modification of that method"
 			methodDescriptions := methodDescriptions copy reject: [ :each | each nameOfClass = anItem nameOfClass and: [ each selector = anItem selector ] ] ]
-		ifFalse: [  classDescriptions addFirst: anItem ]
+		ifFalse: [  methodDescriptions addFirst: anItem ]
 	
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'initialization' }
 CooTemporalHandler >> initialize [
 
 	super initialize.
