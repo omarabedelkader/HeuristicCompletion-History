@@ -50,7 +50,18 @@ NewCooSessionTemporalTest >> setUp [
 	super setUp.
 	"Pay attention for now running the tests will empty the session cache."
 	
-	session := CooXPSession withCache: CooTemporalHandler new
+	session := CooSession withCache: CooTemporalHandler new
+]
+
+{ #category : 'running' }
+NewCooSessionTemporalTest >> tearDown [
+    session ifNotNil: [
+        session resetProgramEntities. 
+        session resetInteractionItems.
+    ].
+
+    super tearDown
+
 ]
 
 { #category : 'tests' }
