@@ -188,7 +188,6 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 { #category : 'matching' }
 CooSession >> classEntries [
 
-	self halt.
 	^ (programEntityHandler classDescriptions: classDescriptions) classEntries
 ]
 

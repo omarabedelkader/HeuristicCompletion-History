@@ -22,8 +22,8 @@ CooTemporalHandler >> classEntries [
 	
 	
 	"
-	self halt.
-	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each className node: nil) fetcher: CooTemporalHandler ]
+	
+	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each nameOfClass node: nil) fetcher: CooTemporalHandler ]
 ]
 
 { #category : 'as yet unclassified' }
