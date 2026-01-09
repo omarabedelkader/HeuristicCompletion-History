@@ -48,12 +48,12 @@ CooSession class >> deinstall [
 	self environment codeChangeAnnouncer unsubscribe: self current.
 	Current := nil.
 	
-	((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
+	"((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
 		ifTrue: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') removeFirst ].
 		
 	((CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') first class = CooSessionVariableHeuristic )
 		ifTrue: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') removeFirst ].
-	
+	"
 ]
 
 { #category : 'actions' }
@@ -92,11 +92,11 @@ CooSession class >> install [
 		send: #addCompletionItem: 
 		to: self current. 
 		
-	((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
+	"((CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') first class = CooSessionMessagesHeuristic)
 		ifFalse: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'MessageHeuristic') addFirst: CooSessionMessagesHeuristic new ].
 		
 	((CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') first class = CooSessionVariableHeuristic)
-		ifFalse: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') addFirst: CooSessionVariableHeuristic new ].	
+		ifFalse: [ (CoASTHeuristicsResultSetBuilder classVarNamed: 'VariablesHeuristic') addFirst: CooSessionVariableHeuristic new ]."
 
 
 ]
