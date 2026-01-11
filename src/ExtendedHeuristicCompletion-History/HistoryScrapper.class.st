@@ -167,6 +167,13 @@ HistoryScrapper >> fetchLatestCommits [
 ]
 
 { #category : 'initialization' }
+HistoryScrapper >> initialize [
+
+	super initialize.
+	commitCount := 10
+]
+
+{ #category : 'initialization' }
 HistoryScrapper >> initializeRepository [
 	"Find or clone the repository locally."
 
