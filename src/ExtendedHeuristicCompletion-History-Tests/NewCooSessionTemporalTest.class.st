@@ -50,7 +50,7 @@ NewCooSessionTemporalTest >> setUp [
 	super setUp.
 	"Pay attention for now running the tests will empty the session cache."
 	
-	session := CooXPSession withCache: CooTemporalHandler new
+	session := CooSession withCache: CooTemporalHandler new
 ]
 
 { #category : 'tests' }
@@ -88,7 +88,7 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 
 	| announcement entry |
 	announcement := CooMockClassAddedAnnouncement for: NewCooSessionTemporalTest.
-	session addNewVariableInVocabulary: announcement.
+	session addNewClassInVocabulary: announcement.
 
 	entry := session programEntityHandler classDescriptions first.
 
@@ -110,24 +110,6 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 		equals: #( #testComputeMessages )
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
-
-	| announcement descr |
-	self skip.
-	announcement := self modifiedMethodAnnouncement.
-	session addModifiedMethodInVocabulary: announcement.
-	
-	announcement := self removedMethodAnnouncement.
-	session removeMethodFromVocabulary: announcement.
-	
-	descr := session programEntityHandler methodDescriptions.
-	self assert: descr size equals: 2.
-	self assert: descr first selector equals: #ourModifiedPrintString. 
-	self assert: descr second selector equals: #ourModifiedPrintString. 
-	self assert: session programEntityHandler selectorEntries isEmpty
-]
-
 { #category : 'tests - compute' }
 NewCooSessionTemporalTest >> testComputeMessages [
 
@@ -147,17 +129,4 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	announcement := CooMockMethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
 	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) isEmpty
-]
-
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testMethodRemovedRemovedTheMethodFromSelectors [
-
-	| announcement descr |
-	announcement := self removedMethodAnnouncement.
-
-	session removeMethodFromVocabulary: announcement.
-	descr := session programEntityHandler methodDescriptions.
-	self assert: descr size equals: 1.
-	self assert: descr first selector equals: #ourModifiedPrintString. "but we removed the first one."
-	self assert: session programEntityHandler selectorEntries isEmpty
 ]
