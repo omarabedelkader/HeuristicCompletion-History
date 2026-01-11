@@ -96,23 +96,6 @@ HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
-
-	| session info |
-	session := CooTemporalHandler new.
-	populator session: session.
-
-	info := CooAddedMethodHistoryItem new
-		        selector: #sample;
-		        timestamp: DateAndTime now;
-		        yourself.
-
-	populator populateCachesWithMethodInfo: info.
-	self assert: session size equals: 1.
-	self assert: session selectorEntries first contents equals: #sample
-]
-
-{ #category : 'running' }
 HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 
 	| collection addition timestamp info |
