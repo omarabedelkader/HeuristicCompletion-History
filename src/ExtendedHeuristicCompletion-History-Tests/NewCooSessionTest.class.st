@@ -21,3 +21,16 @@ NewCooSessionTest >> setUp [
 	super setUp.
 	session := CooSession withCache: CooTemporalHandler new
 ]
+
+{ #category : 'running' }
+NewCooSessionTest >> testAddClassAddsEntry [
+
+	| announcement |
+	announcement := ClassAdded new
+		classAdded: Point;
+		yourself.
+
+	session addNewClassInVocabulary: announcement.
+
+	self assert: session classEntries size equals: 1
+]
