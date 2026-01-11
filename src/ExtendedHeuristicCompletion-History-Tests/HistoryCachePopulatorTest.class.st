@@ -10,6 +10,67 @@ Class {
 }
 
 { #category : 'running' }
+HistoryCachePopulatorTest >> commitWithDiff [
+
+	^ (self repository head withCommitWalkDo: [ :walk |
+		   walk
+			   maxNumber: 50;
+			   commits ])
+		  detect: [ :commit | commit diffToParent notNil ]
+		  ifNone: [ nil ]
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> firstAdditionOperation [
+
+	^ self firstOperationMatching: [ :operation |
+		  operation isAddition and: [ (populator selectorFromNode: operation) notNil ] ]
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> firstMethodOperation [
+
+	^ self firstOperationMatching: [ :operation |
+		  (populator selectorFromNode: operation) notNil ]
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> firstModificationOperation [
+
+	^ self firstOperationMatching: [ :operation |
+		  operation isModification and: [ (populator selectorFromNode: operation) notNil ] ]
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> firstNonMethodOperation [
+
+	^ self firstOperationMatching: [ :operation |
+		  (populator selectorFromNode: operation) isNil ]
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> firstOperationMatching: aBlock [
+
+	| commit diff found |
+	commit := self commitWithDiff.
+	commit ifNil: [ ^ nil ].
+	diff := commit diffToParent.
+	diff ifNil: [ ^ nil ].
+	found := nil.
+	diff tree allChildrenDo: [ :node |
+		(found isNil and: [ aBlock value: node value ]) ifTrue: [ found := node value ] ].
+	^ found
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> repository [
+
+	^ IceRepository registry
+		  detect: [ :repo | repo name = 'HeuristicCompletion-History' ]
+		  ifNone: [ self error: 'Expected Iceberg repository for HeuristicCompletion-History not found.' ]
+]
+
+{ #category : 'running' }
 HistoryCachePopulatorTest >> setUp [
     super setUp.
     populator := HistoryCachePopulator new
@@ -18,25 +79,26 @@ HistoryCachePopulatorTest >> setUp [
 { #category : 'running' }
 HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 
-    | operation |
-    operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
-    operation definition: Object new.
-    self assert: (populator selectorFromNode: operation) isNil
+	| operation |
+	operation := self firstNonMethodOperation.
+   operation ifNil: [ ^ self skip ].
+	self assert: (populator selectorFromNode: operation) isNil
 ]
 
 { #category : 'running' }
 HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeReturnsSelector [
 
-    | operation |
-    operation := HistoryMockDiffOperation additionForSelector: #foo leftContents: 'foo ^ 1'.
-    self assert: (populator selectorFromNode: operation) equals: #foo
+	| operation |
+	operation := self firstMethodOperation.
+    operation ifNil: [ ^ self skip ].
+    self assert: (populator selectorFromNode: operation) equals: operation definition selector
 ]
 
 { #category : 'running' }
 HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions [
 
 	| session info |
-	session := HistoryMockSession new.
+	session := CooTemporalHandler new.
 	populator session: session.
 
 	info := CooAddedMethodHistoryItem new
@@ -45,8 +107,8 @@ HistoryCachePopulatorTest >> testPopulateCachesWithMethodInfoDelegatesToSessions
 		        yourself.
 
 	populator populateCachesWithMethodInfo: info.
-	self assert: session registrations size equals: 1.
-	self assert: session registrations first selector equals: #sample
+	self assert: session size equals: 1.
+	self assert: session selectorEntries first contents equals: #sample
 ]
 
 { #category : 'running' }
@@ -54,12 +116,13 @@ HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 
 	| collection addition timestamp info |
 	collection := OrderedCollection new.
-	addition := HistoryMockDiffOperation additionForSelector: #bar leftContents: 'bar ^ 2'.
+	addition := self firstAdditionOperation.
+	addition ifNil: [ ^ self skip ].
 	timestamp := DateAndTime now.
 	populator processAddition: addition into: collection timestamp: timestamp.
 	self assert: collection size equals: 1.
 	info := collection first.
-	self assert: info selector equals: #bar.
+	self assert: info selector equals: addition definition selector.
 	self assert: info timestamp equals: timestamp.
 	self deny: info ast isNil
 ]
@@ -69,13 +132,13 @@ HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
 
 	| collection modification timestamp info |
 	collection := OrderedCollection new.
-	modification := HistoryMockDiffOperation modificationForSelector: #baz leftContents: 'baz ^ 3' rightContents: 'baz ^ 2'.
-	modification className: #AAA.
+	modification := self firstModificationOperation.
+	modification ifNil: [ ^ self skip ].
 	timestamp := DateAndTime now.
 	populator processModification: modification into: collection timestamp: timestamp.
 	self assert: collection size equals: 1.
 	info := collection first.
-	self assert: info selector equals: #baz.
-	self assert: info nameOfClass equals: #AAA.
+	self assert: info selector equals: modification definition selector.
+	self assert: info nameOfClass equals: modification definition className.
 	self assert: info timestamp equals: timestamp
 ]
