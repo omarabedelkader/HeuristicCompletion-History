@@ -78,6 +78,18 @@ HistoryCachePopulatorTest >> setUp [
 ]
 
 { #category : 'running' }
+HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenReturnsNewSelectors [
+
+	| oldAst newAst deltaMessages |
+	oldAst := RBParser parseMethod: 'sample ^ self alpha'.
+	newAst := RBParser parseMethod: 'sample ^ self alpha. self beta'.
+	deltaMessages := populator computeDeltaMessageBetween: newAst andOld: oldAst.
+
+	self assert: (deltaMessages includes: #beta).
+	self deny: (deltaMessages includes: #alpha)
+]
+
+{ #category : 'running' }
 HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 
 	| operation |
