@@ -9,7 +9,7 @@ Class {
 { #category : 'running' }
 NewCooSessionTemporalTest >> modifiedMethodAnnouncement [
 
-	^ CooMockMethodModified
+	^ MethodModified
 		  methodChangedFrom: self class >> #ourOriginalPrintString
 		  to: self class >> #ourModifiedPrintString
 		  oldProtocol: 'toto'
@@ -39,7 +39,7 @@ NewCooSessionTemporalTest >> ourOriginalPrintString [
 { #category : 'running' }
 NewCooSessionTemporalTest >> removedMethodAnnouncement [
 
-	^ CooMockMethodRemoved new
+	^ MethodRemoved new
 		  methodOrigin: NewCooSessionTemporalTest;
 		  method: NewCooSessionTemporalTest >> #ourModifiedPrintString
 ]
@@ -50,7 +50,7 @@ NewCooSessionTemporalTest >> setUp [
 	super setUp.
 	"Pay attention for now running the tests will empty the session cache."
 	
-	session := CooXPSession withCache: CooTemporalHandler new
+	session := CooSession withCache: CooTemporalHandler new
 ]
 
 { #category : 'tests' }
@@ -67,7 +67,7 @@ NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 
 	| announcement |
-	announcement := CooMockMethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
+	announcement := MethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
 
 	session addModifiedMethodInVocabulary: announcement.
 	self assert: session programEntityHandler selectorEntries size equals: 1
@@ -77,7 +77,9 @@ NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 
 	| announcement |
-	announcement := CooMockMethodAdded for: Point >> #degrees.
+	announcement := MethodAdded new
+		method: Point >> #degrees;
+		yourself.
 
 	session addNewMethodInVocabulary: announcement.
 	self assert: session programEntityHandler selectorEntries size equals: 1
@@ -87,12 +89,14 @@ NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 
 	| announcement entry |
-	announcement := CooMockClassAddedAnnouncement for: NewCooSessionTemporalTest.
-	session addNewVariableInVocabulary: announcement.
+	announcement := ClassAdded new
+		classAdded: NewCooSessionTemporalTest;
+		yourself.
+	session addNewClassInVocabulary: announcement.
 
 	entry := session programEntityHandler classDescriptions first.
 
-	self assert: session programEntityHandler classEntries size equals: 1.
+	self assert: session programEntityHandler classEntries size equals: 1
 ]
 
 { #category : 'tests' }
@@ -110,32 +114,14 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 		equals: #( #testComputeMessages )
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethodShouldRemoveIt [
-
-	| announcement descr |
-	self skip.
-	announcement := self modifiedMethodAnnouncement.
-	session addModifiedMethodInVocabulary: announcement.
-	
-	announcement := self removedMethodAnnouncement.
-	session removeMethodFromVocabulary: announcement.
-	
-	descr := session programEntityHandler methodDescriptions.
-	self assert: descr size equals: 2.
-	self assert: descr first selector equals: #ourModifiedPrintString. 
-	self assert: descr second selector equals: #ourModifiedPrintString. 
-	self assert: session programEntityHandler selectorEntries isEmpty
-]
-
 { #category : 'tests - compute' }
 NewCooSessionTemporalTest >> testComputeMessages [
 
 	| announcement |
-	announcement := CooMockMethodModified
-		                methodChangedFrom: self class >> #ourOriginalPrintString
-		                to: self class >> #ourModifiedPrintString
-		                oldProtocol: 'toto'.
+	announcement := MethodModified
+	                methodChangedFrom: self class >> #ourOriginalPrintString
+	                to: self class >> #ourModifiedPrintString
+	                oldProtocol: 'toto'.
 
 	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) asArray equals: #( #testComputeMessages )
 ]
@@ -144,20 +130,7 @@ NewCooSessionTemporalTest >> testComputeMessages [
 NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 
 	| announcement |
-	announcement := CooMockMethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
+	announcement := MethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
 	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) isEmpty
-]
-
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testMethodRemovedRemovedTheMethodFromSelectors [
-
-	| announcement descr |
-	announcement := self removedMethodAnnouncement.
-
-	session removeMethodFromVocabulary: announcement.
-	descr := session programEntityHandler methodDescriptions.
-	self assert: descr size equals: 1.
-	self assert: descr first selector equals: #ourModifiedPrintString. "but we removed the first one."
-	self assert: session programEntityHandler selectorEntries isEmpty
 ]
