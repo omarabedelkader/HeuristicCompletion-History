@@ -10,9 +10,18 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 
 	<baseline>
 	spec postLoadDoIt: #postLoad.
-	spec for: #common do: [ spec package: 'ExtendedHeuristicCompletion-History' ].
-				spec package: 'ExtendedHeuristicCompletion-History-Tests' with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
-				spec package: 'ExtendedHeuristicCompletion-History-Benchmarks' with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+	spec for: #common do: [
+			spec
+				baseline: 'ExtendedHeuristicCompletionBenchmarks'
+				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks/repository' ].
+
+			spec package: 'ExtendedHeuristicCompletion-History' ].
+	spec 
+		package: 'ExtendedHeuristicCompletion-History-Tests' 
+		with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+	spec 
+		package: 'ExtendedHeuristicCompletion-History-Benchmarks' 
+		with: [ spec requires: 'ExtendedHeuristicCompletion-History' ]
 ]
 
 { #category : 'script' }
