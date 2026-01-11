@@ -70,9 +70,9 @@ CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbo
 
 	methodDescriptions add: (CooMethodHistoryItem new
 			 selector: aSelector;
-			 time: aDateAndTime;
+			 timestamp: aDateAndTime;
 			 ast: anAst;
-			 yourself) 
+			 yourself)
 ]
 
 { #category : 'accessing' }
