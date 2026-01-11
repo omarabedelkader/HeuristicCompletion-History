@@ -12,12 +12,13 @@ Class {
 { #category : 'running' }
 HistoryCachePopulatorTest >> commitWithDiff [
 
-	^ (self repository head withCommitWalkDo: [ :walk |
-		   walk
-			   maxNumber: 50;
-			   commits ])
-		  detect: [ :commit | commit diffToParent notNil ]
-		  ifNone: [ nil ]
+	| repository |
+	repository := self repository.
+	repository ifNil: [ ^ nil ].
+	^ (repository head withCommitWalkDo: [ :walk |
+			   walk
+				   maxNumber: 50;
+				   commits ]) detect: [ :commit | commit diffToParent notNil ] ifNone: [ nil ]
 ]
 
 { #category : 'running' }
