@@ -67,8 +67,8 @@ HistoryCachePopulatorTest >> firstOperationMatching: aBlock [
 HistoryCachePopulatorTest >> repository [
 
 	^ IceRepository registry
-		  detect: [ :repo | repo name = 'HeuristicCompletion-History' ]
-		  ifNone: [ self error: 'Expected Iceberg repository for HeuristicCompletion-History not found.' ]
+		  detect: [ :repo | #('HeuristicCompletion-History' 'ExtendedHeuristicCompletion-History') includes: repo name ]
+		  ifNone: [ nil ]
 ]
 
 { #category : 'running' }
