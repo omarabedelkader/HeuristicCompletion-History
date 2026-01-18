@@ -21,9 +21,3 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 		package: 'ExtendedHeuristicCompletion-History-Benchmarks' 
 		with: [ spec requires: 'ExtendedHeuristicCompletion-History' ]
 ]
-
-{ #category : 'script' }
-BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
-
-	CompletionContext sorterClass: NoSorter
-]
