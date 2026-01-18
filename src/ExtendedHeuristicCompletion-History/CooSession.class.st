@@ -69,8 +69,6 @@ CooSession class >> install [
 	
 	self deinstall.
 
-	"We should kill this idea of shorter it does not help."
-	CompletionContext sorterClass: NoSorter.
 	
 	"First handling changes of structural code entities: classes and methods so far"
 	
