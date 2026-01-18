@@ -9,7 +9,6 @@ Class {
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 
 	<baseline>
-	spec postLoadDoIt: #postLoad.
 	spec for: #common do: [ spec
 				baseline: 'ExtendedHeuristicCompletionBenchmarks'
 				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks/repository' ].
