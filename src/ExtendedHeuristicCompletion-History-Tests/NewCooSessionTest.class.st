@@ -19,7 +19,7 @@ NewCooSessionTest >> programEntityHandler [
 NewCooSessionTest >> setUp [
 
 	super setUp.
-	session := CooSession withCache: CooTemporalHandler new
+	session := CooSession withEntityHandler: CooTemporalHandler new
 ]
 
 { #category : 'running' }

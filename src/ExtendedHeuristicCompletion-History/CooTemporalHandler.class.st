@@ -58,6 +58,12 @@ CooTemporalHandler >> initialize [
 	methodDescriptions := OrderedCollection new.
 ]
 
+{ #category : 'accessing' }
+CooTemporalHandler >> methodSize [ 
+
+	^ methodDescriptions size
+]
+
 { #category : 'printing' }
 CooTemporalHandler >> printOn: aStream [
 
@@ -84,6 +90,6 @@ CooTemporalHandler >> selectorEntries [
 
 { #category : 'accessing' }
 CooTemporalHandler >> size [ 
-
+	self halt.
 	^ methodDescriptions size
 ]

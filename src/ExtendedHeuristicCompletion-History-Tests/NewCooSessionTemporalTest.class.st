@@ -47,10 +47,9 @@ NewCooSessionTemporalTest >> removedMethodAnnouncement [
 { #category : 'running' }
 NewCooSessionTemporalTest >> setUp [
 
-	super setUp.
-	"Pay attention for now running the tests will empty the session cache."
-	
-	session := CooSession withCache: CooTemporalHandler new
+	super setUp. "Pay attention for now running the tests will empty the session cache."
+
+	session := CooSession withEntityHandler: CooTemporalHandler new
 ]
 
 { #category : 'tests' }
@@ -60,7 +59,9 @@ NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 	announcement := self modifiedMethodAnnouncement.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session programEntityHandler methodDescriptions first deltaMessages asArray equals: #( #testComputeMessages )
+	self 
+		assert: session programEntityHandler methodDescriptions first deltaMessages asArray 
+		equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests' }
@@ -70,7 +71,9 @@ NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 	announcement := MethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
 
 	session addModifiedMethodInVocabulary: announcement.
-	self assert: session programEntityHandler selectorEntries size equals: 1
+	self 
+		assert: session programEntityHandler selectorEntries size 
+		equals: 1
 ]
 
 { #category : 'tests' }
@@ -82,7 +85,9 @@ NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 		yourself.
 
 	session addNewMethodInVocabulary: announcement.
-	self assert: session programEntityHandler selectorEntries size equals: 1
+	self 
+		assert: session programEntityHandler selectorEntries size 
+		equals: 1
 ]
 
 { #category : 'tests' }
@@ -96,7 +101,9 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 
 	entry := session programEntityHandler classDescriptions first.
 
-	self assert: session programEntityHandler classEntries size equals: 1
+	self 
+		assert: session programEntityHandler classEntries size 
+		equals: 1
 ]
 
 { #category : 'tests' }
@@ -123,7 +130,9 @@ NewCooSessionTemporalTest >> testComputeMessages [
 	                to: self class >> #ourModifiedPrintString
 	                oldProtocol: 'toto'.
 
-	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) asArray equals: #( #testComputeMessages )
+	self 
+		assert: (session computeDeltaMessageOf: announcement) asArray 
+		equals: #( #testComputeMessages )
 ]
 
 { #category : 'tests - compute' }
@@ -132,5 +141,5 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	| announcement |
 	announcement := MethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
-	self assert: (CooTemporalHandler new computeDeltaMessageOf: announcement) isEmpty
+	self assert: (session computeDeltaMessageOf: announcement) isEmpty
 ]
