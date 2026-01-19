@@ -138,7 +138,15 @@ HistoryScrapper >> cloneRepositoryToTemporaryLocationFrom: url [
 
 	^ [ creator createRepository ]
 		  on: IceDuplicatedRepository
-		  do: [ :ex | ex return: ex repository ]
+		  		  do: [ :ex | 
+			  | existing |
+			  existing := IceRepository registry
+				  detect: [ :repo | 
+					  repo location = location
+						  or: [ repo remotes anySatisfy: [ :remote | 
+								  remote url = url or: [ remote url = (url , '.git') ] ] ] ]
+				  ifNone: [ nil ].
+			  ex return: existing ]
 ]
 
 { #category : 'accessing' }
