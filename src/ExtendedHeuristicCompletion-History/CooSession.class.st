@@ -129,6 +129,9 @@ CooSession class >> withEntityHandler: aProgramEntityHandler [
 CooSession >> addClassItem: anItem [
 	
 	classDescriptions addFirst: anItem.
+	
+	"Instead of poking the handler during each addition we could pass it all the info when 
+	requesting a list of entries."
 	programEntityHandler handleNewClassItem: anItem addedTo: classDescriptions
 ]
 
@@ -155,6 +158,9 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 CooSession >> addMethodItem: anItem [
 
 	methodDescriptions addFirst: anItem.
+	"Instead of poking the handler during each addition we could pass it all the info when 
+	requesting a list of entries."
+	
 	programEntityHandler handleNewMethodItem: anItem addedTo: methodDescriptions
 ]
 
