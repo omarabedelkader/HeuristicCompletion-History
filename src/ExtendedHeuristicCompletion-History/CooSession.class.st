@@ -55,6 +55,12 @@ CooSession class >> deinstall [
 		ifTrue: [ CoASTHeuristicsResultSetBuilder variablesHeuristic removeFirst ].
 ]
 
+{ #category : 'instance creation' }
+CooSession class >> entityHandler: aProgramEntityHandler [
+
+	^ self current programEntityHandler: aProgramEntityHandler
+]
+
 { #category : 'actions' }
 CooSession class >> initialize [
 
@@ -108,8 +114,15 @@ CooSession class >> resetProgramEntities [
 
 { #category : 'instance creation' }
 CooSession class >> withCache: aCache [
+	
+	self deprecated: 'use entityHandler' transformWith: '`@rec withCache: `@a' ->  '`@rec withEntityHandler: `@a'. 
+	^ self withEntityHandler: aCache
+]
 
-	^ self current programEntityHandler: aCache
+{ #category : 'instance creation' }
+CooSession class >> withEntityHandler: aProgramEntityHandler [
+
+	^ self current programEntityHandler: aProgramEntityHandler
 ]
 
 { #category : 'class handling' }
@@ -167,8 +180,9 @@ CooSession >> addNewClassInVocabulary: ann [
 	self addClassItem: (CooAddedClassHistoryItem new
 			 nameOfClass: ann classAdded name;
 			live: true;
-			 "meta: anAnn classAdded check if we get the classAdded for metaclass"timestamp: DateAndTime now;
-			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
+			timestamp: DateAndTime now;
+			yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 ]
 
@@ -262,12 +276,11 @@ CooSession >> removeClassFromVocabulary: ann [
 		ifTrue: [ removedClassName := removedClassName allButFirst: 'AnObsolete' size ].
 		
 	self addClassItem: (CooRemovedClassHistoryItem new
-			 nameOfClass: removedClassName;
+			nameOfClass: removedClassName;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
 			live: true;
 			timestamp: DateAndTime now;
-
-			 yourself)
+			yourself)
 ]
 
 { #category : 'method handling' }

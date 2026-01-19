@@ -27,7 +27,9 @@ CooSessionVariableHeuristic >> buildFetcherFor: aVariableNode
 		fetcher := CoCollectionFetcher new.
       ^ fetcher
 				 collection: (self session classEntries collect: [ :each |
-					"we should indicate that the fetcher is  composed from an existing one and the session"
+					"we should indicate that the fetcher is  composed from an existing one and the session but first we should make fetcher handle temporarily
+					both a string and a class :("
+					
                               (each node: aVariableNode)
 											fetcher: fetcher ])
 ]
