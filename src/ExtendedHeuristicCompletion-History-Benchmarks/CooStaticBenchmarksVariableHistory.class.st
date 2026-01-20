@@ -7,7 +7,8 @@ Class {
 	#name : 'CooStaticBenchmarksVariableHistory',
 	#superclass : 'CooStaticBenchmarksVariables',
 	#instVars : [
-		'selectorCache'
+		'selectorCache',
+		'session'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
@@ -17,7 +18,7 @@ Class {
 CooStaticBenchmarksVariableHistory >> cachedClassNames [
 
 	| entries |
-	entries := CooSession current programEntityHandler classEntries
+	entries := self session current programEntityHandler classEntries
 		           ifNil: [ #() ].
 	^ (entries collect: [ :each | each contents ]) asSet
 ]
@@ -33,4 +34,15 @@ CooStaticBenchmarksVariableHistory >> run [
 				and: [ node name first isUppercase
 				and: [ cachedClassNames includes: node name ] ])
 				ifTrue: [ self benchCallsite: node atPosition: node start ] ] ]
+]
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksVariableHistory >> session [ 
+	^ session ifNil: [ CooSession current ]
+]
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksVariableHistory >> session: aSession [
+
+	session := aSession
 ]
