@@ -8,7 +8,8 @@ Class {
 	#name : 'CooStaticBenchmarksMessageHistory',
 	#superclass : 'CooStaticBenchmarksMessage',
 	#instVars : [
-		'selectorCache'
+		'selectorCache',
+		'session'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
@@ -18,7 +19,7 @@ Class {
 CooStaticBenchmarksMessageHistory >> cachedSelectors [
 
 	| entries |
-	entries := CooSession current programEntityHandler selectorEntries
+	entries := self session programEntityHandler selectorEntries
 		           ifNil: [ #() ].
 	^ (entries collect: [ :each | each contents ]) asSet
 ]
@@ -33,4 +34,16 @@ CooStaticBenchmarksMessageHistory >> run [
 			(node isMessage and: [ cachedSelectors includes: node selector ])
 				ifTrue: [
 					self benchCallsite: node atPosition: node keywordsIntervals first ] ] ]
+]
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksMessageHistory >> session [
+
+	^ session ifNil: [ CooSession current ]
+]
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksMessageHistory >> session: aSession [
+
+	session := aSession
 ]

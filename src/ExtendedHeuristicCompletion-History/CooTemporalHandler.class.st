@@ -20,6 +20,11 @@ Class {
 	#tag : 'Session'
 }
 
+{ #category : 'adding' }
+CooTemporalHandler >> addMethodItem: aCooAddedMethodHistoryItem [ 
+	self handleNewMethodItem: aCooAddedMethodHistoryItem addedTo: methodDescriptions
+]
+
 { #category : 'accessing' }
 CooTemporalHandler >> classEntries [
 	"Clearly we should manage what happen when we remove a class
@@ -94,6 +99,5 @@ CooTemporalHandler >> selectorEntries [
 
 { #category : 'accessing' }
 CooTemporalHandler >> size [ 
-	self halt.
 	^ methodDescriptions size
 ]

@@ -20,23 +20,18 @@ HistoryCachePopulator class >> comix [
 	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
 ]
 
-{ #category : 'instance creation' }
+{ #category : 'examples' }
 HistoryCachePopulator class >> populateFromRepo: aURLString [
-	"Populate caches from the given repository URL.
-	Usage: HistoryCachePopulator populateFromRepo: 'https://github.com/pharo-spec/Spec'"
-	
+
 	^ self new
 		scrapper: (HistoryScrapper fetchRepo: aURLString);
 		populateCaches;
 		yourself
 ]
 
-{ #category : 'instance creation' }
+{ #category : 'examples' }
 HistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
-	"Populate caches from a specific number of commits.
-	Usage: HistoryCachePopulator populateFromRepo: 'https://github.com/pharo-spec/Spec' commits: 50"
-	"Pay attention that the string should be the same as the one you cloned."
-	
+
 	^ self new
 		scrapper: (HistoryScrapper fetchRepo: aURLString commits: aNumber);
 		populateCaches;
@@ -55,7 +50,7 @@ HistoryCachePopulator class >> spec10 [
 HistoryCachePopulator class >> toplo [
 	<script>
 	
-	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 1) inspect 
+	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 500) inspect 
 ]
 
 { #category : 'compute population' }
