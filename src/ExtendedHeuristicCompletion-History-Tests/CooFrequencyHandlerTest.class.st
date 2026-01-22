@@ -1,5 +1,5 @@
 Class {
-	#name : 'CooFerequencyHandlerTest',
+	#name : 'CooFrequencyHandlerTest',
 	#superclass : 'TestCase',
 	#instVars : [
 		'handler'
@@ -10,62 +10,38 @@ Class {
 }
 
 { #category : 'running' }
-CooFerequencyHandlerTest >> setUp [
+CooFrequencyHandlerTest >> setUp [
 
 	super setUp.
-	handler := CooTemporalHandler new
+	handler := CooFrequencyHandler new
 ]
 
 { #category : 'running' }
-CooFerequencyHandlerTest >> testHandleNewClassItemRemovalClearsMatchingEntries [
+CooFrequencyHandlerTest >> testAddingThreeTimesTheSame [
 
-	| added newer removed |
-	added := CooAddedClassHistoryItem new
+	| added1 addedTheSame1 aDifferentOne |
+	added1 := CooAddedClassHistoryItem new
 		nameOfClass: 'TestClass';
 		yourself.
-	newer := CooAddedClassHistoryItem new
+	addedTheSame1 := CooAddedClassHistoryItem new
 		nameOfClass: 'TestClass';
 		yourself.
 
-	handler handleNewClassItem: added addedTo: #().
-	handler handleNewClassItem: newer addedTo: #().
+	handler handleNewClassItem: added1 addedTo: #().
+	handler handleNewClassItem: addedTheSame1 addedTo: #().
 
-	self assert: handler classEntries size equals: 2.
+	self assert: handler classEntries size equals: 1.
 
-	removed := CooRemovedClassHistoryItem new
-		nameOfClass: 'TestClass';
+	aDifferentOne := CooAddedClassHistoryItem new
+		nameOfClass: 'AnotherTestClass';
 		yourself.
-	handler handleNewClassItem: removed addedTo: #().
-
-	self assert: handler classEntries isEmpty
+	handler handleNewClassItem: aDifferentOne addedTo: #().
+	
+	self assert: handler classEntries size equals: 2
 ]
 
 { #category : 'running' }
-CooFerequencyHandlerTest >> testHandleNewClassItemRemovalKeepsOtherClasses [
-
-	| classOne classTwo removed |
-	classOne := CooAddedClassHistoryItem new
-		nameOfClass: 'ClassOne';
-		yourself.
-	classTwo := CooAddedClassHistoryItem new
-		nameOfClass: 'ClassTwo';
-		yourself.
-
-	handler handleNewClassItem: classOne addedTo: #().
-	handler handleNewClassItem: classTwo addedTo: #().
-
-	self assert: handler classEntries size equals: 2.
-
-	removed := CooRemovedClassHistoryItem new
-		nameOfClass: 'ClassOne';
-		yourself.
-	handler handleNewClassItem: removed addedTo: #().
-
-	self assert: handler classEntries size equals: 1
-]
-
-{ #category : 'running' }
-CooFerequencyHandlerTest >> testHandleNewMethodItemRemovalClearsMatchingEntries [
+CooFrequencyHandlerTest >> testHandleNewMethodItemRemovalClearsMatchingEntries [
 
 	| added modified removed |
 	added := CooAddedMethodHistoryItem new
@@ -92,7 +68,7 @@ CooFerequencyHandlerTest >> testHandleNewMethodItemRemovalClearsMatchingEntries 
 ]
 
 { #category : 'running' }
-CooFerequencyHandlerTest >> testSelectorEntriesExcludeRemovedMethods [
+CooFrequencyHandlerTest >> testSelectorEntriesExcludeRemovedMethods [
 
 	| added removed selectorEntries |
 	added := CooAddedMethodHistoryItem new

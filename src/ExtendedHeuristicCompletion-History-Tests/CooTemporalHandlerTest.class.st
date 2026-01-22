@@ -13,31 +13,55 @@ Class {
 CooTemporalHandlerTest >> setUp [
 
 	super setUp.
-	handler := CooFrequencyHandler new
+	handler := CooTemporalHandler new
 ]
 
 { #category : 'running' }
-CooTemporalHandlerTest >> testAddingThreeTimesTheSame [
+CooTemporalHandlerTest >> testHandleNewClassItemRemovalClearsMatchingEntries [
 
-	| added1 addedTheSame1 aDifferentOne |
-	added1 := CooAddedClassHistoryItem new
+	| added newer removed |
+	added := CooAddedClassHistoryItem new
 		nameOfClass: 'TestClass';
 		yourself.
-	addedTheSame1 := CooAddedClassHistoryItem new
+	newer := CooAddedClassHistoryItem new
 		nameOfClass: 'TestClass';
 		yourself.
 
-	handler handleNewClassItem: added1 addedTo: #().
-	handler handleNewClassItem: addedTheSame1 addedTo: #().
+	handler handleNewClassItem: added addedTo: #().
+	handler handleNewClassItem: newer addedTo: #().
 
-	self assert: handler classEntries size equals: 1.
+	self assert: handler classEntries size equals: 2.
 
-	aDifferentOne := CooAddedClassHistoryItem new
-		nameOfClass: 'AnotherTestClass';
+	removed := CooRemovedClassHistoryItem new
+		nameOfClass: 'TestClass';
 		yourself.
-	handler handleNewClassItem: aDifferentOne addedTo: #().
-	
-	self assert: handler classEntries size equals: 2
+	handler handleNewClassItem: removed addedTo: #().
+
+	self assert: handler classEntries isEmpty
+]
+
+{ #category : 'running' }
+CooTemporalHandlerTest >> testHandleNewClassItemRemovalKeepsOtherClasses [
+
+	| classOne classTwo removed |
+	classOne := CooAddedClassHistoryItem new
+		nameOfClass: 'ClassOne';
+		yourself.
+	classTwo := CooAddedClassHistoryItem new
+		nameOfClass: 'ClassTwo';
+		yourself.
+
+	handler handleNewClassItem: classOne addedTo: #().
+	handler handleNewClassItem: classTwo addedTo: #().
+
+	self assert: handler classEntries size equals: 2.
+
+	removed := CooRemovedClassHistoryItem new
+		nameOfClass: 'ClassOne';
+		yourself.
+	handler handleNewClassItem: removed addedTo: #().
+
+	self assert: handler classEntries size equals: 1
 ]
 
 { #category : 'running' }
