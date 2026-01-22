@@ -16,7 +16,35 @@ CooFrequencyHandlerTest >> setUp [
 	handler := CooFrequencyHandler new
 ]
 
-{ #category : 'running' }
+{ #category : 'tests - class' }
+CooFrequencyHandlerTest >> testAddingClassesSortsTheMostFrequent [
+
+	| added1 aDifferentOne |
+	added1 := CooAddedClassHistoryItem new
+		nameOfClass: 'TestClass';
+		yourself.
+	aDifferentOne := CooAddedClassHistoryItem new
+		nameOfClass: 'AnotherTestClass';
+		yourself.
+		
+	handler handleNewClassItem: aDifferentOne addedTo: #().
+
+	handler handleNewClassItem: added1 addedTo: #().
+	handler handleNewClassItem: added1 addedTo: #().
+	
+	self assert: handler classEntries first contents equals: 'TestClass'.
+
+
+	added1 := CooRemovedClassHistoryItem new
+		nameOfClass: 'TestClass';
+		yourself.
+	handler handleNewClassItem: added1 addedTo: #().
+	
+	self assert: handler classEntries size equals: 1.
+	self assert: handler classEntries first contents equals: 'AnotherTestClass' 
+]
+
+{ #category : 'tests - class' }
 CooFrequencyHandlerTest >> testAddingThreeTimesTheSame [
 
 	| added1 addedTheSame1 aDifferentOne |
@@ -40,10 +68,14 @@ CooFrequencyHandlerTest >> testAddingThreeTimesTheSame [
 	self assert: handler classEntries size equals: 2
 ]
 
-{ #category : 'running' }
-CooFrequencyHandlerTest >> testHandleNewMethodItemRemovalClearsMatchingEntries [
+{ #category : 'tests - selectors' }
+CooFrequencyHandlerTest >> testNewAddModifiedMethodUpdateTheSameEntry [
 
-	| added modified removed |
+	| later added modified |
+	later := CooAddedMethodHistoryItem new
+		selector: #rankedLaterSelector;
+		nameOfClass: 'TestClass';
+		yourself.
 	added := CooAddedMethodHistoryItem new
 		selector: #sampleSelector;
 		nameOfClass: 'TestClass';
@@ -53,37 +85,53 @@ CooFrequencyHandlerTest >> testHandleNewMethodItemRemovalClearsMatchingEntries [
 		nameOfClass: 'TestClass';
 		yourself.
 
+	handler handleNewMethodItem: later addedTo: #().
 	handler handleNewMethodItem: added addedTo: #().
 	handler handleNewMethodItem: modified addedTo: #().
 
 	self assert: handler selectorEntries size equals: 2.
-
-	removed := CooRemovedMethodHistoryItem new
-		selector: #sampleSelector;
-		nameOfClass: 'TestClass';
-		yourself.
-	handler handleNewMethodItem: removed addedTo: #().
-
-	self assert: handler selectorEntries isEmpty
+	"SampleSelector got 2 and rankedLaterSelector 1 so sampleSelector is first."
+	self assert: handler selectorEntries first selector equals: #sampleSelector.
+	self assert: handler selectorEntries second selector equals: #rankedLaterSelector
+	
 ]
 
-{ #category : 'running' }
+{ #category : 'tests - selectors' }
 CooFrequencyHandlerTest >> testSelectorEntriesExcludeRemovedMethods [
 
-	| added removed selectorEntries |
+	| added removed willBeRankedFirstSelector |
+	willBeRankedFirstSelector := CooAddedMethodHistoryItem new
+		selector: #willBeRankedFirstSelector;
+		nameOfClass: 'TestClass';
+		yourself.
 	added := CooAddedMethodHistoryItem new
 		selector: #sampleSelector;
 		nameOfClass: 'TestClass';
 		yourself.
+		
+		
+	handler handleNewMethodItem: willBeRankedFirstSelector addedTo: #().	
 	handler handleNewMethodItem: added addedTo: #().
-
+	handler handleNewMethodItem: added addedTo: #().
+	
+	self assert: handler selectorEntries size equals: 2.
+	"SampleSelector got 2 and willBeRankedFirstSelector 1 so sampleSelector is first."
+	self assert: handler selectorEntries first selector equals: #sampleSelector.
+	self assert: handler selectorEntries second selector equals: #willBeRankedFirstSelector.
+	
+	
 	removed := CooRemovedMethodHistoryItem new
 		selector: #sampleSelector;
 		nameOfClass: 'TestClass';
 		yourself.
+	
+	"The question is what do we do when we remove a method
+	We could zero the entry or decrease it from one. Now structurally if we remove the method, we should not get it proposed
+	because it can be really the only one."
+		
 	handler handleNewMethodItem: removed addedTo: #().
-
-	selectorEntries := handler selectorEntries.
-
-	self assert: selectorEntries isEmpty
+	"SampleSelector got 2 and willBeRankedFirstSelector 1 so sampleSelector is first."
+	
+	self assert: handler selectorEntries size equals: 1.
+	self assert: handler selectorEntries first selector equals: #willBeRankedFirstSelector.
 ]

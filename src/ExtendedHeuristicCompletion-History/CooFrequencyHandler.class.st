@@ -1,3 +1,11 @@
+"
+I count each time a method or a class is added, modified, removed for now. 
+
+When a method is added or modified I increase its counter. 
+When it is removed I remove its entry (because I do not want to see it again at all - because we could if everything is zero). 
+
+
+"
 Class {
 	#name : 'CooFrequencyHandler',
 	#superclass : 'CooProgramEntityHandler',
@@ -24,10 +32,22 @@ CooFrequencyHandler >> handleNewClassItem: anItem addedTo: aCollection [
 	| key |
 	key := anItem nameOfClass.
 	
-	classFrequencyDictionary 
-		at: key 
-		ifPresent: [ :v  | classFrequencyDictionary at: key put: v + 1 ]
-		ifAbsentPut: [ 1 ]
+	"to be changed"
+	(#(#added #modified) includes: anItem event) 
+		ifTrue: [ 
+			classFrequencyDictionary 
+				at: key
+				ifPresent: [:v  | classFrequencyDictionary at: key put: v + 1 ]
+				ifAbsentPut: [ 1 ] ].
+	
+ 	(anItem event = #removed)
+		ifTrue: [ 
+			"The problem could be removing two methods with the same name so the ifAbsent is important"
+			classFrequencyDictionary removeKey: key ifAbsent: [  ]
+		
+		  ]
+	 
+
 ]
 
 { #category : 'matching' }
@@ -36,11 +56,21 @@ CooFrequencyHandler >> handleNewMethodItem: anItem addedTo: aCollection [
 	
 	| key |
 	key :=  anItem selector.
-	selectorFrequenceDictionary 
-		at: key
-		ifPresent: [:v  | selectorFrequenceDictionary at: key put: v + 1 ]
-		ifAbsentPut: [ 1 ]
- 
+	
+	"to be changed"
+	(#(#added #modified) includes: anItem event) 
+		ifTrue: [ 
+			selectorFrequenceDictionary 
+				at: key
+				ifPresent: [:v  | selectorFrequenceDictionary at: key put: v + 1 ]
+				ifAbsentPut: [ 1 ] ].
+	
+ 	(anItem event = #removed)
+		ifTrue: [ 
+			"The problem could be removing two methods with the same name so the ifAbsent is important"
+			selectorFrequenceDictionary removeKey: key ifAbsent: [  ]
+		
+		  ]
 ]
 
 { #category : 'matching' }
