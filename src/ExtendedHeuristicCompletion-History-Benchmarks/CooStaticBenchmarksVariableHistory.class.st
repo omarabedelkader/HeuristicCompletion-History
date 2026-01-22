@@ -18,7 +18,7 @@ Class {
 CooStaticBenchmarksVariableHistory >> cachedClassNames [
 
 	| entries |
-	entries := self session current programEntityHandler classEntries
+	entries := self session programEntityHandler classEntries
 		           ifNil: [ #() ].
 	^ (entries collect: [ :each | each contents ]) asSet
 ]
