@@ -75,3 +75,15 @@ CooMostRecentFrequencyHandler >> sortedUserEntries [
 	lst := self sortedRecentChoices.
 	^ lst first: (lst size min: 5)
 ]
+
+{ #category : 'tracking' }
+CooMostRecentFrequencyHandler >> sortedUserLowercasedEntries [
+	"right now in frequency do not distinguish upper and lower"
+	^ self sortedUserEntries
+]
+
+{ #category : 'tracking' }
+CooMostRecentFrequencyHandler >> sortedUserUppercasedEntries [
+	"right now in frequency do not distinguish upper and lower"
+	^ self sortedUserEntries
+]

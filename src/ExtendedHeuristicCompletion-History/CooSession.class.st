@@ -207,7 +207,7 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 { #category : 'matching' }
 CooSession >> classEntries [
 
-	^ programEntityHandler classEntries
+	^ userSelectionHandler sortedUserUppercasedEntries, programEntityHandler classEntries
 ]
 
 { #category : 'helpers' }
@@ -235,6 +235,12 @@ CooSession >> initialize [
 	super initialize.
 	self resetProgramEntities.
 	self resetInteractionItems.
+]
+
+{ #category : 'configuration' }
+CooSession >> mostDualRecentFrequentSelectionHandling [
+
+	userSelectionHandler := CooDualMostRecentFrequencyHandler new.
 ]
 
 { #category : 'configuration' }
@@ -320,7 +326,10 @@ CooSession >> resetProgramEntities [
 CooSession >> selectorEntries [
 	"Return a list of message selector entries computed from the user interaction and the modification of program."
 	
-	^ userSelectionHandler sortedUserEntries, programEntityHandler selectorEntries 
+	"here I would love to know the token because I could then 
+	decide if the user is looking for a global or not."
+	
+	^ userSelectionHandler sortedUserLowercasedEntries, programEntityHandler selectorEntries 
 ]
 
 { #category : 'accessing' }
