@@ -20,20 +20,19 @@ CooHistoryBenchmarksRunner class >> runBenchmarks [
 { #category : 'running' }
 CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 
-	| messageBenchmark variableBenchmark |
+	| messageBenchmark variableBenchmark scope |
+	scope := PackageOrganizer default packages.
+
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
 		session: aSession;
+		scope: scope;
 		yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
 		session: aSession;
+		scope: scope;
 		yourself.
 
 	Transcript show: 'Running history completion benchmarks...'; cr.
-	messageBenchmark run.
-	variableBenchmark run.
-	Transcript show: 'History benchmarks complete.'; cr.
-
-	^ { messageBenchmark . variableBenchmark }
 ]
 
 { #category : 'running' }
@@ -46,4 +45,33 @@ CooHistoryBenchmarksRunner class >> runWithSession: aSession [
 		^ self ].
 
 	^ self runBenchmarksWithSession: aSession
+]
+
+{ #category : 'running' }
+CooHistoryBenchmarksRunner class >> runWithSession: aSession scope: aScope [
+	"Run benchmarks with a specific session and scope.
+	Example: CooHistoryBenchmarksRunner runWithSession: CooSession current scope: (RPackage named: 'Kernel')"
+
+	| messageBenchmark variableBenchmark |
+	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
+		Transcript
+			show: 'History cache is empty. Populate caches before running benchmarks.';
+			cr.
+		^ self ].
+
+	messageBenchmark := CooStaticBenchmarksMessageHistory new
+		session: aSession;
+		scope: aScope;
+		yourself.
+	variableBenchmark := CooStaticBenchmarksVariableHistory new
+		session: aSession;
+		scope: aScope;
+		yourself.
+
+	Transcript show: 'Running history completion benchmarks on ', aScope name, '...'; cr.
+	messageBenchmark run.
+	variableBenchmark run.
+	Transcript show: 'History benchmarks complete.'; cr.
+
+	^ { messageBenchmark . variableBenchmark }
 ]
