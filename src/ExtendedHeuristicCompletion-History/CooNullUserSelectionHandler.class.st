@@ -1,3 +1,6 @@
+"
+I'm drop support for user item selection.
+"
 Class {
 	#name : 'CooNullUserSelectionHandler',
 	#superclass : 'CooUserSelectionHandler',
