@@ -21,6 +21,12 @@ CooHistoryBenchmarksRunner class >> runBenchmarks [
 CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 
 	| messageBenchmark variableBenchmark scope |
+	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
+		Transcript
+			show: 'History cache is empty. Populate caches before running benchmarks.';
+			cr.
+		^ self ].
+
 	scope := PackageOrganizer default packages.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
@@ -33,6 +39,12 @@ CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 		yourself.
 
 	Transcript show: 'Running history completion benchmarks...'; cr.
+	messageBenchmark run.
+	variableBenchmark run.
+	Transcript show: 'History benchmarks complete.'; cr.
+
+	^ { messageBenchmark . variableBenchmark }
+
 ]
 
 { #category : 'as yet unclassified' }
