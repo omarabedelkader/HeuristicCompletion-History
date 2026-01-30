@@ -8,6 +8,10 @@ I pay attention to not hold directly class or compiled method objects to avoid c
 Class {
 	#name : 'CooTemporalHandler',
 	#superclass : 'CooProgramEntityHandler',
+	#instVars : [
+		'classDescriptions',
+		'methodDescriptions'
+	],
 	#classInstVars : [
 		'current'
 	],
