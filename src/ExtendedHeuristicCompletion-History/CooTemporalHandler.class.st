@@ -26,6 +26,18 @@ CooTemporalHandler >> addMethodItem: aCooAddedMethodHistoryItem [
 ]
 
 { #category : 'accessing' }
+CooTemporalHandler >> classDescriptions [
+
+	^ classDescriptions
+]
+
+{ #category : 'accessing' }
+CooTemporalHandler >> classDescriptions: aCollection [
+
+	classDescriptions := aCollection
+]
+
+{ #category : 'accessing' }
 CooTemporalHandler >> classEntries [
 	"Clearly we should manage what happen when we remove a class
 	
@@ -65,6 +77,18 @@ CooTemporalHandler >> initialize [
 	super initialize.
 	classDescriptions := OrderedCollection new.
 	methodDescriptions := OrderedCollection new.
+]
+
+{ #category : 'accessing' }
+CooTemporalHandler >> methodDescriptions [
+
+	^ methodDescriptions
+]
+
+{ #category : 'accessing' }
+CooTemporalHandler >> methodDescriptions: aCollection [
+
+	methodDescriptions := aCollection
 ]
 
 { #category : 'accessing' }
