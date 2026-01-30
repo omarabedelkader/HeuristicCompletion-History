@@ -27,13 +27,16 @@ CooStaticBenchmarksMessageHistory >> cachedSelectors [
 { #category : 'running' }
 CooStaticBenchmarksMessageHistory >> run [
 
-	| cachedSelectors |
+	| cachedSelectors pos |
 	cachedSelectors := self cachedSelectors.
 	scope methodsDo: [ :method |
 		method parseTree nodesDo: [ :node |
 			(node isMessage and: [ cachedSelectors includes: node selector ])
 				ifTrue: [
-					self benchCallsite: node atPosition: node keywordsIntervals first ] ] ]
+					pos := node selectorInterval
+						ifNil: [ node start ]
+						ifNotNil: [ :interval | interval first ].
+					self benchCallsite: node atPosition: pos ] ] ]
 ]
 
 { #category : 'benchmarks' }

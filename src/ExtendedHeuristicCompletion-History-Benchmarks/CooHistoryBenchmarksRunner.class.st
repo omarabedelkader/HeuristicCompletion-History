@@ -21,6 +21,12 @@ CooHistoryBenchmarksRunner class >> runBenchmarks [
 CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 
 	| messageBenchmark variableBenchmark scope |
+	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
+		Transcript
+			show: 'History cache is empty. Populate caches before running benchmarks.';
+			cr.
+		^ self ].
+
 	scope := PackageOrganizer default packages.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
@@ -33,6 +39,36 @@ CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 		yourself.
 
 	Transcript show: 'Running history completion benchmarks...'; cr.
+	messageBenchmark run.
+	variableBenchmark run.
+	Transcript show: 'History benchmarks complete.'; cr.
+
+	^ { messageBenchmark . variableBenchmark }
+
+]
+
+{ #category : 'as yet unclassified' }
+CooHistoryBenchmarksRunner class >> runOnModifiedMethods [
+	"Run benchmarks only on methods that were modified in the populated commits.
+	Example: CooHistoryBenchmarksRunner runOnModifiedMethods"
+
+	^ self runOnModifiedMethodsWithSession: CooSession current
+]
+
+{ #category : 'as yet unclassified' }
+CooHistoryBenchmarksRunner class >> runOnModifiedMethodsWithSession: aSession [
+	"Run benchmarks only on methods that were modified in the populated commits.
+	Example: CooHistoryBenchmarksRunner runOnModifiedMethodsWithSession: CooSession current"
+
+	| scope |
+	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
+		Transcript
+			show: 'History cache is empty. Populate caches before running benchmarks.';
+			cr.
+		^ self ].
+
+	scope := CoBenchmarkModifiedMethods fromSession: aSession.
+	^ self runWithSession: aSession scope: scope
 ]
 
 { #category : 'running' }
