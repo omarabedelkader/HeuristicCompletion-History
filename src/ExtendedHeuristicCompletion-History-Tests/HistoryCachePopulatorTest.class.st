@@ -82,7 +82,7 @@ HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenReturnsNewSelectors [
 
 	| oldAst newAst deltaMessages |
 	oldAst := RBParser parseMethod: 'sample ^ self alpha'.
-	newAst := RBParser parseMethod: 'sample ^ self alpha. self beta'.
+	newAst := RBParser parseMethod: 'sample  self beta. ^ self alpha'.
 	deltaMessages := populator computeDeltaMessageBetween: newAst andOld: oldAst.
 
 	self assert: (deltaMessages includes: #beta).
