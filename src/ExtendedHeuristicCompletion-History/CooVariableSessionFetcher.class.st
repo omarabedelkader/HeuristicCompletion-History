@@ -1,6 +1,6 @@
 Class {
 	#name : 'CooVariableSessionFetcher',
-	#superclass : 'CoSessionFetcher',
+	#superclass : 'CooSessionFetcher',
 	#category : 'ExtendedHeuristicCompletion-History-Session',
 	#package : 'ExtendedHeuristicCompletion-History',
 	#tag : 'Session'
