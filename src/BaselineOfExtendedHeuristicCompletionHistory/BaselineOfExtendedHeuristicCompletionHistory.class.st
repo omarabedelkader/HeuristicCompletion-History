@@ -11,7 +11,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	<baseline>
 	spec for: #common do: [ spec
 				baseline: 'ExtendedHeuristicCompletionBenchmarks'
-				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks/repository' ].
+				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks/src' ].
 
 			spec package: 'ExtendedHeuristicCompletion-History' ].
 	spec 
