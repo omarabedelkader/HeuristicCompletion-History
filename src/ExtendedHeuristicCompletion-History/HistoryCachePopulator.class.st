@@ -21,6 +21,13 @@ HistoryCachePopulator class >> comix [
 ]
 
 { #category : 'examples' }
+HistoryCachePopulator class >> mockRepo [
+
+	<script>
+	(self populateFromRepo: 'https://github.com/omarabedelkader/test-repo-for-history' commits: 4) inspect
+]
+
+{ #category : 'examples' }
 HistoryCachePopulator class >> populateFromRepo: aURLString [
 
 	^ self new
@@ -74,6 +81,8 @@ HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 	
 	| diff methodInfos |
 	methodInfos := OrderedCollection new.
+	"for the first commit iceberg was barking."
+	aCommit ancestors ifEmpty: [ ^ methodInfos  ].
 	diff := aCommit diffToParent.
 	diff ifNil: [ ^ methodInfos ].
 	
@@ -99,6 +108,9 @@ HistoryCachePopulator >> populateCaches [
 	
 	| commits totalMethods |
 	commits := self scrapper fetchLatestCommits.
+	
+	"we order older first"
+	commits := commits reversed.
 	totalMethods := 0.
 	
 	Transcript show: 'Populating caches from ', commits size asString, ' commits...'; cr.

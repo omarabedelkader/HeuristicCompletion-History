@@ -156,10 +156,16 @@ HistoryScrapper >> fetchLatestCommits [
 	
 	Transcript show: 'Fetching latest ', commitCount asString, ' changes...'; cr.
 	repository fetch.
+	
 	^ repository head withCommitWalkDo: [ :walk |
-		walk
+		| com |
+		com := walk
+			fromHead;
 			maxNumber: commitCount;
-			commits ]
+			commits.
+		com inspect.
+		com 
+			]
 ]
 
 { #category : 'initialization' }
