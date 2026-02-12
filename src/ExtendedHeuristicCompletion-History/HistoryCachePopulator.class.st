@@ -108,7 +108,7 @@ HistoryCachePopulator >> populateCaches [
 		methodInfos := self extractMethodsFromCommit: commit.
 		methodInfos do: [ :info |
 			"for now we do not manage variable"
-			session programEntityHandler addMethodItem: info ].
+			session addMethodItem: info ].
 		totalMethods := totalMethods + methodInfos size.
 		
 		(index \\ 10 = 0) ifTrue: [
@@ -116,7 +116,7 @@ HistoryCachePopulator >> populateCaches [
 	
 	Transcript 
 		show: 'Done! Populated caches with ', totalMethods asString, ' methods from ', commits size asString, ' commits.'; cr;
-		show: '  Temporal cache size: ', session size asString; cr
+		show: '  Cache size: ', session size asString; cr
 ]
 
 { #category : 'compute population' }

@@ -111,18 +111,6 @@ HistoryScrapper class >> fetchRepo: aURLString commits: aNumber [
 		yourself
 ]
 
-{ #category : 'example' }
-HistoryScrapper class >> spec10 [
-	<script>
-	^ self fetchRepo: 'https://github.com/pharo-spec/Spec' commits: 10
-]
-
-{ #category : 'example' }
-HistoryScrapper class >> toplo [
-	<script>
-	^ self fetchRepo: 'git@github.com:omarabedelkader/ChatPharo.git' commits: 10
-]
-
 { #category : 'actions' }
 HistoryScrapper >> cloneRepositoryToTemporaryLocationFrom: url [
 	"Clone the repository to a temporary location."

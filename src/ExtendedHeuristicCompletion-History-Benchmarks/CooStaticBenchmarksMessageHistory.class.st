@@ -19,8 +19,7 @@ Class {
 CooStaticBenchmarksMessageHistory >> cachedSelectors [
 
 	| entries |
-	entries := self session programEntityHandler selectorEntries
-		           ifNil: [ #() ].
+	entries := self session programEntityHandler selectorEntries.
 	^ (entries collect: [ :each | each contents ]) asSet
 ]
 
