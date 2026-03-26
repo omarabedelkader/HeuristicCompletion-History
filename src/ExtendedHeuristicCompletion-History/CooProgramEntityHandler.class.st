@@ -7,6 +7,12 @@ Class {
 }
 
 { #category : 'matching' }
+CooProgramEntityHandler >> classEntries [
+
+	self subclassResponsibility
+]
+
+{ #category : 'matching' }
 CooProgramEntityHandler >> handleNewClassItem: anItem addedTo: aCollection [
 
 	self subclassResponsibility

@@ -16,13 +16,6 @@ NewCooSessionTest >> programEntityHandler [
 ]
 
 { #category : 'running' }
-NewCooSessionTest >> setUp [
-
-	super setUp.
-	session := CooSession new programEntityHandler: CooTemporalHandler new
-]
-
-{ #category : 'running' }
 NewCooSessionTest >> testAddClassAddsEntry [
 
 	| announcement |

@@ -44,6 +44,13 @@ NewCooSessionTemporalTest >> removedMethodAnnouncement [
 		  method: NewCooSessionTemporalTest >> #ourModifiedPrintString
 ]
 
+{ #category : 'running' }
+NewCooSessionTemporalTest >> setUp [
+
+	super setUp.
+	session := CooSession new programEntityHandler: CooTemporalHandler new
+]
+
 { #category : 'tests - announcements' }
 NewCooSessionTemporalTest >> testAnnouncementAddModifiedMethodComputesMessageDiff [
 
@@ -113,7 +120,7 @@ NewCooSessionTemporalTest >> testAnnouncementAddedAndRemovedTheSameMethod [
 		equals: #( #testComputeMessages )
 ]
 
-{ #category : 'tests - changing handler' }
+{ #category : 'tests' }
 NewCooSessionTemporalTest >> testChangeHandler [
 
 	| anns |
