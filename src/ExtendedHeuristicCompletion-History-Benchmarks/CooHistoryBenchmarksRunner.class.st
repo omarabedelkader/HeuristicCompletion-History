@@ -1,3 +1,15 @@
+"
+```
+CooHistoryBenchmarksRunner
+  runWithSession: CooSession current
+  scope: (Package named: 'Spec2').
+```
+
+
+```
+CooHistoryBenchmarksRunner run.
+```
+"
 Class {
 	#name : 'CooHistoryBenchmarksRunner',
 	#superclass : 'Object',
