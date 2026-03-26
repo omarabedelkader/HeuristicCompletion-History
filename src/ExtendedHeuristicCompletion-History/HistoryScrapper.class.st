@@ -76,8 +76,8 @@ Class {
 	#instVars : [
 		'repository',
 		'location',
-		'repositoryURL',
-		'commitCount'
+		'commitCount',
+		'repositoryURLString'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
 	#package : 'ExtendedHeuristicCompletion-History',
@@ -154,18 +154,14 @@ HistoryScrapper >> commitCount: aNumber [
 HistoryScrapper >> fetchLatestCommits [
 	"Fetch remote changes and answer the requested number of commits."
 	
-	Transcript show: 'Fetching latest ', commitCount asString, ' changes...'; cr.
-	repository fetch.
-	
+
 	^ repository head withCommitWalkDo: [ :walk |
-		| com |
-		com := walk
-			fromHead;
-			maxNumber: commitCount;
-			commits.
-		com inspect.
-		com 
-			]
+			  | com |
+			  com := walk
+				         fromHead;
+				         maxNumber: commitCount;
+				         commits.
+			  com ]
 ]
 
 { #category : 'initialization' }
@@ -179,17 +175,11 @@ HistoryScrapper >> initialize [
 HistoryScrapper >> initializeRepository [
 	"Find or clone the repository locally."
 
-	| url |
-	url := self repositoryURLString.
-	url ifNil: [ self error: 'Repository URL must be set before initializing' ].
-	
-	
 	repository := IceRepository registry
-		detect: [ :repo | 
-			repo remotes anySatisfy: [ :remote | 
-				remote url = url or: [ remote url = (url , '.git') ] ] ]
-		ifNone: [ self cloneRepositoryToTemporaryLocationFrom: url
-			].
+		              detect: [ :repo | repo remotes anySatisfy: [ :remote | 
+							remote url = repositoryURLString or: [ 
+								remote url = (repositoryURLString , '.git') ] ] ]
+		              ifNone: [ self cloneRepositoryToTemporaryLocationFrom: repositoryURLString ].
 	repository ifNil: [ ^ self ].
 	self registerRepositoryIfNeeded
 ]
@@ -197,7 +187,7 @@ HistoryScrapper >> initializeRepository [
 { #category : 'actions' }
 HistoryScrapper >> registerRepositoryIfNeeded [
 
-	(IceRepository registry includes: repository)
+	(IceRepository registry includes: repository) 
 		ifFalse: [ repository register ]
 ]
 
@@ -210,11 +200,11 @@ HistoryScrapper >> repository: aRepo [
 HistoryScrapper >> repositoryURLString [
 	"Answer the repository URL"
 	
-	^ repositoryURL
+	^ repositoryURLString
 ]
 
 { #category : 'accessing' }
 HistoryScrapper >> repositoryURLString: aString [
 	
-	repositoryURL := aString
+	repositoryURLString := aString
 ]

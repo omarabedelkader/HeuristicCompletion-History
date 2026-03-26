@@ -60,14 +60,7 @@ HistoryCachePopulator class >> toplo [
 	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 500) inspect 
 ]
 
-{ #category : 'examples' }
-HistoryCachePopulator >> comix [
-
-	<script>
-	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
-]
-
-{ #category : 'compute population' }
+{ #category : 'utils' }
 HistoryCachePopulator >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [ 
 	"This is a copy of the logic defined in the CooTemporalCache or subclasses.
 	For now there is not relationship between the history populator and the cache. 
@@ -130,27 +123,22 @@ HistoryCachePopulator >> initialize [
 { #category : 'main API' }
 HistoryCachePopulator >> populateCaches [
 	"Main method to populate both temporal and frequency caches from Git history."
-	
+
 	| commits totalMethods |
-	commits := self scrapper fetchLatestCommits.
-	
-	"we order older first!"
+	commits := self scrapper fetchLatestCommits. "we order older first!"
 	commits := commits reversed.
 	totalMethods := 0.
-	
-	Transcript show: 'Populating caches from ', commits size asString, ' commits...'; cr.
-	
+
+	Transcript
+		show: 'Populating caches from ' , commits size asString , ' commits...';
+		cr.
+		
 	commits withIndexDo: [ :commit :index |
-		
-		| infos |
-		
-		infos := self extractMethodsFromCommit: commit.
-		infos do: [ :info |
-			session addMethodItem: info ].
-		infos := self extractClassesFromCommit: commit.
-		infos do: [ :info |
-			session addClassItem: info ].
-		]
+			| infos |
+			infos := self extractMethodsFromCommit: commit.
+			infos do: [ :info | session addMethodItem: info ].
+			infos := self extractClassesFromCommit: commit.
+			infos do: [ :info | session addClassItem: info ] ]
 ]
 
 { #category : 'compute population' }
@@ -276,7 +264,7 @@ HistoryCachePopulator >> scrapper: aHistoryScrapper [
 	scrapper := aHistoryScrapper
 ]
 
-{ #category : 'method-populating' }
+{ #category : 'utils' }
 HistoryCachePopulator >> selectorFromNode: aDiffNode [
 	"Extract method information from a diff node if it's a method change."
 	
@@ -294,7 +282,7 @@ HistoryCachePopulator >> session: aHistoryMockSession [
 	session := aHistoryMockSession
 ]
 
-{ #category : 'compute population' }
+{ #category : 'utils' }
 HistoryCachePopulator >> tryParseAST: sourceCode [
 	"Try to parse source code into an AST, return nil on failure."
 	
