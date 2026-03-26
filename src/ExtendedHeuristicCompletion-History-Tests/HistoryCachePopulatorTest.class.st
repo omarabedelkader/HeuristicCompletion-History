@@ -115,7 +115,7 @@ HistoryCachePopulatorTest >> testProcessAdditionAddsDictionaryWithMetadata [
 	addition := self firstAdditionOperation.
 	addition ifNil: [ ^ self skip ].
 	timestamp := DateAndTime now.
-	populator processAddition: addition into: collection timestamp: timestamp.
+	populator processMethodAddition: addition into: collection timestamp: timestamp.
 	self assert: collection size equals: 1.
 	info := collection first.
 	self assert: info selector equals: addition definition selector.
@@ -131,7 +131,7 @@ HistoryCachePopulatorTest >> testProcessModificationAddsDictionaryWithMetadata [
 	modification := self firstModificationOperation.
 	modification ifNil: [ ^ self skip ].
 	timestamp := DateAndTime now.
-	populator processModification: modification into: collection timestamp: timestamp.
+	populator processMethodModification: modification into: collection timestamp: timestamp.
 	self assert: collection size equals: 1.
 	info := collection first.
 	self assert: info selector equals: modification definition selector.

@@ -14,3 +14,15 @@ CooNullUserSelectionHandler >> sortedUserEntries [
 
 	^ #()
 ]
+
+{ #category : 'tracking' }
+CooNullUserSelectionHandler >> sortedUserLowercasedEntries [
+	
+	^ #()
+]
+
+{ #category : 'tracking' }
+CooNullUserSelectionHandler >> sortedUserUppercasedEntries [
+
+		^ #()
+]
