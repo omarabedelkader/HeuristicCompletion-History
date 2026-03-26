@@ -19,8 +19,7 @@ CooHistoryBenchmarksRunner class >> runBenchmarks [
 
 { #category : 'running' }
 CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
-
-	| messageBenchmark variableBenchmark scope |
+	| scope |
 	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
 		Transcript
 			show: 'History cache is empty. Populate caches before running benchmarks.';
@@ -29,21 +28,7 @@ CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
 
 	scope := PackageOrganizer default packages.
 
-	messageBenchmark := CooStaticBenchmarksMessageHistory new
-		session: aSession;
-		scope: scope;
-		yourself.
-	variableBenchmark := CooStaticBenchmarksVariableHistory new
-		session: aSession;
-		scope: scope;
-		yourself.
-
-	Transcript show: 'Running history completion benchmarks...'; cr.
-	messageBenchmark run.
-	variableBenchmark run.
-	Transcript show: 'History benchmarks complete.'; cr.
-
-	^ { messageBenchmark . variableBenchmark }
+^ self runWithSession: aSession scope: scope
 
 ]
 
@@ -88,26 +73,39 @@ CooHistoryBenchmarksRunner class >> runWithSession: aSession scope: aScope [
 	"Run benchmarks with a specific session and scope.
 	Example: CooHistoryBenchmarksRunner runWithSession: CooSession current scope: (RPackage named: 'Kernel')"
 
-	| messageBenchmark variableBenchmark |
+	| messageBenchmark variableBenchmark scopeName |
 	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
-		Transcript
-			show: 'History cache is empty. Populate caches before running benchmarks.';
-			cr.
-		^ self ].
+			Transcript
+				show: 'History cache is empty. Populate caches before running benchmarks.';
+				cr.
+			^ self ].
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
-		session: aSession;
-		scope: aScope;
-		yourself.
+		                    session: aSession;
+		                    scope: aScope;
+		                    yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
-		session: aSession;
-		scope: aScope;
-		yourself.
+		                     session: aSession;
+		                     scope: aScope;
+		                     yourself.
 
-	Transcript show: 'Running history completion benchmarks on ', aScope name, '...'; cr.
+	scopeName := self scopeNameFor: aScope.
 	messageBenchmark run.
 	variableBenchmark run.
-	Transcript show: 'History benchmarks complete.'; cr.
 
-	^ { messageBenchmark . variableBenchmark }
+	^ {
+		  messageBenchmark.
+		  variableBenchmark }
+]
+
+{ #category : 'running' }
+CooHistoryBenchmarksRunner class >> scopeNameFor: aScope [
+
+	(aScope isCollection)
+		ifTrue: [ ^ aScope size asString, ' items' ].
+	(aScope class canUnderstand: #name)
+		ifTrue: [ ^ aScope name ].
+	(aScope respondsTo: #size)
+		ifTrue: [ ^ aScope size asString, ' scoped elements' ].
+	^ aScope class name
 ]

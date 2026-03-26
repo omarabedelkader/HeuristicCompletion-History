@@ -29,7 +29,7 @@ CoBenchmarkModifiedMethods class >> fromSession: aSession [
 CoBenchmarkModifiedMethods >> methodDescriptions [
 	"Return the method descriptions from the session's program entity handler"
 
-	^ session programEntityHandler methodDescriptions ifNil: [ #() ]
+	^ self session programEntityHandler methodDescriptions ifNil: [ #() ]
 ]
 
 { #category : 'accessing' }

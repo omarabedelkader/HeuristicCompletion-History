@@ -24,16 +24,28 @@ CooStaticBenchmarksVariableHistory >> cachedClassNames [
 ]
 
 { #category : 'running' }
+CooStaticBenchmarksVariableHistory >> methodsInScopeDo: aBlock [
+
+	(scope respondsTo: #methodsDo:)
+		ifTrue: [ ^ scope methodsDo: aBlock ].
+	(scope respondsTo: #do:)
+		ifTrue: [ ^ scope do: [ :each |
+			(each respondsTo: #methodsDo:) ifTrue: [ each methodsDo: aBlock ] ] ].
+	self error: 'Scope does not support method enumeration'
+]
+
+{ #category : 'running' }
 CooStaticBenchmarksVariableHistory >> run [
 
 	| cachedClassNames |
 	cachedClassNames := self cachedClassNames.
-	scope methodsDo: [ :method |
-		method parseTree nodesDo: [ :node |
-			(node isVariable
-				and: [ node name first isUppercase
-				and: [ cachedClassNames includes: node name ] ])
-				ifTrue: [ self benchCallsite: node atPosition: node start ] ] ]
+self methodsInScopeDo: [ :method |
+		method parseTree ifNotNil: [ :parseTree |
+			parseTree nodesDo: [ :node |
+				(node isVariable
+					and: [ node name first isUppercase
+					and: [ cachedClassNames includes: node name ] ])
+					ifTrue: [ self benchCallsite: node atPosition: node start ] ] ] ]
 ]
 
 { #category : 'benchmarks' }
