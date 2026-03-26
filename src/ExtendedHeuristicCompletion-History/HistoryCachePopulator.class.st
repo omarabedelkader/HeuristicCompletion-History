@@ -17,7 +17,7 @@ Class {
 HistoryCachePopulator class >> comix [
 
 	<script>
-	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 2) inspect
+	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
 ]
 
 { #category : 'examples' }
@@ -60,17 +60,11 @@ HistoryCachePopulator class >> toplo [
 	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 500) inspect 
 ]
 
-{ #category : 'compute population' }
-HistoryCachePopulator >> classFromNode: aDiffNode [
-	"Extract method information from a diff node if it's a method change."
-	
-	| definition |
-	definition := aDiffNode definition.
-	(definition isKindOf: IceClassDefinition) ifFalse: [ ^ nil ].
-	
-	"We will have probably to handle class definition in a second time"
-	
-	^ definition name
+{ #category : 'examples' }
+HistoryCachePopulator >> comix [
+
+	<script>
+	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
 ]
 
 { #category : 'compute population' }
@@ -91,54 +85,39 @@ HistoryCachePopulator >> computeDeltaMessageBetween: aNewMethodAst andOld: anOld
 { #category : 'compute population' }
 HistoryCachePopulator >> extractClassesFromCommit: aCommit [
 	"Extract all method selectors and their ASTs from a commit's diff."
-	
+
 	| diff classInfos |
-	classInfos := OrderedCollection new.
-	"for the first commit iceberg was barking."
-	aCommit ancestors ifEmpty: [ ^ classInfos  ].
+	classInfos := OrderedCollection new. "for the first commit iceberg was barking."
+	aCommit ancestors ifEmpty: [ ^ classInfos ].
 	diff := aCommit diffToParent.
 	diff ifNil: [ ^ classInfos ].
-	
+
 	diff tree allChildrenDo: [ :node |
-		node definition isClassDefinition 
-			ifTrue: [ 
-		node value isRemoval 
-			ifTrue: [ self processClassRemoval: node value into: classInfos timestamp: aCommit datetime ].
-		node value isAddition 
-			ifTrue: [ self processClassAddition: node value into: classInfos timestamp: aCommit datetime ].
-		node value isModification 
-			ifTrue: [ self processClassModification: node value into: classInfos timestamp: aCommit datetime ].
-		 ]].
-	
-	^ classInfos
+			node definition isClassDefinition ifTrue: [
+					node value isRemoval ifTrue: [ self processClassRemoval: node value into: classInfos timestamp: aCommit datetime ].
+					node value isAddition ifTrue: [ self processClassAddition: node value into: classInfos timestamp: aCommit datetime ].
+					node value isModification ifTrue: [ self processClassModification: node value into: classInfos timestamp: aCommit datetime ] ] ].
+
+	^ classInfos 
 ]
 
 { #category : 'compute population' }
 HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 	"Extract all method selectors and their ASTs from a commit's diff."
-	
+
 	| diff methodInfos |
-	methodInfos := OrderedCollection new.
-	"for the first commit iceberg was barking."
-	aCommit ancestors ifEmpty: [ ^ methodInfos  ].
+	methodInfos := OrderedCollection new. "for the first commit iceberg was barking."
+	aCommit ancestors ifEmpty: [ ^ methodInfos ].
 	diff := aCommit diffToParent.
 	diff ifNil: [ ^ methodInfos ].
-	
+
 	diff tree allChildrenDo: [ :node |
-		Transcript show: 'Extacting method ', node definition printString; cr.
-		
-		node definition isMethodDefinition 
-			ifTrue: [ 
-		node value isRemoval 
-			ifTrue: [ self processMethodRemoval: node value into: methodInfos timestamp: aCommit datetime ].
-		node value isAddition 
-			ifTrue: [ self processMethodAddition: node value into: methodInfos timestamp: aCommit datetime ].
-		node value isModification 
-			ifTrue: [ self processMethodModification: node value into: methodInfos timestamp: aCommit datetime ].
-		 ]
-		].
-	
-	^ methodInfos
+			node definition isMethodDefinition ifTrue: [
+					node value isRemoval ifTrue: [ self processMethodRemoval: node value into: methodInfos timestamp: aCommit datetime ].
+					node value isAddition ifTrue: [ self processMethodAddition: node value into: methodInfos timestamp: aCommit datetime ].
+					node value isModification ifTrue: [ self processMethodModification: node value into: methodInfos timestamp: aCommit datetime ] ] ].
+
+	^ methodInfos 
 ]
 
 { #category : 'initialization' }
@@ -175,22 +154,6 @@ HistoryCachePopulator >> populateCaches [
 ]
 
 { #category : 'compute population' }
-HistoryCachePopulator >> populateCachesWithMethodInfo: aMethodInfo [
-	"Add a method to both temporal and frequency caches."
-
-	| selector ast event timestamp |
-	selector := aMethodInfo selector.
-	ast := aMethodInfo ast.	
-	timestamp := aMethodInfo timestamp.
-
-	session
-		registerSelector: selector
-		ast: ast
-		event: event
-		at: timestamp
-]
-
-{ #category : 'as yet unclassified' }
 HistoryCachePopulator >> processClassAddition: anIceAddition into: aCollection timestamp: aDateAndTime [ 
 	| item |
 	item := (CooAddedClassHistoryItem new
@@ -202,7 +165,7 @@ HistoryCachePopulator >> processClassAddition: anIceAddition into: aCollection t
 	
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'compute population' }
 HistoryCachePopulator >> processClassModification: anIceModification into: aCollection timestamp: aDateAndTime [ 
 	
 	| item |
@@ -215,7 +178,7 @@ HistoryCachePopulator >> processClassModification: anIceModification into: aColl
 	
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'compute population' }
 HistoryCachePopulator >> processClassRemoval: anIceRemoval into: aCollection timestamp: aDateAndTime [ 
 	| item |
 	item := (CooRemovedClassHistoryItem new
