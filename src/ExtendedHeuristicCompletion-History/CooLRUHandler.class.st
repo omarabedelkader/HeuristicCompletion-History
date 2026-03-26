@@ -10,7 +10,7 @@ Class {
 	#tag : 'Session'
 }
 
-{ #category : 'initialization' }
+{ #category : 'matching' }
 CooLRUHandler >> classEntries [
 	"Clearly we should manage what happen when we remove a class"
 	
@@ -21,13 +21,13 @@ CooLRUHandler >> classEntries [
 	^ col 
 ]
 
-{ #category : 'initialization' }
+{ #category : 'matching' }
 CooLRUHandler >> handleNewClassItem: anItem addedTo: aCollection [
 
 	classLRU at: anItem name put: anItem
 ]
 
-{ #category : 'initialization' }
+{ #category : 'matching' }
 CooLRUHandler >> handleNewMethodItem: anItem addedTo: aCollection [
 
 	selectorLRU at: anItem selector put: anItem
@@ -41,7 +41,7 @@ CooLRUHandler >> initialize [
 	classLRU := LRUCache new maximumWeight: 1000
 ]
 
-{ #category : 'initialization' }
+{ #category : 'matching' }
 CooLRUHandler >> selectorEntries [
 	"Clearly we should manage what happen when we remove a class"
 	

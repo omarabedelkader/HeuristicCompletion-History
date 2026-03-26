@@ -120,52 +120,6 @@ NewCooSessionTemporalTest >> testAnnouncementAddedAndRemovedTheSameMethod [
 		equals: #( #testComputeMessages )
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testChangeHandler [
-
-	| anns |
-	anns := { 
-		
-		CooModifiedMethodHistoryItem new
-		        selector: #degrees;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        nameOfClass: 'Point';
-		        yourself.
-		CooModifiedMethodHistoryItem new
-		        selector: #degrees;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        nameOfClass: 'Point';
-		        yourself.
-		CooModifiedMethodHistoryItem new
-		        selector: #degrees;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        nameOfClass: 'Point';
-		        yourself.
-		CooModifiedMethodHistoryItem new
-		        selector: #debt;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        nameOfClass: 'Point';
-		        yourself}.
-	
-	anns do: [ :each | 
-		session addMethodItem: each ].
-	
-	self assert: session selectorEntries size equals: 4.
-	session shiftHandlerTo: CooFrequencyHandler new. 
-	
-	self 
-		assert: (session selectorEntries collect: [ :each | each selector ])
-		equals: #(#degrees #debt) asOrderedCollection 
-
-	
-
-
-]
-
 { #category : 'tests - changing handler' }
 NewCooSessionTemporalTest >> testChangeHandlerToTheSame [
 
@@ -238,6 +192,52 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	announcement := MethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
 	self assert: (session computeDeltaMessageOf: announcement) isEmpty
+]
+
+{ #category : 'tests' }
+NewCooSessionTemporalTest >> testHandler [
+
+	| anns |
+	anns := { 
+		
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #debt;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself}.
+	
+	anns do: [ :each | 
+		session addMethodItem: each ].
+	
+	self assert: session selectorEntries size equals: 4.
+	session shiftHandlerTo: CooFrequencyHandler new. 
+	
+	self 
+		assert: (session selectorEntries collect: [ :each | each selector ])
+		equals: #(#degrees #debt) asOrderedCollection 
+
+	
+
+
 ]
 
 { #category : 'tests - announcements' }

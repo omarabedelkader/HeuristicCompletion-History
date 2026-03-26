@@ -6,11 +6,32 @@ Class {
 	#tag : 'Session'
 }
 
+{ #category : 'running' }
+NewCooSessionLRUTest >> setUp [
+
+	super setUp.
+	session := CooSession new programEntityHandler: CooLRUHandler new
+]
+
 { #category : 'tests' }
 NewCooSessionLRUTest >> testHandler [
 
 	| anns |
 	anns := {
+				CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		
+			CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		
 		CooModifiedMethodHistoryItem new
 		        selector: #degrees;
 		        live: true;
@@ -39,7 +60,7 @@ NewCooSessionLRUTest >> testHandler [
 	anns do: [ :each | 
 		session addMethodItem: each ].
 	
-	self assert: session selectorEntries size equals: 4.
+	self assert: session selectorEntries size equals: 2.
 	
 	self 
 		assert: (session selectorEntries collect: [ :each | each selector ])

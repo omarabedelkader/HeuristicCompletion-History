@@ -14,7 +14,7 @@ NewCooSessionFrequencyTest >> setUp [
 ]
 
 { #category : 'running' }
-NewCooSessionFrequencyTest >> testChangeHandler [
+NewCooSessionFrequencyTest >> testHandler [
 
 	| anns |
 	anns := { 
