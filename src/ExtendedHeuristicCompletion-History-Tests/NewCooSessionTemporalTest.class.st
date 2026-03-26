@@ -51,6 +51,19 @@ NewCooSessionTemporalTest >> setUp [
 	session := CooSession new programEntityHandler: CooTemporalHandler new
 ]
 
+{ #category : 'tests - compute' }
+NewCooSessionTemporalTest >> testAddClassAddsEntry [
+
+	| announcement |
+	announcement := ClassAdded new
+		classAdded: Point;
+		yourself.
+
+	session addNewClassInVocabulary: announcement.
+
+	self assert: session classEntries size equals: 1
+]
+
 { #category : 'tests - announcements' }
 NewCooSessionTemporalTest >> testAnnouncementAddModifiedMethodComputesMessageDiff [
 

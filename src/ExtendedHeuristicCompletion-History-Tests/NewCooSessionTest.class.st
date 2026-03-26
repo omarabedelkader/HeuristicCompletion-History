@@ -14,16 +14,3 @@ NewCooSessionTest >> programEntityHandler [
 
 	^ session programEntityHandler
 ]
-
-{ #category : 'running' }
-NewCooSessionTest >> testAddClassAddsEntry [
-
-	| announcement |
-	announcement := ClassAdded new
-		classAdded: Point;
-		yourself.
-
-	session addNewClassInVocabulary: announcement.
-
-	self assert: session classEntries size equals: 1
-]
