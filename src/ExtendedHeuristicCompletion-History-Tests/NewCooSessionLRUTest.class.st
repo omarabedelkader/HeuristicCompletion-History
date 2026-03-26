@@ -70,3 +70,41 @@ NewCooSessionLRUTest >> testHandler [
 
 
 ]
+
+{ #category : 'tests' }
+NewCooSessionLRUTest >> testHandlerSaturate [
+
+	2 timesRepeat: [ 
+		1 to: 1000 do: [ :i |
+		session addMethodItem: (CooModifiedMethodHistoryItem new
+		        selector: (#degrees, i asString) asSymbol;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself)
+			]].
+	
+	100 timesRepeat: [ 	
+		session addMethodItem: (CooModifiedMethodHistoryItem new
+		        selector: #debt;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself) ].
+		100 timesRepeat: [ 	
+		session addMethodItem: (CooModifiedMethodHistoryItem new
+		        selector: #debt2;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself) ].
+		
+	
+	self assert: session selectorEntries size equals: 1000.
+	
+	self assert: ((session selectorEntries collect: [ :each | each selector ]) includesAll: { #debt . #debt2} ).
+	
+	self deny: ((session selectorEntries collect: [ :each | each selector ]) includesAll: { #degrees1 . #degrees2 })
+
+
+]
