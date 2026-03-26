@@ -1,3 +1,6 @@
+"
+I represent session (development history-based) fetcher.
+"
 Class {
 	#name : 'CooSessionFetcher',
 	#superclass : 'CoFetcher',

@@ -1,6 +1,6 @@
 "
-I'm recording structrure that records modified or added methods and classes.
-My behavior is to record everything. 
+I'm recording program elements e.g., modified or added methods and classes.
+My behavior is to record everything. Other variations may keep only the last ones.
 
 I pay attention to not hold directly class or compiled method objects to avoid creating spurious references. 
 

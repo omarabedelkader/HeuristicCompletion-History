@@ -1,9 +1,9 @@
 Class {
 	#name : 'CooInstaller',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
+	#category : 'ExtendedHeuristicCompletion-History-toRemove',
 	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Fetching-Github'
+	#tag : 'toRemove'
 }
 
 { #category : 'as yet unclassified' }

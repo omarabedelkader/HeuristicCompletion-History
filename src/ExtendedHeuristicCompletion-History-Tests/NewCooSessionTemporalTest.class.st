@@ -44,16 +44,8 @@ NewCooSessionTemporalTest >> removedMethodAnnouncement [
 		  method: NewCooSessionTemporalTest >> #ourModifiedPrintString
 ]
 
-{ #category : 'running' }
-NewCooSessionTemporalTest >> setUp [
-
-	super setUp. "Pay attention for now running the tests will empty the session cache."
-
-	session := CooSession withEntityHandler: CooTemporalHandler new
-]
-
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testAnnouncementAddModifiedMethodComputesMessageDiff [
 
 	| announcement |
 	announcement := self modifiedMethodAnnouncement.
@@ -64,8 +56,8 @@ NewCooSessionTemporalTest >> testAddModifiedMethodComputesMessageDiff [
 		equals: #( #testComputeMessages )
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testAnnouncementAddModifiedMethodRegistersEntry [
 
 	| announcement |
 	announcement := MethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
@@ -76,8 +68,8 @@ NewCooSessionTemporalTest >> testAddModifiedMethodRegistersEntry [
 		equals: 1
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testAnnouncementAddNewMethodRegistersEntry [
 
 	| announcement |
 	announcement := MethodAdded new
@@ -90,8 +82,8 @@ NewCooSessionTemporalTest >> testAddNewMethodRegistersEntry [
 		equals: 1
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testAnnouncementAddNewVariableAnnouncementRegistersEntry [
 
 	| announcement entry |
 	announcement := ClassAdded new
@@ -106,8 +98,8 @@ NewCooSessionTemporalTest >> testAddNewVariableAnnouncementRegistersEntry [
 		equals: 1
 ]
 
-{ #category : 'tests' }
-NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testAnnouncementAddedAndRemovedTheSameMethod [
 	| announcement |
 	announcement := self removedMethodAnnouncement.
 	session removeMethodFromVocabulary: announcement.
@@ -119,6 +111,103 @@ NewCooSessionTemporalTest >> testAddedAndRemovedTheSameMethod [
 	self 
 		assert: session programEntityHandler methodDescriptions first deltaMessages asArray
 		equals: #( #testComputeMessages )
+]
+
+{ #category : 'tests - changing handler' }
+NewCooSessionTemporalTest >> testChangeHandler [
+
+	| anns |
+	anns := { 
+		
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #debt;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself}.
+	
+	anns do: [ :each | 
+		session addMethodItem: each ].
+	
+	self assert: session selectorEntries size equals: 4.
+	session shiftHandlerTo: CooFrequencyHandler new. 
+	
+	self 
+		assert: (session selectorEntries collect: [ :each | each selector ])
+		equals: #(#degrees #debt) asOrderedCollection 
+
+	
+
+
+]
+
+{ #category : 'tests - changing handler' }
+NewCooSessionTemporalTest >> testChangeHandlerToTheSame [
+
+	| anns |
+	anns := { 
+		
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #debt;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself}.
+	
+	anns do: [ :each | 
+		session addMethodItem: each ].
+	
+	self assert: session selectorEntries size equals: 4.
+	self assert: session methodDescriptions size equals: 4.
+	
+	session shiftHandlerTo: CooTemporalHandler new. 
+	
+	self assert: session selectorEntries size equals: 4.
+	self assert: session methodDescriptions size equals: 4.
+	
+	self 
+		assert: (session selectorEntries collect: [ :each | each selector ])
+		equals: #(#degrees #degrees #degrees #debt) asOrderedCollection 
+
+	
+
+
 ]
 
 { #category : 'tests - compute' }
@@ -142,4 +231,101 @@ NewCooSessionTemporalTest >> testComputeMessagesOfSimilarMethods [
 	announcement := MethodModified methodChangedFrom: self class >> #ourOriginalPrintString to: (self class >> #ourOriginalPrintString) oldProtocol: 'toto'.
 
 	self assert: (session computeDeltaMessageOf: announcement) isEmpty
+]
+
+{ #category : 'tests - announcements' }
+NewCooSessionTemporalTest >> testHandlerChanges [
+
+	| anns |
+	anns := { 
+		MethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
+		MethodModified methodChangedFrom: Point >> #degrees to: (Point >> #degrees) copy oldProtocol: 'toto'.
+		}.
+	
+	anns do: [ :each | 
+		session addModifiedMethodInVocabulary: each ].
+	
+	self 
+		assert: session programEntityHandler selectorEntries size 
+		equals: 2.
+	
+]
+
+{ #category : 'tests - changing handler' }
+NewCooSessionTemporalTest >> testLowLevelHandlerPopulation [
+
+	| anns |
+	anns := { 
+		
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #debt;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself}.
+	
+	anns do: [ :each | 
+		session addMethodItem: each ].
+	
+	self assert: session selectorEntries size equals: 4.
+	self 
+		assert: (session selectorEntries collect: [ :each | each selector ])
+		equals: #(#debt #degrees #degrees #degrees) asOrderedCollection 
+
+	
+
+
+]
+
+{ #category : 'tests - changing handler' }
+NewCooSessionTemporalTest >> testLowLevelSessionPopulation [
+
+	| anns |
+	anns := { 
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself.
+		CooModifiedMethodHistoryItem new
+		        selector: #degrees;
+		        live: true;
+		        timestamp: DateAndTime now;
+		        nameOfClass: 'Point';
+		        yourself}.
+	
+	anns do: [ :each | 
+		session addMethodItem: each ].
+	
+	self assert: session classDescriptions size equals: 0.
+	self assert: session methodDescriptions size equals: 2.
+	
+
+
+]
+
+{ #category : 'running' }
+NewCooSessionTemporalTest >> testSessionNewCreatesAndEmptySession [
+
+
+	self assert: session classDescriptions size equals: 0
 ]

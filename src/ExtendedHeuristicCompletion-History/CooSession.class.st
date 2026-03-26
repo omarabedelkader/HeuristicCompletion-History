@@ -1,12 +1,18 @@
 "
 I collect and treat information about development sessions. I take two sources of information: the definition/modification of program elements (class added, removed,...) and the choices made by the developer when selecting a completion item in the proposed list.
 
+### Program definitions
 I collect information about class and method definitions.
-Their treatments are delegated to strategies implementing different behavior and acessible via the `cache` message.
+Their treatments are delegated to strategies implementing different behavior and accessible via the `cache` message.
 
+
+### User selection
 
 In addition I'm collecting information about the user selection in the ecompletion items. 
 I delegate the treatment of such information to a dedicated strategy. The protocol of communication between me and the strategy is the following one:  The message `handleNewSelectionItem: item addedTo: completionItems` is sent to the strategy the item and the full collection of recorded item included the newly added one. 
+
+
+### Composition of information
 
 I then compose the results coming from the structural program definitions and the user selection using the message `sortedUserVocabulary`
 
@@ -112,6 +118,19 @@ CooSession class >> resetProgramEntities [
 		
 ]
 
+{ #category : 'todo' }
+CooSession class >> todos [
+
+^ '- loading code element should be tagged as live
+- check the protocol to add element to the handler
+- implement LRU
+- check more history handler
+- what about the information stored in the completionItem (the class but we need a symbol to give feedback when we reuse them)
+- filling up the repo.
+- what is happening when we remove a class
+- TemporalselectorEntries is unclear. '
+]
+
 { #category : 'instance creation' }
 CooSession class >> withCache: aCache [
 	
@@ -204,6 +223,12 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 	Focus of attention. So this can be computed latter based on such information. "
 ]
 
+{ #category : 'low-level' }
+CooSession >> classDescriptions [ 
+	
+	^ classDescriptions 
+]
+
 { #category : 'matching' }
 CooSession >> classEntries [
 
@@ -237,19 +262,25 @@ CooSession >> initialize [
 	self resetInteractionItems.
 ]
 
-{ #category : 'configuration' }
+{ #category : 'low-level' }
+CooSession >> methodDescriptions [ 
+	
+	^ methodDescriptions 
+]
+
+{ #category : 'interaction configuration' }
 CooSession >> mostDualRecentFrequentSelectionHandling [
 
 	userSelectionHandler := CooDualMostRecentFrequencyHandler new.
 ]
 
-{ #category : 'configuration' }
+{ #category : 'interaction configuration' }
 CooSession >> mostRecentFrequentSelectionHandling [
 
 	userSelectionHandler := CooMostRecentFrequencyHandler new.
 ]
 
-{ #category : 'configuration' }
+{ #category : 'interaction configuration' }
 CooSession >> noUserSelectionHandling [
 
 	userSelectionHandler := CooNullUserSelectionHandler new.
@@ -267,13 +298,13 @@ CooSession >> printOn: aStream [
 	aStream space ; nextPutAll: 'interaction'; print: completionItems size.
 ]
 
-{ #category : 'accessing' }
+{ #category : 'accessing - handlers' }
 CooSession >> programEntityHandler [
 
 	^ programEntityHandler 
 ]
 
-{ #category : 'accessing' }
+{ #category : 'accessing - handlers' }
 CooSession >> programEntityHandler: aCache [
 
 	programEntityHandler := aCache
@@ -310,7 +341,8 @@ CooSession >> removeMethodFromVocabulary: anAnn [
 CooSession >> resetInteractionItems [
 	
 	completionItems := OrderedCollection new.
-	userSelectionHandler := CooMostRecentFrequencyHandler new.
+	self mostDualRecentFrequentSelectionHandling.
+	
 ]
 
 { #category : 'initialization' }
@@ -332,13 +364,45 @@ CooSession >> selectorEntries [
 	^ userSelectionHandler sortedUserLowercasedEntries, programEntityHandler selectorEntries 
 ]
 
-{ #category : 'accessing' }
+{ #category : 'as yet unclassified' }
+CooSession >> shiftHandlerTo: aCooHandler [ 
+
+	programEntityHandler := aCooHandler.
+	methodDescriptions do: [ :item | 
+		programEntityHandler handleNewMethodItem: item addedTo: methodDescriptions ] .
+	classDescriptions do: [ :item | 
+		programEntityHandler handleNewClassItem: item addedTo: classDescriptions ]
+]
+
+{ #category : 'accessing - handlers' }
 CooSession >> size [ 
 
 	^ programEntityHandler size
 ]
 
-{ #category : 'accessing' }
+{ #category : 'structural handler configuration' }
+CooSession >> structuralFrequency [
+
+	programEntityHandler := CooFrequencyHandler new.
+
+ 
+]
+
+{ #category : 'structural handler configuration' }
+CooSession >> structuralLRU [
+
+	programEntityHandler := CooLRUHandler new.
+	
+]
+
+{ #category : 'structural handler configuration' }
+CooSession >> structuralTemporal [
+
+	programEntityHandler := CooTemporalHandler new.
+	
+]
+
+{ #category : 'accessing - handlers' }
 CooSession >> useSelectionHandler: aUserSelectionHandler [
 
 	userSelectionHandler := aUserSelectionHandler
