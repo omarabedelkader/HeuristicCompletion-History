@@ -20,8 +20,7 @@ CooStaticBenchmarksMessageHistory >> cachedSelectors [
 
 	| entries |
 	entries := self session programEntityHandler selectorEntries ifNil: [ #(  ) ].
-	self halt.
-	^ (entries collect: [ :each | each contents asSymbol ]) asSet
+	^ (entries flatCollect: [ :each | each deltaMessages ]) asSet
 ]
 
 { #category : 'benchmarks' }
@@ -49,16 +48,18 @@ CooStaticBenchmarksMessageHistory >> run [
 	cachedSelectors := self cachedSelectors.
 	scannedMethods := 0.
 	matchedCallsites := 0.
-	scope methods do: [ :method |
+	
+	"we should look for the methods that are in the history and not in the package.
+	Because the bench is simulating a dev behavior. We are only interested in added, modified methods. "
+	
+	self session existingMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
-							(node isMessage and: [ cachedSelectors includes: node selector ])
-								 ifTrue: [
+							(node isMessage and: [ cachedSelectors includes: node selector ]) ifTrue: [
+									Transcript show: 'Benched messages:'; show: node selector; space.
 									matchedCallsites := matchedCallsites + 1.
-									pos := node selectorInterval 
-										ifNil: [ node start ] 
-										ifNotNil: [ :interval | interval first ].
+									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ].
 
 	matchedCallsites = 0 ifTrue: [

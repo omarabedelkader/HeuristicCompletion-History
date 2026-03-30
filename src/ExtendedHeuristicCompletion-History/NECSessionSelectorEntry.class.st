@@ -14,6 +14,12 @@ Class {
 }
 
 { #category : 'accessing' }
+NECSessionSelectorEntry >> deltaMessages [ 
+	
+	^ sessionItem deltaMessages 
+]
+
+{ #category : 'accessing' }
 NECSessionSelectorEntry >> sessionItem [
 
 	^ sessionItem 

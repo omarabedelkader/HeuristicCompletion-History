@@ -254,6 +254,36 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 	
 ]
 
+{ #category : 'for benchmark' }
+CooSession >> existingMethodDescriptions [
+
+	| tmps removed existing |
+	tmps := methodDescriptions copy.
+	existing := Set new.
+	removed := Set new.
+	tmps do: [ :each |
+			each event = #removed ifTrue: [ removed add: each ].
+			(removed anySatisfy: [ :r | r selector = each selector and: [ r nameOfClass = each nameOfClass ] ]) 
+				ifFalse: [ existing add: each ] ].
+	^ existing
+]
+
+{ #category : 'for benchmark' }
+CooSession >> existingMethods [
+	"pay attention this requires that the classes are loaded in Pharo."
+
+	^ self existingMethodDescriptions collect: [ :each |
+			  | metaclass clss |
+			  metaclass := false.
+			  clss := each nameOfClass.
+			  (each nameOfClass endsWith: ' class') ifTrue: [
+					  metaclass := true.
+					  clss := each nameOfClass allButLast: 6 ].
+			  metaclass
+				  ifTrue: [ (self class environment at: clss asSymbol) class >> each selector ]
+				  ifFalse: [ (self class environment at: clss asSymbol) >> each selector ] ]
+]
+
 { #category : 'initialization' }
 CooSession >> initialize [
 
@@ -364,7 +394,7 @@ CooSession >> selectorEntries [
 	^ userSelectionHandler sortedUserLowercasedEntries, programEntityHandler selectorEntries 
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'updating' }
 CooSession >> shiftHandlerTo: aCooHandler [ 
 
 	programEntityHandler := aCooHandler.

@@ -155,12 +155,11 @@ HistoryCachePopulator >> populateForBenchmarkCommit: aNumber [
 
 	| commit infos |
 	commit := self scrapper fetchAncestorCommit: aNumber.
-	
-
-			infos := self extractMethodsFromCommit: commit.
-			infos do: [ :info | session addMethodItem: info ].
-			infos := self extractClassesFromCommit: commit.
-			infos do: [ :info | session addClassItem: info ]
+	commit checkout.
+	infos := self extractMethodsFromCommit: commit.
+	infos do: [ :info | session addMethodItem: info ].
+	infos := self extractClassesFromCommit: commit.
+	infos do: [ :info | session addClassItem: info ]
 ]
 
 { #category : 'compute population' }
