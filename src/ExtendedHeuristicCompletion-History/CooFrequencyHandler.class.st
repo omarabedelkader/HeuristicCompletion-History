@@ -21,9 +21,10 @@ Class {
 { #category : 'matching' }
 CooFrequencyHandler >> classEntries [
 
-	^ (classFrequencyDictionary associations  
-			sort: [ :a1 :a2 | a1 value > a2 value ]) 
-			collect: [ :each | (NECGlobalEntry contents: each key node: nil) fetcher: self ]
+	^ (classFrequencyDictionary associations sort: [ :a1 :a2 | a1 value > a2 value ]) collect: [ :each |
+		  (NECSessionGlobalEntry contents: each key node: nil) 
+				sessionItem: each;
+				fetcher: 'Session Frequency' ]
 ]
 
 { #category : 'matching' }
@@ -86,5 +87,8 @@ CooFrequencyHandler >> selectorEntries [
 
 	^ (selectorFrequenceDictionary associations  
 			sort: [ :a1 :a2 | a1 value > a2 value ]) 
-			collect: [ :each | (NECSelectorEntry contents: each key node: nil) fetcher: self ]
+			collect: [ :each | 
+				(NECSessionSelectorEntry contents: each key node: nil) 
+					sessionItem: each;
+					fetcher: 'Session Frequency' ]
 ]

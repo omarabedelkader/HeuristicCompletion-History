@@ -31,16 +31,10 @@ CooHistoryBenchmarksRunner class >> runBenchmarks [
 
 { #category : 'running' }
 CooHistoryBenchmarksRunner class >> runBenchmarksWithSession: aSession [
+
 	| scope |
-	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
-		Transcript
-			show: 'History cache is empty. Populate caches before running benchmarks.';
-			cr.
-		^ self ].
-
 	scope := PackageOrganizer default packages.
-
-^ self runWithSession: aSession scope: scope
+	^ self runWithSession: aSession scope: scope
 
 ]
 
@@ -84,14 +78,19 @@ CooHistoryBenchmarksRunner class >> runWithSession: aSession [
 CooHistoryBenchmarksRunner class >> runWithSession: aSession scope: aScope [
 	"Run benchmarks with a specific session and scope.
 	Example: CooHistoryBenchmarksRunner runWithSession: CooSession current scope: (RPackage named: 'Kernel')"
+	
+	
+	"CooHistoryBenchmarksRunner 
+		runWithSession: CooSession current 
+		scope: (PackageOrganizer default packageNamed: 'Comix')"
 
-	| messageBenchmark variableBenchmark scopeName |
-	(aSession isNil or: [ aSession size = 0 ]) ifTrue: [
-			Transcript
-				show: 'History cache is empty. Populate caches before running benchmarks.';
-				cr.
-			^ self ].
-
+	| populator messageBenchmark variableBenchmark scopeName |
+	
+	"fill up the history"
+	populator := HistoryCachePopulator repo: 'git@github.com:Ducasse/Comix2.git'.
+	populator populateForBenchmarkCommit: 10.
+	
+	
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
 		                    session: aSession;
 		                    scope: aScope;

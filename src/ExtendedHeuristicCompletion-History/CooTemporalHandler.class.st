@@ -41,10 +41,12 @@ CooTemporalHandler >> classDescriptions: aCollection [
 CooTemporalHandler >> classEntries [
 	"Clearly we should manage what happen when we remove a class
 	
-	
 	"
-	
-	^ classDescriptions collect: [ :each | (NECGlobalEntry contents: each nameOfClass node: nil) fetcher: CooTemporalHandler ]
+
+	^ classDescriptions collect: [ :each | 
+		(NECSessionGlobalEntry contents: each nameOfClass node: nil)
+			sessionItem: each ;
+			fetcher: 'Session Temporal' ]
 ]
 
 { #category : 'api' }
@@ -116,9 +118,11 @@ CooTemporalHandler >> registerSelector: aSelector ast: anAst event: anEventSymbo
 
 { #category : 'accessing' }
 CooTemporalHandler >> selectorEntries [
-	
-	^ (methodDescriptions reject: [ :each | each event = #removed ])
-		collect: [ :each | (NECSelectorEntry contents: each selector node: nil) fetcher: 'TemporalHandler' ]
+
+	^ (methodDescriptions reject: [ :each | each event = #removed ]) collect: [ :each |
+			  (NECSessionSelectorEntry contents: each selector node: nil)
+				  sessionItem: each;
+				  fetcher: 'Session Temporal' ]
 ]
 
 { #category : 'accessing' }

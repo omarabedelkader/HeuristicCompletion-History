@@ -19,8 +19,8 @@ Class {
 CooStaticBenchmarksMessageHistory >> cachedSelectors [
 
 	| entries |
-entries := self session programEntityHandler selectorEntries
-		           ifNil: [ #() ].
+	entries := self session programEntityHandler selectorEntries ifNil: [ #(  ) ].
+	self halt.
 	^ (entries collect: [ :each | each contents asSymbol ]) asSet
 ]
 
@@ -45,30 +45,30 @@ CooStaticBenchmarksMessageHistory >> methodsInScopeDo: aBlock [
 { #category : 'running' }
 CooStaticBenchmarksMessageHistory >> run [
 
-| cachedSelectors pos scannedMethods matchedCallsites |
+	| cachedSelectors pos scannedMethods matchedCallsites |
 	cachedSelectors := self cachedSelectors.
 	scannedMethods := 0.
 	matchedCallsites := 0.
-	self methodsInScopeDo: [ :method |
-		scannedMethods := scannedMethods + 1.
-		method parseTree ifNotNil: [ :parseTree |
-			parseTree nodesDo: [ :node |
-				(node isMessage and: [ cachedSelectors includes: node selector ])
-					ifTrue: [
-						matchedCallsites := matchedCallsites + 1.
-						pos := node selectorInterval
-							ifNil: [ node start ]
-							ifNotNil: [ :interval | interval first ].
-						self benchCallsite: node atPosition: pos ] ] ] ].
+	scope methods do: [ :method |
+			scannedMethods := scannedMethods + 1.
+			method parseTree ifNotNil: [ :parseTree |
+					parseTree nodesDo: [ :node |
+							(node isMessage and: [ cachedSelectors includes: node selector ])
+								 ifTrue: [
+									matchedCallsites := matchedCallsites + 1.
+									pos := node selectorInterval 
+										ifNil: [ node start ] 
+										ifNotNil: [ :interval | interval first ].
+									self benchCallsite: node atPosition: pos ] ] ] ].
 
 	matchedCallsites = 0 ifTrue: [
-		Transcript
-			show: 'Message history benchmark found no matching callsites. Cached selectors: ';
-			show: cachedSelectors size asString;
-			show: ' - scanned methods: ';
-			show: scannedMethods asString;
-			show: '. Try a broader scope or run on modified methods.';
-			cr ]
+			Transcript
+				show: 'Message history benchmark found no matching callsites. Cached selectors: ';
+				show: cachedSelectors size asString;
+				show: ' - scanned methods: ';
+				show: scannedMethods asString;
+				show: '. Try a broader scope or run on modified methods.';
+				cr ]
 ]
 
 { #category : 'benchmarks' }
