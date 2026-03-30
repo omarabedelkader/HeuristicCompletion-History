@@ -18,6 +18,34 @@ Class {
 }
 
 { #category : 'running' }
+CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [ 
+	"Run benchmarks with a specific session and scope.
+	Example: CooHistoryBenchmarksRunner runWithSession: CooSession current scope: (RPackage named: 'Kernel')"
+
+	"CooHistoryBenchmarksRunner 
+		newRunWithSession: CooSession current )"
+
+	| populator messageBenchmark variableBenchmark |
+	"fill up the history"
+	populator := HistoryCachePopulator repo: 'git@github.com:Ducasse/Comix2.git'.
+	populator populateForBenchmarkCommit: 10.
+
+
+	messageBenchmark := CooStaticBenchmarksMessageHistory new
+		                    session: aSession;
+		                    yourself.
+	variableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     session: aSession;
+		                     yourself.
+	messageBenchmark run.
+	variableBenchmark run.
+
+	^ {
+		  messageBenchmark.
+		  variableBenchmark } inspect
+]
+
+{ #category : 'running' }
 CooHistoryBenchmarksRunner class >> run [
 
 	^ self runWithSession: CooSession current

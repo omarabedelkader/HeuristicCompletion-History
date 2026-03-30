@@ -44,7 +44,6 @@ CooStaticBenchmarksVariableHistory >> methodsInScopeDo: aBlock [
 CooStaticBenchmarksVariableHistory >> run [
 
 	| cachedClassNames scannedMethods matchedCallsites |
-	self halt.
 	cachedClassNames := self cachedClassNames.
 	scannedMethods := 0.
 	matchedCallsites := 0.

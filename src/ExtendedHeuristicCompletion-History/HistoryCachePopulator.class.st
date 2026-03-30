@@ -155,7 +155,7 @@ HistoryCachePopulator >> populateForBenchmarkCommit: aNumber [
 
 	| commit infos |
 	commit := self scrapper fetchAncestorCommit: aNumber.
-	commit checkout.
+	commit checkoutAllPackages.
 	infos := self extractMethodsFromCommit: commit.
 	infos do: [ :info | session addMethodItem: info ].
 	infos := self extractClassesFromCommit: commit.
