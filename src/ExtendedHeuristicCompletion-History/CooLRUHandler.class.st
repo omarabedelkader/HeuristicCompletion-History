@@ -17,7 +17,7 @@ CooLRUHandler >> classEntries [
 	| col |
 	col := OrderedCollection new.
 	classLRU keysAndValuesDo: [ :k :v | 
-		col add: ((NECSessionGlobalEntry contents: v selector node: nil)
+		col add: ((NECSessionGlobalEntry contents: v nameOfClass node: nil)
 					 sessionItem: v;
 					 fetcher: 'Session LRU';
 					 yourself) ].
@@ -27,7 +27,7 @@ CooLRUHandler >> classEntries [
 { #category : 'matching' }
 CooLRUHandler >> handleNewClassItem: anItem addedTo: aCollection [
 
-	classLRU at: anItem name put: anItem
+	classLRU at: anItem nameOfClass put: anItem
 ]
 
 { #category : 'matching' }
