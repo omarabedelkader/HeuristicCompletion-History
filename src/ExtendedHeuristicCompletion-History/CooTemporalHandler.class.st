@@ -44,7 +44,7 @@ CooTemporalHandler >> classEntries [
 	"
 
 	^ classDescriptions collect: [ :each |
-			  (CoSessionGlobalEntry contents: each nameOfClass node: nil)
+			  (CoGlobalEntry contents: each nameOfClass node: nil)
 				  sessionItem: each;
 				  fetcherName: 'Session Temporal' ]
 ]

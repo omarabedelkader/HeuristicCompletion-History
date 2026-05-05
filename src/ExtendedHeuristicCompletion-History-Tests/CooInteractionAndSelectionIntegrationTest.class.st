@@ -18,7 +18,7 @@ CooInteractionAndSelectionIntegrationTest >> fakeEntryWithContents: aString [
 { #category : 'as yet unclassified' }
 CooInteractionAndSelectionIntegrationTest >> fakeGlobalEntryWithContents: aString [
 
-	^ CoSessionGlobalEntry contents: aString node: nil
+	^ CoGlobalEntry contents: aString node: nil
 ]
 
 { #category : 'as yet unclassified' }

@@ -15,7 +15,7 @@ CooSessionCompositionTest >> fakeEntryWithContents: aString [
 { #category : 'running' }
 CooSessionCompositionTest >> fakeGlobalEntryWithContents: aString [
 
-	^ CoSessionGlobalEntry contents: aString node: nil
+	^ CoGlobalEntry contents: aString node: nil
 ]
 
 { #category : 'running' }

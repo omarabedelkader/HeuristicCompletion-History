@@ -18,7 +18,7 @@ Class {
 CooFrequencyHandler >> classEntries [
 
 	^ (classFrequencyDictionary associations sort: [ :a1 :a2 | a1 value > a2 value ]) collect: [ :each |
-			  (CoSessionGlobalEntry contents: each key node: nil)
+			  (CoGlobalEntry contents: each key node: nil)
 				  sessionItem: each;
 				  fetcherName: 'Session Frequency' ]
 ]

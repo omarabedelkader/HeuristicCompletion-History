@@ -347,7 +347,7 @@ CooSession >> navigationClassEntries [
 	navigationItems do: [ :item |
 		(item isClassObservation and: [ (seen includes: item name) not ]) ifTrue: [
 			seen add: item name.
-			entries add: ((CoSessionGlobalEntry contents: item name node: nil)
+			entries add: ((CoGlobalEntry contents: item name node: nil)
 					 sessionItem: item;
 					 fetcherName: 'Session Navigation';
 					 yourself) ] ].
