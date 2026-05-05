@@ -9,7 +9,7 @@ Class {
 { #category : 'running' }
 CooSessionCompositionTest >> fakeEntryWithContents: aString [
 
-	^ CoSessionSelectorEntry contents: aString node: nil
+	^ CoSelectorEntry contents: aString node: nil
 ]
 
 { #category : 'running' }

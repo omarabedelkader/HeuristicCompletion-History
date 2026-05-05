@@ -370,7 +370,7 @@ CooSession >> navigationSelectorEntries [
 	navigationItems do: [ :item |
 		(item isSelectorObservation and: [ (seen includes: item name) not ]) ifTrue: [
 			seen add: item name.
-			entries add: ((CoSessionSelectorEntry contents: item name node: nil)
+			entries add: ((CoSelectorEntry contents: item name node: nil)
 					 sessionItem: item;
 					 fetcherName: 'Session Navigation';
 					 yourself) ] ].

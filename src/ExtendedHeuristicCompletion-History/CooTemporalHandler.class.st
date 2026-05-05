@@ -124,7 +124,7 @@ CooTemporalHandler >> removeMethodItem: anItem [
 CooTemporalHandler >> selectorEntries [
 
 	^ methodDescriptions collect: [ :each |
-			  (CoSessionSelectorEntry contents: each selector node: nil)
+			  (CoSelectorEntry contents: each selector node: nil)
 				  sessionItem: each;
 				  fetcherName: 'Session Temporal' ]
 ]

@@ -12,7 +12,7 @@ Class {
 { #category : 'as yet unclassified' }
 CooInteractionAndSelectionIntegrationTest >> fakeEntryWithContents: aString [
 
-	^ CoSessionSelectorEntry contents: aString node: nil
+	^ CoSelectorEntry contents: aString node: nil
 ]
 
 { #category : 'as yet unclassified' }

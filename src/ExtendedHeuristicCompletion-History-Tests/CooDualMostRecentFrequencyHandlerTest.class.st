@@ -12,7 +12,7 @@ Class {
 { #category : 'running' }
 CooDualMostRecentFrequencyHandlerTest >> fakeEntryWithContents: aString [
 
-	^ CoSessionSelectorEntry contents: aString node: nil
+	^ CoSelectorEntry contents: aString node: nil
 ]
 
 { #category : 'running' }
