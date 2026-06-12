@@ -2,7 +2,8 @@ Class {
 	#name : 'CooHistoryEventRecorderTest',
 	#superclass : 'TestCase',
 	#instVars : [
-		'recorder'
+		'recorder',
+		'initialSubscriptionNumber'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests'
@@ -15,10 +16,8 @@ CooHistoryEventRecorderTest >> setUp [
 	"Put here a common initialization logic for tests"
 	recorder := CooHistoryEventRecorder new.
 	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
-	recorder announcer subscriptions reset.
-	"recorder subscribeCodeChangeAnnouncements."
-	recorder session resetProgramEntities.
-	
+	"never reset subscription, it will damage the image"
+	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
 ]
 
 { #category : 'tests' }
@@ -28,7 +27,7 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenAddingMetho
 	
 	Object compile: 'foo ^ 0'.
 	
-	self assert: (recorder announcer numberOfSubscriptions ) equals: 1.
+	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber + 1.
 ]
 
 { #category : 'tests' }
@@ -40,11 +39,11 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenAnnoncement
 	Object compile: 'foo ^ 0'.
 
 	self assert: result equals: recorder .
-	self assert: (recorder announcer numberOfSubscriptions ) equals: 0.
+	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber .
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenNotAnnounceementClass [ 
+CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenNotAnnouncementClass [ 
 	
 	| result |
 	
@@ -54,7 +53,7 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenNotAnnounce
 	Object compile: 'foo ^ 0'.
 	
 	self assert: (result) equals: recorder .
-	self assert: (recorder announcer numberOfSubscriptions ) equals: 0.
+	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber .
 ]
 
 { #category : 'tests' }
@@ -64,5 +63,5 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenRemovingMet
 	
 	Object compile: 'foo ^ 0'.
 	
-	self assert: (recorder announcer numberOfSubscriptions ) equals: 1.
+	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber + 1.
 ]
