@@ -382,6 +382,16 @@ CooHistoryEventRecorder >> addMethodItemOf: aHistoryItemClass from: anAnnounceme
 	self recordMethodItem: item announcement: anAnnouncement
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> announcer [
+	^ announcer
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> announcer: anAnnouncer [ 
+	announcer := anAnnouncer.
+]
+
 { #category : 'helpers' }
 CooHistoryEventRecorder >> astOf: aCompiledMethod [
 
@@ -982,11 +992,15 @@ CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: se
 	announcementClass := self class environment
 		                     at: announcementName
 		                     ifAbsent: [ ^ self ].
+	
+	"When the passed class does not inherit from Announcement, we do nothing"
+	(announcementClass inheritsFrom: Announcement)
+        ifFalse: [ ^ self ].
 
 	announcer
 		when: announcementClass
 		send: selector
-		to: self
+		to: self.
 ]
 
 { #category : 'installation' }
