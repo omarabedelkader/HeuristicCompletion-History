@@ -14,11 +14,21 @@ CooHistoryEventRecorderTest >> setUp [
 	super setUp.
 
 	"Put here a common initialization logic for tests"
-	recorder := CooHistoryEventRecorder new.
+	recorder := CooHistoryEventRecorderMock uniqueInstance .
 	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
 	"never reset subscription, it will damage the image"
 
 	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSerializePayloadWhenSTONMissing [
+	|payload result|
+	payload := Dictionary new.
+	payload at: 'key' put: 'value'.
+	result := recorder serializePayload: payload.
+	self assert: result class equals: ByteArray.
+	self assert: result utf8Encoded 
 ]
 
 { #category : 'tests' }
@@ -123,4 +133,28 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenRemovingMet
 	recorder subscribeAnnouncementNamed: #MethodRemoved send: #MethodRemoved:.
 	
 	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber + 1.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelector [
+    self assert: (recorder valueFrom: CooHistoryEventRecorderMock new selector: #increment) counter equals: 1
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenException [
+	|object|
+	object := CooHistoryEventRecorderMock new counter: '1'.
+    self assert: (recorder valueFrom: object selector: #increment) equals: nil
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenObjectIsNil [
+	
+	self assert: (recorder valueFrom: (nil) selector: #increment) equals: nil
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenUnknownSelector [
+	self assert: (recorder valueFrom: (CooHistoryEventRecorderMock new) selector: #unknownSelector) equals: nil
+	
 ]
