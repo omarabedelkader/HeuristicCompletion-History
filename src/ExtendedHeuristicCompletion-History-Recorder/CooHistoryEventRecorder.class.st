@@ -856,6 +856,11 @@ CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
 	^ nil
 ]
 
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> pendingEvents [
+	^ pendingEvents 
+]
+
 { #category : 'printing' }
 CooHistoryEventRecorder >> printOn: aStream [
 

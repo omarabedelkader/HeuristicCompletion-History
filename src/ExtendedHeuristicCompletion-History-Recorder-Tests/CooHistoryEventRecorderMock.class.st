@@ -18,11 +18,6 @@ CooHistoryEventRecorderMock >> counter: aNumber [
 	counter := aNumber 
 ]
 
-{ #category : 'accessing' }
-CooHistoryEventRecorderMock >> environment [ 
-	^ self class environment copyWithout: #STON
-]
-
 { #category : 'operations' }
 CooHistoryEventRecorderMock >> increment [ 
 	counter := counter + 1
