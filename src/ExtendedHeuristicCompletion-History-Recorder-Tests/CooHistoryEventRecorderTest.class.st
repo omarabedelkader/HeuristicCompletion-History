@@ -14,7 +14,7 @@ CooHistoryEventRecorderTest >> setUp [
 	super setUp.
 
 	"Put here a common initialization logic for tests"
-	recorder := CooHistoryEventRecorderMock uniqueInstance.
+	recorder := CooHistoryEventRecorder uniqueInstance.
 	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
 	"never reset subscription, it will damage the image"
 
@@ -25,6 +25,25 @@ CooHistoryEventRecorderTest >> setUp [
 CooHistoryEventRecorderTest >> tearDown [ 
 	recorder := nil.
 	super tearDown
+]
+
+{ #category : 'running' }
+CooHistoryEventRecorderTest >> testAstOfCompiledMethodReturnsAst [
+   | method result expected|
+
+   Object compile: 'foo ^ 0'.
+   method := Object >> #foo.
+
+   result := recorder astOf: method.
+	expected := OCParser parseMethod: 'foo ^ 0'.
+
+   self assert: result equals: expected.
+    Object removeSelector: #foo.
+]
+
+{ #category : 'running' }
+CooHistoryEventRecorderTest >> testAstOfNilReturnsNil [
+    self assert: (recorder astOf: nil) isNil.
 ]
 
 { #category : 'tests' }
@@ -214,11 +233,11 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfDoesNotMatchSubclass [
 
     | collection |
 	"CooHistoryEventRecorderMock is a subInsctance of CooHistoryEventRecorder, it should return false"
-    collection := OrderedCollection new 
-		add: CooHistoryEventRecorder new;
+    collection := OrderedCollection new
+		add: LargeInteger new;
 		yourself .
 		
-    self deny: (recorder includesInstanceOf: CooHistoryEventRecorderMock in: collection).
+    self deny: (recorder includesInstanceOf: LargePositiveInteger in: collection).
 ]
 
 { #category : 'tests' }
@@ -230,7 +249,7 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsFalseWhenAbsent [
 		add: CooSessionVariableHeuristic new;
 		yourself .
 
-    self deny: (recorder includesInstanceOf: CooHistoryEventRecorderMock in: collection).
+    self deny: (recorder includesInstanceOf: CooHistoryEventRecorder in: collection).
 
 ]
 
@@ -334,10 +353,6 @@ CooHistoryEventRecorderTest >> testNormalizedClassNameFromNilReturnsNil [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testNormalizedClassNameFromObjectWithName [
     self assert: (recorder normalizedClassNameFrom: OrderedCollection) equals: 'OrderedCollection'.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testNormalizedClassNameFromObjectWithoutName [
 ]
 
 { #category : 'tests' }
@@ -529,8 +544,6 @@ CooHistoryEventRecorderTest >> testSelectorOfWhenMethodIsNil [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testSerializePayload [
 	| payload result expectedString |
-	
-	recorder := CooHistoryEventRecorderMock new. 
 
 	payload := Dictionary new.
 	payload at: 'key' put: 'value'.
@@ -646,14 +659,13 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenRemovingMet
 
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testValueFromSelector [
-    self assert: (recorder valueFrom: CooHistoryEventRecorderMock new selector: #increment) counter equals: 1
+    self assert: (recorder valueFrom: -1  selector: #abs) equals: 1
 ]
 
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testValueFromSelectorWhenException [
-	|object|
-	object := CooHistoryEventRecorderMock new counter: '1'.
-    self assert: (recorder valueFrom: object selector: #increment) equals: nil
+
+    self assert: (recorder valueFrom: '1' selector: #abs) equals: nil
 ]
 
 { #category : 'tests' }
@@ -664,6 +676,6 @@ CooHistoryEventRecorderTest >> testValueFromSelectorWhenObjectIsNil [
 
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testValueFromSelectorWhenUnknownSelector [
-	self assert: (recorder valueFrom: (CooHistoryEventRecorderMock new) selector: #unknownSelector) equals: nil
+	self assert: (recorder valueFrom: 1 selector: #unknownSelector) equals: nil
 	
 ]

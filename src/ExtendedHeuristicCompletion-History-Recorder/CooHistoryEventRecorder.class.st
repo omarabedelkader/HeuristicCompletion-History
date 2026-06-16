@@ -403,7 +403,7 @@ CooHistoryEventRecorder >> astOf: aCompiledMethod [
 			  [ aCompiledMethod sourceNode ]
 				  on: Error
 				  do: [ :ex2 |
-					  [ RBParser parseMethod: aCompiledMethod sourceCode ]
+					  [ OCParser parseMethod: aCompiledMethod sourceCode ]
 						  on: Error
 						  do: [ :ex3 | nil ] ] ]
 ]
