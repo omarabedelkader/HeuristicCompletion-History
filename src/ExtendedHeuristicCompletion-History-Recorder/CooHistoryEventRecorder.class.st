@@ -359,6 +359,7 @@ CooHistoryEventRecorder >> addMethodItemOf: aHistoryItemClass from: anAnnounceme
 	method := self methodFrom: anAnnouncement.
 	method ifNil: [ ^ self ].
 
+
 	selector := self selectorOf: method announcement: anAnnouncement.
 	selector ifNil: [ ^ self ].
 

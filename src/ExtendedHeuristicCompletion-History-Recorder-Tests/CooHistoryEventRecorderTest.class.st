@@ -17,14 +17,34 @@ CooHistoryEventRecorderTest >> setUp [
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
 	"never reset subscription, it will damage the image"
+	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
 
 	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
 ]
 
-{ #category : 'running' }
-CooHistoryEventRecorderTest >> tearDown [ 
-	recorder := nil.
-	super tearDown
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testAddClassItem [
+    | ann item classDescriptions|
+	classDescriptions := recorder session classDescriptions.
+   ann := ClassAdded new.
+   ann classAdded: OrderedCollection.
+   recorder addClassItemOf: CooAddedClassHistoryItem
+		from: ann
+      	selectors: #(classAdded classAffected affectedClass behaviorAffected behavior).
+	
+	self assert: (recorder session classDescriptions first) nameOfClass equals: 'OrderedCollection'
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testAddClassItemWithoutClassName [
+    | ann classDescriptions|
+	classDescriptions := recorder session classDescriptions.
+    ann := ClassAdded new.
+
+    recorder addClassItemOf: CooAddedClassHistoryItem
+             from: ann
+             selectors: #().
+    self assert: (recorder session classDescriptions) equals: classDescriptions .
 ]
 
 { #category : 'running' }
@@ -343,6 +363,38 @@ CooHistoryEventRecorderTest >> testMethodFromReturnsNilWhenNoValidMethod [
 
     result := recorder methodFrom: ann.
     self assert: result isNil.
+]
+
+{ #category : 'running' }
+CooHistoryEventRecorderTest >> testMethodItemFrom [
+	| ann |
+	ann := MethodAdded new. 
+	ann method: (Object >> #printString).
+
+	recorder addMethodItemOf: CooModifiedMethodHistoryItem from: ann oldMethod: (Object >> #printString).
+	
+	self assert: (recorder session methodDescriptions) first selector equals: 'printString'
+]
+
+{ #category : 'running' }
+CooHistoryEventRecorderTest >> testMethodItemFromNil [ 
+	
+	|methodDescription|
+	methodDescription := recorder session methodDescriptions.
+	self assert: (recorder addMethodItemOf: CooAddedClassHistoryItem new from: nil oldMethod: nil) equals: recorder .
+	self assert: (recorder session methodDescriptions) equals: methodDescription
+]
+
+{ #category : 'running' }
+CooHistoryEventRecorderTest >> testMethodItemFromWithoutSelector [
+	| ann methodDescription |
+	
+	methodDescription := recorder session methodDescriptions.
+	ann := MethodAdded new. 
+	ann method: CompiledMethod new.
+	
+	self assert: (recorder addMethodItemOf: CooModifiedMethodHistoryItem from: ann oldMethod: nil) equals: recorder.
+	self assert: (recorder session methodDescriptions) equals: methodDescription
 ]
 
 { #category : 'tests' }
