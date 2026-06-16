@@ -15,7 +15,7 @@ CooHistoryEventRecorderTest >> setUp [
 
 	"Put here a common initialization logic for tests"
 	recorder := CooHistoryEventRecorder uniqueInstance.
-	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
+
 	"never reset subscription, it will damage the image"
 
 	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
@@ -652,7 +652,7 @@ CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenRemovingCla
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenRemovingMethod [
 
-	recorder subscribeAnnouncementNamed: #MethodRemoved send: #MethodRemoved:.
+	recorder subscribeAnnouncementNamed: #MethodRemoved send: #methodRemoved:.
 	
 	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber + 1.
 ]
