@@ -50,6 +50,224 @@ CooHistoryEventRecorderTest >> testBlockValueWhenBlockThrowAnException [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeliverNowInBackgroundDoesNotForkWhenProcessAlreadyRunning [
+    | firstProcess |
+	"we try to fork two times, if the fork is not terminated we will not create another one "
+    recorder deliveryEnabled: true.
+    recorder deliverNowInBackground.
+    firstProcess := recorder deliveryProcess.
+    recorder deliverNowInBackground.
+
+    self assert: recorder deliveryProcess equals: firstProcess.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeliverNowInBackgroundDoesNothingWhenDeliveryDisabled [
+    recorder deliveryEnabled: false.
+    self assert: recorder deliverNowInBackground equals: recorder
+    
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeliverNowInBackgroundForksAProcess [
+	"When delivery is enabled, a new process willl be created"
+    recorder deliveryEnabled: true.
+    recorder deliverNowInBackground.
+    self assert: recorder deliveryProcess notNil.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeliverNowWhenDisabled [ 
+	recorder deliveryEnabled: false. 
+	
+	self assert: (recorder deliverNow ) equals: recorder 
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeliverNowWhenEmptyListOfEvents [
+	
+	recorder drainPendingEvents.
+	self assert: recorder pendingEvents isEmpty.
+	self assert: (recorder deliverNow ) equals: recorder 
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeltaMessagesForNilNewAstReturnsEmpty [
+	|oldAST|
+	oldAST := OCParser parseMethod: '
+	foo 
+		^1.
+	'.
+    self assert: (recorder deltaMessagesFor: nil oldAst: oldAST) equals: #().
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeltaMessagesForNilOldAstReturnsAllNewMessages [
+    | newAst result |
+
+    newAst := OCParser parseMethod: 'foo
+        ^ self bar + self baz'.
+
+    result := recorder deltaMessagesFor: newAst oldAst: nil.
+
+    self assert: (result includes: #bar).
+    self assert: (result includes: #baz).
+    self assert: (result includes: #+).
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeltaMessagesForReturnsEmptyWhenNoNewMessages [
+    | newAst oldAst result |
+    newAst := OCParser parseMethod: '
+		foo
+        ^ self bar
+		'.
+    oldAst := OCParser parseMethod: '
+		foo
+        ^ self bar + self baz
+		'.
+		
+    result := recorder deltaMessagesFor: newAst oldAst: oldAst.
+    self assert: result isEmpty.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeltaMessagesForReturnsOnlyNewMessages [
+    | newAst oldAst result |
+
+    newAst := OCParser parseMethod: '
+			foo
+        		^ self bar + self baz + self another
+		'.
+
+    oldAst := OCParser parseMethod: '
+			foo
+        		^ self bar + self baz
+		'.
+		
+    result := recorder deltaMessagesFor: newAst oldAst: oldAst.
+
+    self assert: (result includes: #another).
+    self assert: (result includes: #bar) not.
+    self assert: (result includes: #baz) not.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testDeltaMessagesForWhenMethodShrinks [
+    | newAst oldAst result |
+
+	"We do difference, when the new method is shrinked, we should get an empty list of messages"
+
+	newAst := OCParser parseMethod: '
+		foo
+        ^ self bar
+	'.
+    oldAst := OCParser parseMethod: '
+		foo
+        ^ self bar + self baz + self another
+	'.
+    result := recorder deltaMessagesFor: newAst oldAst: oldAst.
+
+    self assert: result isEmpty.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testEnqueueEventAddsToPendingEvents [
+    | item ann event |
+    recorder drainPendingEvents.
+    ann := ClassAdded new.
+    item := CooAddedClassHistoryItem new
+        nameOfClass: 'MyClass';
+        timestamp: DateAndTime now;
+        yourself.
+    event := recorder dictionaryForClassItem: item announcement: ann.
+    recorder enqueueEvent: event.
+    self assert: recorder pendingEvents size equals: 1.
+    self assert: recorder pendingEvents last equals: event.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testEnqueueEventPreservesOrder [
+    | item1 item2 ann1 ann2 event1 event2 |
+    recorder drainPendingEvents.
+    ann1 := ClassAdded new.
+    ann2 := ClassAdded new.
+    item1 := CooAddedClassHistoryItem new
+        nameOfClass: 'MyClass';
+        timestamp: DateAndTime now;
+        yourself.
+    item2 := CooAddedClassHistoryItem new
+        nameOfClass: 'AnotherClass';
+        timestamp: DateAndTime now;
+        yourself.
+    event1 := recorder dictionaryForClassItem: item1 announcement: ann1.
+    event2 := recorder dictionaryForClassItem: item2 announcement: ann2.
+    recorder enqueueEvent: event1.
+    recorder enqueueEvent: event2.
+    self assert: recorder pendingEvents size equals: 2.
+    self assert: recorder pendingEvents first equals: event1.
+    self assert: recorder pendingEvents last equals: event2.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testIncludesInstanceOfDoesNotMatchSubclass [
+
+    | collection |
+	"CooHistoryEventRecorderMock is a subInsctance of CooHistoryEventRecorder, it should return false"
+    collection := OrderedCollection new 
+		add: CooHistoryEventRecorder new;
+		yourself .
+		
+    self deny: (recorder includesInstanceOf: CooHistoryEventRecorderMock in: collection).
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsFalseWhenAbsent [
+    | collection |
+
+    collection := OrderedCollection new
+		add: CooSessionMessagesHeuristic new;
+		add: CooSessionVariableHeuristic new;
+		yourself .
+
+    self deny: (recorder includesInstanceOf: CooHistoryEventRecorderMock in: collection).
+
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsFalseWhenEmpty [
+    self deny: (recorder includesInstanceOf: CooSessionMessagesHeuristic in: OrderedCollection new).
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
+    | collection |
+    collection := OrderedCollection new
+		add: CooSessionMessagesHeuristic new;
+		add: CooSessionVariableHeuristic new;
+		yourself .
+    self assert: (recorder includesInstanceOf: CooSessionMessagesHeuristic in: collection).
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testInstallCompletionHeuristicsAddsAtFront [
+    recorder installCompletionHeuristics.
+	
+	self assert: CoASTHeuristicsResultSetBuilder messagesHeuristic first class equals: CooSessionMessagesHeuristic.
+	self assert: CoASTHeuristicsResultSetBuilder variablesHeuristic first class equals: CooSessionVariableHeuristic.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testInstallCompletionHeuristicsIsIdempotent [
+
+    recorder installCompletionHeuristics.
+    recorder installCompletionHeuristics.
+
+    self assert: (CoASTHeuristicsResultSetBuilder messagesHeuristic 
+        select: [ :each | each class == CooSessionMessagesHeuristic ]) size equals: 1.
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testMessageSelectorsInNilReturnsEmpty [
     self assert: (recorder messageSelectorsIn: nil) equals: #().
 ]

@@ -540,6 +540,17 @@ CooHistoryEventRecorder >> deliveryEnabled [
 	^ deliveryEnabled
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
+
+	deliveryEnabled := aBoolean 
+]
+
+{ #category : 'events-class' }
+CooHistoryEventRecorder >> deliveryProcess [ 
+	^ deliveryProcess
+]
+
 { #category : 'helpers' }
 CooHistoryEventRecorder >> deltaMessagesFor: newAst oldAst: oldAst [
 
