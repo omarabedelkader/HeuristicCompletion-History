@@ -670,15 +670,19 @@ CooHistoryEventRecorder >> initialize [
 	logToTranscript := true
 ]
 
-{ #category : 'installation' }
+{ #category : 'actions' }
 CooHistoryEventRecorder >> install [
+
+	CooHistorySettings historyRecordingEnabled ifFalse: [
+		self deinstall.
+		self disableDelivery.
+		self log: 'CooHistoryEventRecorder not installed because privacy consent was not accepted.'.
+		^ self ].
 
 	self deinstall.
 
 	announcer := self class codeChangeAnnouncer.
 
-	"Prevent duplicate event recording from CooSession class>>install.
-	This does not modify the history code; it only removes the direct subscription."
 	[ announcer unsubscribe: self session ] on: Error do: [ :ex | nil ].
 
 	self subscribeCodeChangeAnnouncements.

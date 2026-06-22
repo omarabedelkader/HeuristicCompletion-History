@@ -5,11 +5,25 @@ Class {
 	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
 }
 
+{ #category : 'private' }
+BaselineOfExtendedHeuristicCompletionHistory class >> showHistoryPrivacySetupIfNeeded [
+
+	[
+		(Delay forMilliseconds: 500) wait.
+
+		World ifNotNil: [
+			CooHistorySettings firstLaunchCompleted ifFalse: [
+				WorldMorph doOneCycle.
+				CooHistorySettings openFirstLaunchSetup ] ]
+	] fork
+]
+
 { #category : 'baselines' }
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 
 	<baseline>
 	spec for: #common do: [ 
+		spec postLoadDoIt: #postLoad.
 		spec
 				baseline: 'ExtendedHeuristicCompletionBenchmarks'
 				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
@@ -24,4 +38,10 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 		spec 
 			package: 'ExtendedHeuristicCompletion-History-Benchmarks' 
 			with: [ spec requires: 'ExtendedHeuristicCompletion-History' ]
+]
+
+{ #category : 'baselines' }
+BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
+
+	self class showHistoryPrivacySetupIfNeeded
 ]
