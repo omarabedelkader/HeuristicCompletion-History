@@ -124,22 +124,15 @@ CooHistorySettings class >> settingsOn: aBuilder [
 
 	<systemsettings>
 
-	(aBuilder setting: #CooHistorySettings)
+	(aBuilder setting: #'Code Completion History')
 		target: self;
 		parentName: #codeBrowsing;
+		selector: #historyRecordingEnabled;
+		default: self historyRecordingEnabled;
 		label: 'History Recorder Privacy';
 		description: 'Configure history recording and remote delivery.';
 		iconName: #smallConfiguration;
 		with: [
-
-			(aBuilder setting: #historyRecordingEnabled)
-				order: 1;
-				label: 'Enable history data collection';
-				target: self;
-				getSelector: #historyRecordingEnabled;
-				setSelector: #historyRecordingEnabled:;
-				default: self historyRecordingEnabled;
-				description: 'When enabled, the history recorder records method, class, and completion-selection events.'.
 
 			(aBuilder setting: #remoteDeliveryEnabled)
 				order: 2;
