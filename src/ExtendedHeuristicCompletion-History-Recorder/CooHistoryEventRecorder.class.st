@@ -71,7 +71,14 @@ Typical usage:
 	CooHistoryEventRecorder reset.
 	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
 	CooHistoryEventRecorder category: #history.
+	CooHistoryEventRecorder saveOnDisk: false.
 	CooHistoryEventRecorder install.
+
+Events are kept in memory and sent in batches. By default, the recorder sends
+pending events when the queue reaches 100 records. It also tries to send pending
+events before the image is saved. When saveOnDisk is false, pending events are
+cleared before the image is saved so event data is not persisted in the image
+file.
 
 To force delivery manually:
 
@@ -156,6 +163,7 @@ Installation:
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080/gt/events'.
 CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
 
@@ -163,6 +171,7 @@ CooHistoryEventRecorder install.
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
 CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
 
@@ -200,12 +209,16 @@ Class {
 		'deliveryProcess',
 		'lastDeliveryError',
 		'lastDeliveryResponse',
-		'logToTranscript'
+		'logToTranscript',
+		'saveOnDisk',
+		'deliveryBatchSize'
 	],
 	#classInstVars : [
 		'uniqueInstance',
 		'defaultServerUrl',
-		'defaultCategory'
+		'defaultCategory',
+		'defaultSaveOnDisk',
+		'defaultDeliveryBatchSize'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
@@ -246,6 +259,18 @@ CooHistoryEventRecorder class >> defaultCategory [
 ]
 
 { #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultDeliveryBatchSize [
+
+	^ defaultDeliveryBatchSize ifNil: [ defaultDeliveryBatchSize := 100 ]
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultSaveOnDisk [
+
+	^ defaultSaveOnDisk ifNil: [ defaultSaveOnDisk := false ]
+]
+
+{ #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultServerUrl [
 
 	"Default server used by the DebuggingSpy/EventRecorder setup.
@@ -263,6 +288,19 @@ CooHistoryEventRecorder class >> deinstall [
 	<script>
 
 	self uniqueInstance deinstall
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> deliveryBatchSize [
+
+	^ self uniqueInstance deliveryBatchSize
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> deliveryBatchSize: anInteger [
+
+	defaultDeliveryBatchSize := anInteger max: 1.
+	self uniqueInstance deliveryBatchSize: defaultDeliveryBatchSize
 ]
 
 { #category : 'actions' }
@@ -317,6 +355,58 @@ CooHistoryEventRecorder class >> reset [
 		uniqueInstance := nil ]
 ]
 
+{ #category : 'system startup' }
+CooHistoryEventRecorder class >> registerForImageLifecycle [
+
+	| sessionManager registered |
+	sessionManager := self environment at: #SessionManager ifAbsent: [ nil ].
+
+	registered := sessionManager
+		              ifNil: [ false ]
+		              ifNotNil: [
+			              | manager |
+			              manager := sessionManager default.
+			              (manager respondsTo: #registerUserClassNamed:)
+				              ifTrue: [
+					              [
+					              manager registerUserClassNamed: self name.
+					              true ]
+						              on: Error
+						              do: [ :ex | false ] ]
+				              ifFalse: [
+					              (manager respondsTo: #registerSystemClassNamed:)
+						              ifTrue: [
+							              [
+							              manager registerSystemClassNamed: self name.
+							              true ]
+								              on: Error
+								              do: [ :ex | false ] ]
+						              ifFalse: [ false ] ] ].
+
+	registered ifTrue: [ ^ self ].
+
+	[
+	Smalltalk addToShutDownList: self.
+	Smalltalk addToStartUpList: self ]
+		on: Error
+		do: [ :ex | nil ].
+
+	^ self
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk [
+
+	^ self uniqueInstance saveOnDisk
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk: aBoolean [
+
+	defaultSaveOnDisk := aBoolean.
+	self uniqueInstance saveOnDisk: aBoolean
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorder class >> serverUrl [
 
@@ -328,6 +418,19 @@ CooHistoryEventRecorder class >> serverUrl: aStringOrZnUrl [
 
 	defaultServerUrl := aStringOrZnUrl asZnUrl.
 	self uniqueInstance serverUrl: defaultServerUrl
+]
+
+{ #category : 'system startup' }
+CooHistoryEventRecorder class >> shutDown: quitting [
+
+	uniqueInstance ifNotNil: [ uniqueInstance prepareForImageSave ]
+]
+
+{ #category : 'system startup' }
+CooHistoryEventRecorder class >> startUp: resuming [
+
+	(uniqueInstance notNil and: [ uniqueInstance installed ])
+		ifTrue: [ uniqueInstance install ]
 ]
 
 { #category : 'accessing' }
@@ -476,6 +579,13 @@ CooHistoryEventRecorder >> classRemoved: anAnnouncement [
 		selectors: #(classRemoved classAffected affectedClass behaviorAffected behavior)
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> clearPendingEvents [
+
+	deliveryMutex critical: [ pendingEvents removeAll ].
+	^ self
+]
+
 { #category : 'events-completion' }
 CooHistoryEventRecorder >> completionItemSelected: anAnnouncement [
 
@@ -545,6 +655,19 @@ CooHistoryEventRecorder >> deliveryEnabled [
 CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
 
 	deliveryEnabled := aBoolean 
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> deliveryBatchSize [
+
+	^ deliveryBatchSize ifNil: [
+		  deliveryBatchSize := self class defaultDeliveryBatchSize ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
+
+	deliveryBatchSize := anInteger max: 1
 ]
 
 { #category : 'events-class' }
@@ -637,10 +760,13 @@ CooHistoryEventRecorder >> enableDelivery [
 { #category : 'actions' }
 CooHistoryEventRecorder >> enqueueEvent: anEventDictionary [
 
+	| shouldDeliver |
 	deliveryMutex critical: [
-		pendingEvents addLast: anEventDictionary ].
+		pendingEvents addLast: anEventDictionary.
+		shouldDeliver := self shouldDeliverPendingEvents ].
 
-	self deliverNowInBackground
+	shouldDeliver ifTrue: [ self deliverNowInBackground ].
+	^ self
 ]
 
 { #category : 'actions' }
@@ -689,19 +815,16 @@ CooHistoryEventRecorder >> initialize [
 	pendingEvents := OrderedCollection new.
 	deliveryMutex := Mutex new.
 	installed := false.
+	saveOnDisk := self class defaultSaveOnDisk.
+	deliveryBatchSize := self class defaultDeliveryBatchSize.
 	logToTranscript := true
 ]
 
 { #category : 'actions' }
 CooHistoryEventRecorder >> install [
 
-	CooHistorySettings historyRecordingEnabled ifFalse: [
-		self deinstall.
-		self disableDelivery.
-		self log: 'CooHistoryEventRecorder not installed because privacy consent was not accepted.'.
-		^ self ].
-
 	self deinstall.
+	self class registerForImageLifecycle.
 
 	announcer := self class codeChangeAnnouncer.
 
@@ -877,6 +1000,18 @@ CooHistoryEventRecorder >> pendingEvents [
 	^ pendingEvents 
 ]
 
+{ #category : 'system startup' }
+CooHistoryEventRecorder >> prepareForImageSave [
+
+	self saveOnDisk ifTrue: [ ^ self ].
+
+	self waitForDeliveryProcess.
+	self deliverNow.
+	self clearPendingEvents.
+
+	^ self
+]
+
 { #category : 'printing' }
 CooHistoryEventRecorder >> printOn: aStream [
 
@@ -943,6 +1078,18 @@ CooHistoryEventRecorder >> safeValue: aBlock ifError: errorBlock [
 	^ [ aBlock value ]
 		  on: Error
 		  do: [ :ex | errorBlock value ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> saveOnDisk [
+
+	^ saveOnDisk ifNil: [ saveOnDisk := self class defaultSaveOnDisk ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> saveOnDisk: aBoolean [
+
+	saveOnDisk := aBoolean
 ]
 
 { #category : 'events-methods' }
@@ -1038,6 +1185,13 @@ CooHistoryEventRecorder >> subscribeCodeChangeAnnouncements [
 	self subscribeAnnouncementNamed: #CoCompletionItemSelected send: #completionItemSelected:
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> shouldDeliverPendingEvents [
+
+	^ self deliveryEnabled and: [
+		  pendingEvents size >= self deliveryBatchSize ]
+]
+
 { #category : 'helpers' }
 CooHistoryEventRecorder >> valueFrom: anObject selector: selector [
 
@@ -1047,4 +1201,16 @@ CooHistoryEventRecorder >> valueFrom: anObject selector: selector [
 	^ [ anObject perform: selector ]
 		  on: Error
 		  do: [ :ex | nil ]
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> waitForDeliveryProcess [
+
+	(deliveryProcess isNil or: [ deliveryProcess == Processor activeProcess ])
+		ifTrue: [ ^ self ].
+
+	[ deliveryProcess isTerminated ]
+		whileFalse: [ (Delay forMilliseconds: 50) wait ].
+
+	^ self
 ]

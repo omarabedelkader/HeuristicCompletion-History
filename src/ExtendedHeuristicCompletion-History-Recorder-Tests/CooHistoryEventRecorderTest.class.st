@@ -20,6 +20,13 @@ CooHistoryEventRecorderTest >> setUp [
 	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
 
 	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
+
+	recorder logToTranscript: false.
+	recorder deliveryEnabled: false.
+	recorder deliveryBatchSize: 100.
+	recorder saveOnDisk: false.
+	recorder drainPendingEvents.
+	recorder instVarNamed: 'deliveryProcess' put: nil.
 ]
 
 { #category : 'tests' }
@@ -93,8 +100,10 @@ CooHistoryEventRecorderTest >> testDeliverNowInBackgroundDoesNotForkWhenProcessA
     | firstProcess |
 	"we try to fork two times, if the fork is not terminated we will not create another one "
     recorder deliveryEnabled: true.
-    recorder deliverNowInBackground.
-    firstProcess := recorder deliveryProcess.
+
+    firstProcess := Processor activeProcess.
+    recorder instVarNamed: 'deliveryProcess' put: firstProcess.
+
     recorder deliverNowInBackground.
 
     self assert: recorder deliveryProcess equals: firstProcess.
@@ -246,6 +255,67 @@ CooHistoryEventRecorderTest >> testEnqueueEventPreservesOrder [
     self assert: recorder pendingEvents size equals: 2.
     self assert: recorder pendingEvents first equals: event1.
     self assert: recorder pendingEvents last equals: event2.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testEnqueueEventDoesNotDeliverBeforeBatchSize [
+
+	recorder deliveryEnabled: true.
+	recorder deliveryBatchSize: 3.
+
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+
+	self deny: recorder shouldDeliverPendingEvents.
+	self assert: recorder pendingEvents size equals: 2.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testPrepareForImageSaveClearsPendingEventsWhenSaveOnDiskIsFalse [
+
+	recorder saveOnDisk: false.
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+
+	recorder prepareForImageSave.
+
+	self assert: recorder pendingEvents isEmpty.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testPrepareForImageSaveKeepsPendingEventsWhenSaveOnDiskIsTrue [
+
+	recorder saveOnDisk: true.
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+
+	recorder prepareForImageSave.
+
+	self assert: recorder pendingEvents size equals: 1.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testShouldDeliverPendingEventsWhenBatchSizeReached [
+
+	recorder deliveryEnabled: false.
+	recorder deliveryBatchSize: 2.
+
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+	recorder enqueueEvent: (Dictionary new
+			 at: #kind put: #test;
+			 yourself).
+
+	recorder deliveryEnabled: true.
+
+	self assert: recorder shouldDeliverPendingEvents.
 ]
 
 { #category : 'tests' }

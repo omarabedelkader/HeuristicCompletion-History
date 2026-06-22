@@ -19,3 +19,15 @@ Metacello new
   repository: 'github://omarabedelkader/HeuristicCompletion-History:main/src';
   load.
 ```
+
+Recorder setup:
+
+```smalltalk
+CooHistoryEventRecorder reset.
+CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
+CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder saveOnDisk: false.
+CooHistoryEventRecorder install.
+```
+
+The recorder keeps events in memory, updates `CooSession`, and sends to the server only when the pending queue reaches 100 records, when `saveOnDisk: false` flushes before image save, or when `deliverNow` is called manually.
