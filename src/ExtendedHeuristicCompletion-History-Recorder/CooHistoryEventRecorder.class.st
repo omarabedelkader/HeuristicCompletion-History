@@ -359,6 +359,7 @@ CooHistoryEventRecorder >> addMethodItemOf: aHistoryItemClass from: anAnnounceme
 	method := self methodFrom: anAnnouncement.
 	method ifNil: [ ^ self ].
 
+
 	selector := self selectorOf: method announcement: anAnnouncement.
 	selector ifNil: [ ^ self ].
 
@@ -382,6 +383,16 @@ CooHistoryEventRecorder >> addMethodItemOf: aHistoryItemClass from: anAnnounceme
 	self recordMethodItem: item announcement: anAnnouncement
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> announcer [
+	^ announcer
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> announcer: anAnnouncer [ 
+	announcer := anAnnouncer.
+]
+
 { #category : 'helpers' }
 CooHistoryEventRecorder >> astOf: aCompiledMethod [
 
@@ -393,7 +404,7 @@ CooHistoryEventRecorder >> astOf: aCompiledMethod [
 			  [ aCompiledMethod sourceNode ]
 				  on: Error
 				  do: [ :ex2 |
-					  [ RBParser parseMethod: aCompiledMethod sourceCode ]
+					  [ OCParser parseMethod: aCompiledMethod sourceCode ]
 						  on: Error
 						  do: [ :ex3 | nil ] ] ]
 ]
@@ -528,6 +539,17 @@ CooHistoryEventRecorder >> deliverNowInBackground [
 CooHistoryEventRecorder >> deliveryEnabled [
 
 	^ deliveryEnabled
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
+
+	deliveryEnabled := aBoolean 
+]
+
+{ #category : 'events-class' }
+CooHistoryEventRecorder >> deliveryProcess [ 
+	^ deliveryProcess
 ]
 
 { #category : 'helpers' }
@@ -850,6 +872,11 @@ CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
 	^ nil
 ]
 
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> pendingEvents [
+	^ pendingEvents 
+]
+
 { #category : 'printing' }
 CooHistoryEventRecorder >> printOn: aStream [
 
@@ -986,11 +1013,15 @@ CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: se
 	announcementClass := self class environment
 		                     at: announcementName
 		                     ifAbsent: [ ^ self ].
+	
+	"When the passed class does not inherit from Announcement, we do nothing"
+	(announcementClass inheritsFrom: Announcement)
+        ifFalse: [ ^ self ].
 
 	announcer
 		when: announcementClass
 		send: selector
-		to: self
+		to: self.
 ]
 
 { #category : 'installation' }
