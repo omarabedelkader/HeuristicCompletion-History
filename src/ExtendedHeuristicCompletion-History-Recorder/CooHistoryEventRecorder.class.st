@@ -290,6 +290,12 @@ CooHistoryEventRecorder class >> deinstall [
 	self uniqueInstance deinstall
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverNow [
+
+	^ self uniqueInstance deliverNow
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorder class >> deliveryBatchSize [
 
@@ -301,12 +307,6 @@ CooHistoryEventRecorder class >> deliveryBatchSize: anInteger [
 
 	defaultDeliveryBatchSize := anInteger max: 1.
 	self uniqueInstance deliveryBatchSize: defaultDeliveryBatchSize
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverNow [
-
-	^ self uniqueInstance deliverNow
 ]
 
 { #category : 'cleanup' }
@@ -346,15 +346,6 @@ CooHistoryEventRecorder class >> lastDeliveryResponse [
 	^ self uniqueInstance lastDeliveryResponse
 ]
 
-{ #category : 'cleanup' }
-CooHistoryEventRecorder class >> reset [
-	<script>
-
-	uniqueInstance ifNotNil: [
-		uniqueInstance deinstall.
-		uniqueInstance := nil ]
-]
-
 { #category : 'system startup' }
 CooHistoryEventRecorder class >> registerForImageLifecycle [
 
@@ -392,6 +383,15 @@ CooHistoryEventRecorder class >> registerForImageLifecycle [
 		do: [ :ex | nil ].
 
 	^ self
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> reset [
+	<script>
+
+	uniqueInstance ifNotNil: [
+		uniqueInstance deinstall.
+		uniqueInstance := nil ]
 ]
 
 { #category : 'accessing' }
@@ -645,18 +645,6 @@ CooHistoryEventRecorder >> deliverNowInBackground [
 		] forkAt: Processor userBackgroundPriority named: 'CooHistoryEventRecorder delivery' ]
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder >> deliveryEnabled [
-
-	^ deliveryEnabled
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
-
-	deliveryEnabled := aBoolean 
-]
-
 { #category : 'accessing' }
 CooHistoryEventRecorder >> deliveryBatchSize [
 
@@ -668,6 +656,18 @@ CooHistoryEventRecorder >> deliveryBatchSize [
 CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
 
 	deliveryBatchSize := anInteger max: 1
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliveryEnabled [
+
+	^ deliveryEnabled
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
+
+	deliveryEnabled := aBoolean 
 ]
 
 { #category : 'events-class' }
@@ -827,9 +827,7 @@ CooHistoryEventRecorder >> install [
 	self class registerForImageLifecycle.
 
 	announcer := self class codeChangeAnnouncer.
-
-	[ announcer unsubscribe: self session ] on: Error do: [ :ex | nil ].
-
+	
 	self subscribeCodeChangeAnnouncements.
 	self installCompletionHeuristics.
 
@@ -1153,6 +1151,13 @@ CooHistoryEventRecorder >> session: aCooSession [
 	session := aCooSession
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> shouldDeliverPendingEvents [
+
+	^ self deliveryEnabled and: [
+		  pendingEvents size >= self deliveryBatchSize ]
+]
+
 { #category : 'installation' }
 CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: selector [
 
@@ -1183,13 +1188,6 @@ CooHistoryEventRecorder >> subscribeCodeChangeAnnouncements [
 	self subscribeAnnouncementNamed: #ClassRemoved send: #classRemoved:.
 
 	self subscribeAnnouncementNamed: #CoCompletionItemSelected send: #completionItemSelected:
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> shouldDeliverPendingEvents [
-
-	^ self deliveryEnabled and: [
-		  pendingEvents size >= self deliveryBatchSize ]
 ]
 
 { #category : 'helpers' }
