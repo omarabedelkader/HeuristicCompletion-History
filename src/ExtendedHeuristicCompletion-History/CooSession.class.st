@@ -409,6 +409,11 @@ CooSession >> programEntityHandler: aCache [
 	programEntityHandler := aCache
 ]
 
+{ #category : 'matching' }
+CooSession >> recorder [ 
+	^ recorder  ifNil: [CooHistoryEventRecorder uniqueInstance]
+]
+
 { #category : 'class handling' }
 CooSession >> removeClassFromVocabulary: ann [
 
