@@ -178,7 +178,9 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	item choices: aCompletionEntryItem entries.
 	item index: aCompletionEntryItem index. "Could be computed instead of storing it."
 	item selectedItem: aCompletionEntryItem selectedItem.
-	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher class name]).
+
+	item fetchers: (aCompletionEntryItem entries collect: [ :each | each fetcher ]).
+
 
 	completionItems addFirst: item.
 	
@@ -187,7 +189,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	userSelectionHandler handleNewSelectionItem: item. 
 	
 	"pass the selected item to the recorder"
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: item announcement: CoCompletionItemSelected).
+	self recorder enqueueEvent: (self recorder dictionaryForCompletionItem: item announcement: CoCompletionItemSelected).
 ]
 
 { #category : 'method handling' }
@@ -215,7 +217,7 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 	
 	self addMethodItem: item.
 	
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: item announcement: anAnn).
+	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: item announcement: anAnn).
 ]
 
 { #category : 'navigation' }
@@ -257,7 +259,7 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 	self addMethodItem: historyItem. "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: anAnn )
+	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: historyItem announcement: anAnn )
 ]
 
 { #category : 'low-level' }
@@ -465,7 +467,7 @@ CooSession >> removeMethodFromVocabulary: anAnn [
 
 	self addMethodItem:  historyItem.
 	
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: anAnn)
+	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: historyItem announcement: anAnn)
 ]
 
 { #category : 'printing' }
