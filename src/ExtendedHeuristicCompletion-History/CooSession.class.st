@@ -184,7 +184,10 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	
 	"Instead of poking the handler during each addition we could pass it all the info when 
 	requesting a list of entries."
-	userSelectionHandler handleNewSelectionItem: item
+	userSelectionHandler handleNewSelectionItem: item. 
+	
+	"pass the selected item to the recorder"
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: item announcement: CoCompletionItemSelected).
 ]
 
 { #category : 'method handling' }
@@ -210,7 +213,9 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
 	
-	self addMethodItem: item
+	self addMethodItem: item.
+	
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: item announcement: anAnn).
 ]
 
 { #category : 'navigation' }
@@ -222,25 +227,37 @@ CooSession >> addNavigationItem: aNavigationHistoryItem [
 { #category : 'class handling' }
 CooSession >> addNewClassInVocabulary: ann [
 
-	self addClassItem: (CooAddedClassHistoryItem new
+	|historyItem|
+
+	historyItem := CooAddedClassHistoryItem new
 			 nameOfClass: ann classAdded name;
 			live: true;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
 			timestamp: DateAndTime now;
-			yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+			yourself.
+
+	self addClassItem: historyItem.  "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
+	
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: ann)
 ]
 
 { #category : 'method handling' }
 CooSession >> addNewMethodInVocabulary: anAnn [
 
-	self addMethodItem: (CooAddedMethodHistoryItem new
+	|historyItem|
+
+	historyItem := CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
 			 live: true;
 			 timestamp: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
-			 yourself) "we could also decide that when a class gets a new method the name of the class is getting more important. 
+			 yourself.
+
+	self addMethodItem: historyItem. "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
+
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: anAnn )
 ]
 
 { #category : 'low-level' }
@@ -417,28 +434,38 @@ CooSession >> recorder [
 { #category : 'class handling' }
 CooSession >> removeClassFromVocabulary: ann [
 
-	| removedClassName |
+	| removedClassName historyItem|
 	removedClassName := ann classRemoved name.
 	(removedClassName beginsWith: 'AnObsolete')
 		ifTrue: [ removedClassName := removedClassName allButFirst: 'AnObsolete' size ].
-		
-	self addClassItem: (CooRemovedClassHistoryItem new
+
+	historyItem := CooRemovedClassHistoryItem new
 			nameOfClass: removedClassName;
 			 "meta: anAnn classAdded check if we get the classAdded for metaclass"
 			live: true;
 			timestamp: DateAndTime now;
-			yourself)
+			yourself.
+
+	self addClassItem: historyItem.
+
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: ann)
 ]
 
 { #category : 'method handling' }
 CooSession >> removeMethodFromVocabulary: anAnn [
 
-	self addMethodItem: (CooRemovedMethodHistoryItem new
+	|historyItem|
+
+	historyItem := CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
 			 live: true;
 			 timestamp: DateAndTime now;
 			 nameOfClass: anAnn method methodClass name;
-			 yourself) 
+			 yourself.
+
+	self addMethodItem:  historyItem.
+	
+	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: anAnn)
 ]
 
 { #category : 'printing' }
