@@ -40,7 +40,8 @@ Class {
 		'programEntityHandler',
 		'classDescriptions',
 		'methodDescriptions',
-		'navigationItems'
+		'navigationItems',
+		'recorder'
 	],
 	#classVars : [
 		'Current'
