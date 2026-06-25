@@ -800,6 +800,13 @@ CooHistoryEventRecorder >> envelopeFor: eventDictionaries [
 ]
 
 { #category : 'actions' }
+CooHistoryEventRecorder >> flush [
+
+    pendingEvents isEmpty ifTrue: [ ^ self ].
+    self deliverNowInBackground.
+]
+
+{ #category : 'actions' }
 CooHistoryEventRecorder >> imageInfo [
 
 	| info |
@@ -843,6 +850,8 @@ CooHistoryEventRecorder >> install [
 	self class registerForImageLifecycle.
 
 	announcer := self class codeChangeAnnouncer.
+	
+	announcer when: IcePushed send: #addNewMethodInVocabulary: to: self class uniqueInstance.
 	
 
 	installed := true.
@@ -1005,6 +1014,12 @@ CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
 			ifTrue: [ ^ value ] ].
 
 	^ nil
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> onIcePushed: anIcePushedAnnouncement [
+
+    self flush.
 ]
 
 { #category : 'accessing' }
