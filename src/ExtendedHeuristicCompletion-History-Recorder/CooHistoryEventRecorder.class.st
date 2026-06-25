@@ -703,33 +703,20 @@ CooHistoryEventRecorder >> dictionaryForClassItem: item announcement: anAnnounce
 ]
 
 { #category : 'serializing' }
-CooHistoryEventRecorder >> dictionaryForCompletionAnnouncement: anAnnouncement [
+CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
 
 	| dictionary |
-	dictionary := Dictionary new.
-	dictionary at: #kind put: #completion.
-	dictionary at: #timestamp put: DateAndTime now asString.
-	dictionary at: #announcementClass put: anAnnouncement class name.
-	dictionary at: #token put: (self safeValue: [ anAnnouncement token asString ] ifError: [ nil ]).
-	dictionary at: #index put: (self safeValue: [ anAnnouncement index ] ifError: [ nil ]).
-	dictionary at: #selectedItem put: (self safeValue: [ anAnnouncement selectedItem asString ] ifError: [ nil ]).
-	^ dictionary
-]
 
-{ #category : 'serializing' }
-CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem announcement: anAnn [
+   dictionary := Dictionary new.
+   dictionary at: #kind put: #completion.
+   dictionary at: #timestamp put: DateAndTime now asString.
 
-    | dictionary |
-
-    dictionary := Dictionary new.
-    dictionary at: #kind put: #completion.
-    dictionary at: #timestamp put: DateAndTime now asString.
-    dictionary at: #announcementClass put: anAnn class name.
-    dictionary at: #token put: (self safeValue: [ anItem token asString ] ifError: [ nil ]).
-    dictionary at: #index put: (self safeValue: [ anItem index ] ifError: [ nil ]).
-    dictionary at: #selectedItem put: (self safeValue: [ anItem selectedItem asString ] ifError: [ nil ]).
-    dictionary at: #fetchers put: (self safeValue: [ anItem fetchers ] ifError: [ #() ]).
-    ^ dictionary
+   dictionary at: #token put: (self safeValue: [ anItem token asString ] ifError: [ nil ]).
+   dictionary at: #index put: (self safeValue: [ anItem index ] ifError: [ nil ]).
+   dictionary at: #selectedItem put: (self safeValue: [ anItem selectedItem asString ] ifError: [ nil ]).
+	dictionary at: #fetchers put: (self safeValue: [ anItem fetchers ] ifError: [ #() ]).
+	dictionary at: #choices put: (self safeValue: anItem choices  ifError: [ #() ]).
+   ^ dictionary
 ]
 
 { #category : 'serializing' }

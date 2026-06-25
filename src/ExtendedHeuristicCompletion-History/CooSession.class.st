@@ -189,7 +189,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	userSelectionHandler handleNewSelectionItem: item. 
 	
 	"pass the selected item to the recorder"
-	self recorder enqueueEvent: (self recorder dictionaryForCompletionItem: item announcement: CoCompletionItemSelected).
+	self recorder enqueueEvent: (self recorder dictionaryForCompletionItem: item).
 ]
 
 { #category : 'method handling' }
