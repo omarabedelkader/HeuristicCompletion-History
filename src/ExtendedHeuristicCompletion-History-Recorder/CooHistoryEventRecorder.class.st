@@ -844,8 +844,6 @@ CooHistoryEventRecorder >> install [
 
 	announcer := self class codeChangeAnnouncer.
 	
-	self subscribeCodeChangeAnnouncements.
-	self installCompletionHeuristics.
 
 	installed := true.
 	self log: 'CooHistoryEventRecorder installed. Server: ', self serverUrl asString.
