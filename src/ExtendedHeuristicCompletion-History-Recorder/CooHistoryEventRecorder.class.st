@@ -838,7 +838,7 @@ CooHistoryEventRecorder >> install [
 
 	announcer := self class codeChangeAnnouncer.
 	
-	announcer when: IcePushed send: #addNewMethodInVocabulary: to: self class uniqueInstance.
+	announcer when: IcePushed send: #onIcePushed: to: self class uniqueInstance.
 	
 
 	installed := true.
