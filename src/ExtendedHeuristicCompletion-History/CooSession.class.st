@@ -433,6 +433,11 @@ CooSession >> recorder [
 	^ recorder ifNil: [ recorder := CooHistoryEventRecorder uniqueInstance ]
 ]
 
+{ #category : 'matching' }
+CooSession >> recorder: aRecorder [
+	recorder := aRecorder 
+]
+
 { #category : 'class handling' }
 CooSession >> removeClassFromVocabulary: ann [
 

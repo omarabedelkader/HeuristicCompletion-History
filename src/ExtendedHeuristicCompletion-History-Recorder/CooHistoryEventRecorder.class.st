@@ -819,6 +819,7 @@ CooHistoryEventRecorder >> initialize [
 
 	super initialize.
 	session := CooSession current.
+	session recorder: self.
 	serverUrl := self class defaultServerUrl.
 	category := self class defaultCategory.
 	deliveryEnabled := true.
