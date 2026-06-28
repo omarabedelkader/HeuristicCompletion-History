@@ -438,53 +438,6 @@ CooHistoryEventRecorder class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : 'events-class' }
-CooHistoryEventRecorder >> addClassItemOf: aHistoryItemClass from: anAnnouncement selectors: selectorSymbols [
-
-	| className item |
-	className := self classNameFrom: anAnnouncement selectors: selectorSymbols.
-	className ifNil: [ ^ self ].
-
-	item := aHistoryItemClass new
-		        nameOfClass: className;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        yourself.
-
-	self recordClassItem: item announcement: anAnnouncement
-]
-
-{ #category : 'events-class' }
-CooHistoryEventRecorder >> addMethodItemOf: aHistoryItemClass from: anAnnouncement oldMethod: oldCompiledMethod [
-
-	| method selector className ast oldAst deltaMessages item |
-	method := self methodFrom: anAnnouncement.
-	method ifNil: [ ^ self ].
-
-
-	selector := self selectorOf: method announcement: anAnnouncement.
-	selector ifNil: [ ^ self ].
-
-	className := self classNameFromMethod: method announcement: anAnnouncement.
-	className ifNil: [ ^ self ].
-
-	ast := self astOf: method.
-	oldAst := self astOf: oldCompiledMethod.
-	deltaMessages := self deltaMessagesFor: ast oldAst: oldAst.
-
-	item := aHistoryItemClass new
-		        selector: selector;
-		        nameOfClass: className;
-		        live: true;
-		        timestamp: DateAndTime now;
-		        yourself.
-
-	ast ifNotNil: [ item ast: ast ].
-	deltaMessages ifNotEmpty: [ item deltaMessages: deltaMessages ].
-
-	self recordMethodItem: item announcement: anAnnouncement
-]
-
 { #category : 'actions' }
 CooHistoryEventRecorder >> announcer [
 	^ announcer
@@ -493,22 +446,6 @@ CooHistoryEventRecorder >> announcer [
 { #category : 'actions' }
 CooHistoryEventRecorder >> announcer: anAnnouncer [ 
 	announcer := anAnnouncer.
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> astOf: aCompiledMethod [
-
-	aCompiledMethod ifNil: [ ^ nil ].
-
-	^ [ aCompiledMethod ast ]
-		  on: Error
-		  do: [ :ex |
-			  [ aCompiledMethod sourceNode ]
-				  on: Error
-				  do: [ :ex2 |
-					  [ OCParser parseMethod: aCompiledMethod sourceCode ]
-						  on: Error
-						  do: [ :ex3 | nil ] ] ]
 ]
 
 { #category : 'accessing' }
@@ -523,78 +460,11 @@ CooHistoryEventRecorder >> category: aSymbolOrString [
 	category := aSymbolOrString
 ]
 
-{ #category : 'events-class' }
-CooHistoryEventRecorder >> classAdded: anAnnouncement [
-
-	self
-		addClassItemOf: CooAddedClassHistoryItem
-		from: anAnnouncement
-		selectors: #(classAdded classAffected affectedClass behaviorAffected behavior)
-
-]
-
-{ #category : 'events-class' }
-CooHistoryEventRecorder >> classModified: anAnnouncement [
-
-	(self class environment includesKey: #CooModifiedClassHistoryItem)
-		ifFalse: [ ^ self ].
-
-	self
-		addClassItemOf: CooModifiedClassHistoryItem
-		from: anAnnouncement
-		selectors: #(classModified classAffected affectedClass behaviorAffected behavior)
-
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> classNameFrom: anAnnouncement selectors: selectorSymbols [
-
-	selectorSymbols do: [ :eachSelector |
-		| value |
-		value := self valueFrom: anAnnouncement selector: eachSelector.
-		value ifNotNil: [ ^ self normalizedClassNameFrom: value ] ].
-
-	^ nil
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> classNameFromMethod: aCompiledMethod announcement: anAnnouncement [
-
-	| methodClass |
-	methodClass := self valueFrom: aCompiledMethod selector: #methodClass.
-	methodClass ifNotNil: [ ^ self normalizedClassNameFrom: methodClass ].
-
-	^ self
-		  classNameFrom: anAnnouncement
-		  selectors: #(methodClass classAffected affectedClass behaviorAffected behavior classRemoved classAdded)
-]
-
-{ #category : 'events-class' }
-CooHistoryEventRecorder >> classRemoved: anAnnouncement [
-
-	self
-		addClassItemOf: CooRemovedClassHistoryItem
-		from: anAnnouncement
-		selectors: #(classRemoved classAffected affectedClass behaviorAffected behavior)
-]
-
 { #category : 'actions' }
 CooHistoryEventRecorder >> clearPendingEvents [
 
 	deliveryMutex critical: [ pendingEvents removeAll ].
 	^ self
-]
-
-{ #category : 'events-completion' }
-CooHistoryEventRecorder >> completionItemSelected: anAnnouncement [
-
-	"Keep the history-side completion interaction if the announcement has the shape CooSession expects."
-
-	[ self session addCompletionItem: anAnnouncement ]
-		on: Error
-		do: [ :ex | "Do not break completion if the announcement shape changed." ].
-
-	self enqueueEvent: (self dictionaryForCompletionAnnouncement: anAnnouncement)
 ]
 
 { #category : 'installation' }
@@ -672,19 +542,6 @@ CooHistoryEventRecorder >> deliveryEnabled: aBoolean [
 { #category : 'events-class' }
 CooHistoryEventRecorder >> deliveryProcess [ 
 	^ deliveryProcess
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> deltaMessagesFor: newAst oldAst: oldAst [
-
-	| newMessages oldMessages |
-	newAst ifNil: [ ^ #() ].
-
-	newMessages := self messageSelectorsIn: newAst.
-	oldAst ifNil: [ ^ newMessages ].
-
-	oldMessages := self messageSelectorsIn: oldAst.
-	^ newMessages difference: oldMessages
 ]
 
 { #category : 'serializing' }
@@ -845,27 +702,6 @@ CooHistoryEventRecorder >> install [
 	^ self
 ]
 
-{ #category : 'installation' }
-CooHistoryEventRecorder >> installCompletionHeuristics [
-
-	| builder |
-	builder := self class environment
-		           at: #CoASTHeuristicsResultSetBuilder
-		           ifAbsent: [ ^ self ].
-
-	((builder respondsTo: #messagesHeuristic)
-		and: [ self includesInstanceOf: CooSessionMessagesHeuristic in: builder messagesHeuristic ])
-		ifFalse: [
-			(builder respondsTo: #messagesHeuristic)
-				ifTrue: [ builder messagesHeuristic addFirst: CooSessionMessagesHeuristic new ] ].
-
-	((builder respondsTo: #variablesHeuristic)
-		and: [ self includesInstanceOf: CooSessionVariableHeuristic in: builder variablesHeuristic ])
-		ifFalse: [
-			(builder respondsTo: #variablesHeuristic)
-				ifTrue: [ builder variablesHeuristic addFirst: CooSessionVariableHeuristic new ] ]
-]
-
 { #category : 'accessing' }
 CooHistoryEventRecorder >> installed [
 
@@ -905,59 +741,6 @@ CooHistoryEventRecorder >> logToTranscript: aBoolean [
 	logToTranscript := aBoolean
 ]
 
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> messageSelectorsIn: anAst [
-
-	anAst ifNil: [ ^ #() ].
-
-	^ [
-		  (anAst allChildren
-			   select: [ :each |
-				   (each respondsTo: #isMessage) and: [ each isMessage ] ])
-			   collect: [ :each | each selector ] ]
-		  on: Error
-		  do: [ :ex | #() ]
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> methodAdded: anAnnouncement [
-
-	self
-		addMethodItemOf: CooAddedMethodHistoryItem
-		from: anAnnouncement
-		oldMethod: nil
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> methodFrom: anAnnouncement [
-
-	#(method newMethod compiledMethod) do: [ :eachSelector |
-		| value |
-		value := self valueFrom: anAnnouncement selector: eachSelector.
-		(value notNil and: [ value respondsTo: #selector ])
-			ifTrue: [ ^ value ] ].
-
-	^ nil
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> methodModified: anAnnouncement [
-
-	self
-		addMethodItemOf: CooModifiedMethodHistoryItem
-		from: anAnnouncement
-		oldMethod: (self oldMethodFrom: anAnnouncement)
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> methodRemoved: anAnnouncement [
-
-	self
-		addMethodItemOf: CooRemovedMethodHistoryItem
-		from: anAnnouncement
-		oldMethod: nil
-]
-
 { #category : 'actions' }
 CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCategory [
 
@@ -969,36 +752,6 @@ CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCatego
 		addPart: (ZnMimePart fieldName: 'data' entity: (ZnByteArrayEntity bytes: aByteArray)).
 
 	^ entity
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> normalizedClassNameFrom: anObject [
-
-	| name |
-	anObject ifNil: [ ^ nil ].
-
-	name := (anObject respondsTo: #name)
-		        ifTrue: [ anObject name ]
-		        ifFalse: [ anObject asString ].
-
-	name := name asString.
-
-	(name beginsWith: 'AnObsolete')
-		ifTrue: [ name := name allButFirst: 'AnObsolete' size ].
-
-	^ name
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
-
-	#(oldMethod previousMethod oldCompiledMethod) do: [ :eachSelector |
-		| value |
-		value := self valueFrom: anAnnouncement selector: eachSelector.
-		(value notNil and: [ value respondsTo: #selector ])
-			ifTrue: [ ^ value ] ].
-
-	^ nil
 ]
 
 { #category : 'actions' }
@@ -1062,21 +815,6 @@ CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
 ]
 
 { #category : 'actions' }
-CooHistoryEventRecorder >> recordClassItem: item announcement: anAnnouncement [
-
-	self session addClassItem: item.
-	self enqueueEvent: (self dictionaryForClassItem: item announcement: anAnnouncement)
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordMethodItem: item announcement: anAnnouncement [
-
-	self session addMethodItem: item.
-	self enqueueEvent: (self dictionaryForMethodItem: item announcement: anAnnouncement)
-
-]
-
-{ #category : 'actions' }
 CooHistoryEventRecorder >> requeueEvents: events [
 
 	deliveryMutex critical: [
@@ -1102,27 +840,6 @@ CooHistoryEventRecorder >> saveOnDisk [
 CooHistoryEventRecorder >> saveOnDisk: aBoolean [
 
 	saveOnDisk := aBoolean
-]
-
-{ #category : 'events-methods' }
-CooHistoryEventRecorder >> selectorOf: aCompiledMethod [
-
-	^ self valueFrom: aCompiledMethod selector: #selector
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> selectorOf: aCompiledMethod announcement: anAnnouncement [
-
-	| selector |
-	selector := self valueFrom: aCompiledMethod selector: #selector.
-	selector ifNotNil: [ ^ selector ].
-
-	#(selector methodSelector) do: [ :eachSelector |
-		| value |
-		value := self valueFrom: anAnnouncement selector: eachSelector.
-		value ifNotNil: [ ^ value ] ].
-
-	^ nil
 ]
 
 { #category : 'actions' }
@@ -1158,49 +875,6 @@ CooHistoryEventRecorder >> shouldDeliverPendingEvents [
 
 	^ self deliveryEnabled and: [
 		  pendingEvents size >= self deliveryBatchSize ]
-]
-
-{ #category : 'installation' }
-CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: selector [
-
-	| announcementClass |
-	announcementClass := self class environment
-		                     at: announcementName
-		                     ifAbsent: [ ^ self ].
-	
-	"When the passed class does not inherit from Announcement, we do nothing"
-	(announcementClass inheritsFrom: Announcement)
-        ifFalse: [ ^ self ].
-
-	announcer
-		when: announcementClass
-		send: selector
-		to: self.
-]
-
-{ #category : 'installation' }
-CooHistoryEventRecorder >> subscribeCodeChangeAnnouncements [
-
-	self subscribeAnnouncementNamed: #MethodAdded send: #methodAdded:.
-	self subscribeAnnouncementNamed: #MethodModified send: #methodModified:.
-	self subscribeAnnouncementNamed: #MethodRemoved send: #methodRemoved:.
-
-	self subscribeAnnouncementNamed: #ClassAdded send: #classAdded:.
-	self subscribeAnnouncementNamed: #ClassModified send: #classModified:.
-	self subscribeAnnouncementNamed: #ClassRemoved send: #classRemoved:.
-
-	self subscribeAnnouncementNamed: #CoCompletionItemSelected send: #completionItemSelected:
-]
-
-{ #category : 'helpers' }
-CooHistoryEventRecorder >> valueFrom: anObject selector: selector [
-
-	anObject ifNil: [ ^ nil ].
-	(anObject respondsTo: selector) ifFalse: [ ^ nil ].
-
-	^ [ anObject perform: selector ]
-		  on: Error
-		  do: [ :ex | nil ]
 ]
 
 { #category : 'actions' }
