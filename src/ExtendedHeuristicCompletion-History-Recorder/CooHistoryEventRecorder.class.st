@@ -198,7 +198,6 @@ Class {
 	#name : 'CooHistoryEventRecorder',
 	#superclass : 'Object',
 	#instVars : [
-		'session',
 		'announcer',
 		'installed',
 		'serverUrl',
@@ -818,8 +817,6 @@ CooHistoryEventRecorder >> includesInstanceOf: aClass in: aCollection [
 CooHistoryEventRecorder >> initialize [
 
 	super initialize.
-	session := CooSession current.
-	session recorder: self.
 	serverUrl := self class defaultServerUrl.
 	category := self class defaultCategory.
 	deliveryEnabled := true.
@@ -1154,18 +1151,6 @@ CooHistoryEventRecorder >> serverUrl [
 CooHistoryEventRecorder >> serverUrl: aStringOrZnUrl [
 
 	serverUrl := aStringOrZnUrl asZnUrl
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> session [
-
-	^ session ifNil: [ session := CooSession current ]
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> session: aCooSession [
-
-	session := aCooSession
 ]
 
 { #category : 'actions' }
