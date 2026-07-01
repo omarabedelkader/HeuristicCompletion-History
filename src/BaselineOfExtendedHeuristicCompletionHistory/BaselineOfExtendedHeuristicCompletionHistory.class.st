@@ -20,27 +20,27 @@ BaselineOfExtendedHeuristicCompletionHistory class >> showHistoryPrivacySetupIfN
 
 { #category : 'baselines' }
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
-
-	<baseline>
-	spec for: #common do: [ 
-		spec postLoadDoIt: #postLoad.
-		spec
-				baseline: 'ExtendedHeuristicCompletionBenchmarks'
-				with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
-
-		spec package: 'ExtendedHeuristicCompletion-History' ].
-		spec 
-			package: 'ExtendedHeuristicCompletion-History-Tests' 
-			with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
-		spec 
-			package: 'ExtendedHeuristicCompletion-History-Recorder' 
-			with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
-		spec 
-			package: 'ExtendedHeuristicCompletion-History-Benchmarks' 
-			with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
-		spec 
-			package: 'ExtendedHeuristicCompletion-History-Recorder-Tests' 
-			with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
+   <baseline>
+  	spec for: #common do: [ 
+    	spec postLoadDoIt: #postLoad.
+      spec
+        	baseline: 'ExtendedHeuristicCompletionBenchmarks'
+         	with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
+    	spec 
+       	package: 'ExtendedHeuristicCompletion-History-Recorder'.
+     	spec 
+        	package: 'ExtendedHeuristicCompletion-History' 
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
+     	spec 
+        	package: 'ExtendedHeuristicCompletion-History-Tests' 
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+     	spec 
+       	package: 'ExtendedHeuristicCompletion-History-Benchmarks' 
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+     	spec 
+       	package: 'ExtendedHeuristicCompletion-History-Recorder-Tests' 
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
+ 	].
 ]
 
 { #category : 'baselines' }
