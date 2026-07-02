@@ -337,6 +337,7 @@ CooSession >> initialize [
 	self resetProgramEntities.
 	self resetInteractionItems.
 	self resetNavigationItems.
+	self resetRecorder.
 ]
 
 { #category : 'low-level' }
@@ -509,6 +510,14 @@ CooSession >> resetProgramEntities [
 	classDescriptions := OrderedCollection new.
 	programEntityHandler := CooTemporalHandler new.
 	
+]
+
+{ #category : 'for benchmark' }
+CooSession >> resetRecorder [
+
+	recorder := CooHistorySettings remoteDeliveryEnabled
+		            ifTrue: [ CooHistoryEventRecorder new ]
+		            ifFalse: [ CooNullHistoryEventRecorder new ]
 ]
 
 { #category : 'navigation' }
