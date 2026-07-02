@@ -431,7 +431,7 @@ CooSession >> programEntityHandler: aCache [
 
 { #category : 'matching' }
 CooSession >> recorder [ 
-	^ recorder ifNil: [ recorder := CooHistoryEventRecorder uniqueInstance ]
+	^ recorder
 ]
 
 { #category : 'matching' }
