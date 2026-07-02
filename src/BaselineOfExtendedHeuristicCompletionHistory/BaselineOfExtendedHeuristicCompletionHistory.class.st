@@ -40,7 +40,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	
      	spec 
        	package: 'ExtendedHeuristicCompletion-History-Recorder-Tests' 
-        	with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
  	].
 ]
 
