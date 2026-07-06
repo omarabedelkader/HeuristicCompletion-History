@@ -405,9 +405,9 @@ CooHistoryEventRecorder class >> shutDown: quitting [
 
 { #category : 'system startup' }
 CooHistoryEventRecorder class >> startUp: resuming [
-
+	resuming ifTrue:[
 	(uniqueInstance notNil and: [ uniqueInstance installed ])
-		ifTrue: [ uniqueInstance install ]
+		ifTrue: [ uniqueInstance install ]]
 ]
 
 { #category : 'accessing' }
@@ -722,7 +722,8 @@ CooHistoryEventRecorder >> prepareForImageSave [
 
 	self waitForDeliveryProcess.
 	self deliverNow.
-	self clearPendingEvents.
+	lastDeliveryError 
+		ifNil: [ self clearPendingEvents. ].		
 
 	^ self
 ]
