@@ -723,7 +723,7 @@ CooHistoryEventRecorder >> prepareForImageSave [
 	self waitForDeliveryProcess.
 	self deliverNow.
 	lastDeliveryError 
-		ifNil: [ self clearPendingEvents. ].		
+		ifNil: [ self clearPendingEvents. ].
 
 	^ self
 ]
