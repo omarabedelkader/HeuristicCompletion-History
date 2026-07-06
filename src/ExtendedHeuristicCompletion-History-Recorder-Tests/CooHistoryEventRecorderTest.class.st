@@ -5,8 +5,9 @@ Class {
 		'recorder',
 		'initialSubscriptionNumber'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
-	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests'
+	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests-Core',
+	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
+	#tag : 'Core'
 }
 
 { #category : 'running' }
@@ -21,12 +22,10 @@ CooHistoryEventRecorderTest >> setUp [
 
 	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
 
-	recorder logToTranscript: false.
 	recorder deliveryEnabled: false.
 	recorder deliveryBatchSize: 100.
-	recorder saveOnDisk: false.
+
 	recorder drainPendingEvents.
-	recorder instVarNamed: 'deliveryProcess' put: nil.
 ]
 
 { #category : 'tests' }
@@ -191,29 +190,27 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testPrepareForImageSaveClearsPendingEventsWhenSaveOnDiskIsFalse [
+CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
+ 
+	recorder := CooHistoryEventRecorderMock new. 
+	
+	1 to: (recorder deliveryBatchSize) do: 
 
-	recorder saveOnDisk: false.
-	recorder enqueueEvent: (Dictionary new
+	[ :i | recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
-			 yourself).
-
+			 yourself).].
+	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents isEmpty.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testPrepareForImageSaveKeepsPendingEventsWhenSaveOnDiskIsTrue [
-
-	recorder saveOnDisk: true.
+	self assert: recorder pendingEvents size equals: 100.
+	
 	recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
-			 yourself).
-
+			 yourself). 
+	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents size equals: 1.
+	self assert: recorder pendingEvents size equals: 101.
 ]
 
 { #category : 'tests' }

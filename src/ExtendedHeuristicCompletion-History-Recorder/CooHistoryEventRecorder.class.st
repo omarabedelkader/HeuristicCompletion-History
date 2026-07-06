@@ -208,15 +208,12 @@ Class {
 		'deliveryProcess',
 		'lastDeliveryError',
 		'lastDeliveryResponse',
-		'logToTranscript',
-		'saveOnDisk',
 		'deliveryBatchSize'
 	],
 	#classInstVars : [
 		'uniqueInstance',
 		'defaultServerUrl',
 		'defaultCategory',
-		'defaultSaveOnDisk',
 		'defaultDeliveryBatchSize'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
@@ -261,12 +258,6 @@ CooHistoryEventRecorder class >> defaultCategory [
 CooHistoryEventRecorder class >> defaultDeliveryBatchSize [
 
 	^ defaultDeliveryBatchSize ifNil: [ defaultDeliveryBatchSize := 100 ]
-]
-
-{ #category : 'cleanup' }
-CooHistoryEventRecorder class >> defaultSaveOnDisk [
-
-	^ defaultSaveOnDisk ifNil: [ defaultSaveOnDisk := false ]
 ]
 
 { #category : 'cleanup' }
@@ -394,19 +385,6 @@ CooHistoryEventRecorder class >> reset [
 ]
 
 { #category : 'accessing' }
-CooHistoryEventRecorder class >> saveOnDisk [
-
-	^ self uniqueInstance saveOnDisk
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> saveOnDisk: aBoolean [
-
-	defaultSaveOnDisk := aBoolean.
-	self uniqueInstance saveOnDisk: aBoolean
-]
-
-{ #category : 'accessing' }
 CooHistoryEventRecorder class >> serverUrl [
 
 	^ self uniqueInstance serverUrl
@@ -427,9 +405,9 @@ CooHistoryEventRecorder class >> shutDown: quitting [
 
 { #category : 'system startup' }
 CooHistoryEventRecorder class >> startUp: resuming [
-
+	resuming ifTrue:[
 	(uniqueInstance notNil and: [ uniqueInstance installed ])
-		ifTrue: [ uniqueInstance install ]
+		ifTrue: [ uniqueInstance install ]]
 ]
 
 { #category : 'accessing' }
@@ -489,13 +467,11 @@ CooHistoryEventRecorder >> deliverNow [
 	[
 		lastDeliveryResponse := self putBytes: bytes category: self category.
 		lastDeliveryError := nil.
-		self log: 'CooHistoryEventRecorder delivered ', events size printString, ' event(s).'
 	]
 		on: Error
 		do: [ :ex |
 			lastDeliveryError := ex.
-			self requeueEvents: events.
-			self log: 'CooHistoryEventRecorder delivery failed: ', ex description ].
+			self requeueEvents: events.].
 
 	^ lastDeliveryResponse
 ]
@@ -656,7 +632,6 @@ CooHistoryEventRecorder >> imageInfo [
 	info := Dictionary new.
 	info at: #imageVersion put: (self safeValue: [ SystemVersion current version asString ] ifError: [ nil ]).
 	info at: #latestUpdate put: (self safeValue: [ SystemVersion current commitHash asString ] ifError: [ nil ]).
-	info at: #imagePath put: (self safeValue: [ SmalltalkImage current imagePath asString ] ifError: [ nil ]).
 	info at: #imageHash put: (self safeValue: [ SmalltalkImage current imagePath hash ] ifError: [ nil ]).
 	info at: #sessionUUID put: (self safeValue: [ SmalltalkImage current session id asString ] ifError: [ nil ]).
 	info at: #sessionCreationTime put: (self safeValue: [ SmalltalkImage current session creationTime asString ] ifError: [ nil ]).
@@ -680,9 +655,7 @@ CooHistoryEventRecorder >> initialize [
 	pendingEvents := OrderedCollection new.
 	deliveryMutex := Mutex new.
 	installed := false.
-	saveOnDisk := self class defaultSaveOnDisk.
 	deliveryBatchSize := self class defaultDeliveryBatchSize.
-	logToTranscript := true
 ]
 
 { #category : 'actions' }
@@ -697,7 +670,7 @@ CooHistoryEventRecorder >> install [
 	
 
 	installed := true.
-	self log: 'CooHistoryEventRecorder installed. Server: ', self serverUrl asString.
+	
 
 	^ self
 ]
@@ -718,27 +691,6 @@ CooHistoryEventRecorder >> lastDeliveryError [
 CooHistoryEventRecorder >> lastDeliveryResponse [
 
 	^ lastDeliveryResponse
-]
-
-{ #category : 'logging' }
-CooHistoryEventRecorder >> log: aString [
-
-	logToTranscript ifFalse: [ ^ self ].
-	Transcript
-		show: aString;
-		cr
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> logToTranscript [
-
-	^ logToTranscript
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> logToTranscript: aBoolean [
-
-	logToTranscript := aBoolean
 ]
 
 { #category : 'actions' }
@@ -768,11 +720,10 @@ CooHistoryEventRecorder >> pendingEvents [
 { #category : 'system startup' }
 CooHistoryEventRecorder >> prepareForImageSave [
 
-	self saveOnDisk ifTrue: [ ^ self ].
-
 	self waitForDeliveryProcess.
 	self deliverNow.
-	self clearPendingEvents.
+	lastDeliveryError 
+		ifNil: [ self clearPendingEvents. ].
 
 	^ self
 ]
@@ -807,8 +758,6 @@ CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
 		enforceHttpSuccess: true;
 		entity: entity.
 
-	logToTranscript ifTrue: [ client logToTranscript ].
-
 	client put.
 
 	^ client response
@@ -828,18 +777,6 @@ CooHistoryEventRecorder >> safeValue: aBlock ifError: errorBlock [
 	^ [ aBlock value ]
 		  on: Error
 		  do: [ :ex | errorBlock value ]
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> saveOnDisk [
-
-	^ saveOnDisk ifNil: [ saveOnDisk := self class defaultSaveOnDisk ]
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> saveOnDisk: aBoolean [
-
-	saveOnDisk := aBoolean
 ]
 
 { #category : 'actions' }
