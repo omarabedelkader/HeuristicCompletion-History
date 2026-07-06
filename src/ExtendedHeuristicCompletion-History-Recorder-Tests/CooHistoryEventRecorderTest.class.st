@@ -5,8 +5,9 @@ Class {
 		'recorder',
 		'initialSubscriptionNumber'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
-	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests'
+	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests-Core',
+	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
+	#tag : 'Core'
 }
 
 { #category : 'running' }
@@ -25,7 +26,6 @@ CooHistoryEventRecorderTest >> setUp [
 	recorder deliveryBatchSize: 100.
 
 	recorder drainPendingEvents.
-	recorder instVarNamed: 'deliveryProcess' put: nil.
 ]
 
 { #category : 'tests' }
@@ -192,6 +192,8 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
  
+	recorder := CooHistoryEventRecorderMock new. 
+	
 	1 to: (recorder deliveryBatchSize) do: 
 
 	[ :i | recorder enqueueEvent: (Dictionary new
