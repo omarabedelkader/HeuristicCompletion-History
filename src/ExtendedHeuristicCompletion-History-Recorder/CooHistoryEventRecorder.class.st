@@ -220,8 +220,7 @@ Class {
 		'defaultDeliveryBatchSize'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
-	#package : 'ExtendedHeuristicCompletion-History',
-	#tag : 'Recorder'
+	#package : 'ExtendedHeuristicCompletion-History-Recorder'
 }
 
 { #category : 'organization' }

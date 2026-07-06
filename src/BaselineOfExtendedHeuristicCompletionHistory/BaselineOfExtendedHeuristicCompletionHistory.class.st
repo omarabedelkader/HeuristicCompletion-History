@@ -28,7 +28,10 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
          	with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
 
      	spec 
-        	package: 'ExtendedHeuristicCompletion-History'.
+       	package: 'ExtendedHeuristicCompletion-History-Recorder'.
+     	spec 
+        	package: 'ExtendedHeuristicCompletion-History' 
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
 	
      	spec 
         	package: 'ExtendedHeuristicCompletion-History-Tests' 
@@ -40,7 +43,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	
      	spec 
        	package: 'ExtendedHeuristicCompletion-History-Recorder-Tests' 
-        	with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+        	with: [ spec requires: 'ExtendedHeuristicCompletion-History-Recorder' ].
  	].
 ]
 
