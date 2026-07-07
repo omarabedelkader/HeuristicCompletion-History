@@ -198,7 +198,6 @@ Class {
 	#name : 'CooHistoryEventRecorder',
 	#superclass : 'Object',
 	#instVars : [
-		'announcer',
 		'installed',
 		'serverUrl',
 		'category',
@@ -416,16 +415,6 @@ CooHistoryEventRecorder class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder >> announcer [
-	^ announcer
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> announcer: anAnnouncer [ 
-	announcer := anAnnouncer.
-]
-
 { #category : 'accessing' }
 CooHistoryEventRecorder >> category [
 
@@ -448,7 +437,6 @@ CooHistoryEventRecorder >> clearPendingEvents [
 { #category : 'installation' }
 CooHistoryEventRecorder >> deinstall [
 
-	announcer ifNotNil: [ announcer unsubscribe: self ].
 	installed := false
 ]
 
@@ -664,9 +652,9 @@ CooHistoryEventRecorder >> install [
 	self deinstall.
 	self class registerForImageLifecycle.
 
-	announcer := self class codeChangeAnnouncer.
+	Iceberg announcer unsubscribe: self.
 	
-	announcer when: IcePushed send: #onIcePushed: to: self class uniqueInstance.
+	Iceberg announcer when: IceCommited send: #onIcePushed: to: self. 
 	
 
 	installed := true.
@@ -746,11 +734,11 @@ CooHistoryEventRecorder >> printOn: aStream [
 { #category : 'actions' }
 CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
 
-	| client entity |
+	| logger entity |
 	entity := self multipartEntityForBytes: aByteArray category: aCategory.
 
-	client := ZnClient new.
-	client
+	logger := ZnClient new.
+	logger 
 		beOneShot;
 		timeout: 5;
 		numberOfRetries: 0;
@@ -758,9 +746,9 @@ CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
 		enforceHttpSuccess: true;
 		entity: entity.
 
-	client put.
+	logger put.
 
-	^ client response
+	^ logger response
 ]
 
 { #category : 'actions' }

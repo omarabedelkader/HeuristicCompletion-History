@@ -17,12 +17,7 @@ CooHistoryEventRecorderTest >> setUp [
 	"Put here a common initialization logic for tests"
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
-	"never reset subscription, it will damage the image"
-	recorder announcer: CooHistoryEventRecorder codeChangeAnnouncer.
-
-	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
-
-	recorder deliveryEnabled: false.
+	recorder deliveryEnabled: true.
 	recorder deliveryBatchSize: 100.
 
 	recorder drainPendingEvents.
