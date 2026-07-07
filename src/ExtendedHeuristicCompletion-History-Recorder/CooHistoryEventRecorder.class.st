@@ -198,6 +198,7 @@ Class {
 	#name : 'CooHistoryEventRecorder',
 	#superclass : 'Object',
 	#instVars : [
+		'logger',
 		'installed',
 		'serverUrl',
 		'category',
@@ -277,12 +278,6 @@ CooHistoryEventRecorder class >> deinstall [
 	<script>
 
 	self uniqueInstance deinstall
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverNow [
-
-	^ self uniqueInstance deliverNow
 ]
 
 { #category : 'accessing' }
@@ -453,7 +448,7 @@ CooHistoryEventRecorder >> deliverNow [
 	bytes := self serializePayload: payload.
 
 	[
-		lastDeliveryResponse := self putBytes: bytes category: self category.
+		logger log: bytes.
 		lastDeliveryError := nil.
 	]
 		on: Error
@@ -535,7 +530,7 @@ CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
    dictionary at: #index put: (self safeValue: [ anItem index ] ifError: [ nil ]).
    dictionary at: #selectedItem put: (self safeValue: [ anItem selectedItem asString ] ifError: [ nil ]).
 	dictionary at: #fetchers put: (self safeValue: [ anItem fetchers ] ifError: [ #() ]).
-	dictionary at: #choices put: (self safeValue: anItem choices  ifError: [ #() ]).
+	dictionary at: #choices put: (self safeValue: [ anItem choices collect: [ :each | each asString ] ] ifError: [ #() ]).
    ^ dictionary
 ]
 
@@ -659,6 +654,10 @@ CooHistoryEventRecorder >> install [
 
 	installed := true.
 	
+	logger := EMEventRecorderLogger new.
+	
+	logger authorizeDataSending.
+	
 
 	^ self
 ]
@@ -679,19 +678,6 @@ CooHistoryEventRecorder >> lastDeliveryError [
 CooHistoryEventRecorder >> lastDeliveryResponse [
 
 	^ lastDeliveryResponse
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCategory [
-
-	| entity |
-	entity := ZnMultiPartFormDataEntity new.
-
-	entity
-		addPart: (ZnMimePart fieldName: 'category' value: aCategory asString);
-		addPart: (ZnMimePart fieldName: 'data' entity: (ZnByteArrayEntity bytes: aByteArray)).
-
-	^ entity
 ]
 
 { #category : 'actions' }
@@ -729,26 +715,6 @@ CooHistoryEventRecorder >> printOn: aStream [
 		space;
 		nextPutAll: 'pending=';
 		print: pendingEvents size
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
-
-	| logger entity |
-	entity := self multipartEntityForBytes: aByteArray category: aCategory.
-
-	logger := ZnClient new.
-	logger 
-		beOneShot;
-		timeout: 5;
-		numberOfRetries: 0;
-		url: self serverUrl;
-		enforceHttpSuccess: true;
-		entity: entity.
-
-	logger put.
-
-	^ logger response
 ]
 
 { #category : 'actions' }
