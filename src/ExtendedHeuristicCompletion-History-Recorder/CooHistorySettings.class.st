@@ -50,7 +50,7 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [
+CooHistorySettings class >> openFirstLaunchSetup [ 
 
 	| accepted sendRemote message |
 
@@ -81,19 +81,14 @@ Do you agree to enable history data collection?'.
 			remoteDeliveryEnabled := sendRemote.
 
 			sendRemote
-				ifTrue: [ 
-					CooHistoryEventRecorder uniqueInstance.
-					CooHistoryEventRecorder install.
-					]
-				ifFalse: [ 
-					CooNullHistoryEventRecorder uniqueInstance. 
-					CooNullHistoryEventRecorder install. 
-					].
-			]
+				ifTrue: [ CooHistoryEventRecorder enableDelivery. CooHistoryEventRecorder install ]
+				ifFalse: [ CooHistoryEventRecorder disableDelivery. CooNullHistoryEventRecorder install ].
+
+			 ]
 		ifFalse: [
 			remoteDeliveryEnabled := false.
-			CooNullHistoryEventRecorder uniqueInstance. 
-			CooNullHistoryEventRecorder install.  ]
+			CooHistoryEventRecorder deinstall.
+			CooHistoryEventRecorder disableDelivery ]
 ]
 
 { #category : 'accessing' }
