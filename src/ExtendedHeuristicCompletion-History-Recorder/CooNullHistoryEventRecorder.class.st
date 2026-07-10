@@ -22,6 +22,11 @@ CooNullHistoryEventRecorder >> deliveryEnabled [
 ]
 
 { #category : 'actions' }
+CooNullHistoryEventRecorder >> disableDelivery [
+	CooSession current recorder ifNil: [ CooSession current recorder: self class uniqueInstance ]
+]
+
+{ #category : 'actions' }
 CooNullHistoryEventRecorder >> enableDelivery [
 	CooSession current recorder: CooHistoryEventRecorder uniqueInstance 
 ]
