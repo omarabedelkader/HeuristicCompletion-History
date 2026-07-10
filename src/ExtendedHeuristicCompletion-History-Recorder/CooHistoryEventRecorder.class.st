@@ -489,7 +489,7 @@ CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliveryEnabled [
 
-	^ deliveryEnabled
+	^ true
 ]
 
 { #category : 'actions' }
