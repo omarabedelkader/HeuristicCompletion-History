@@ -489,7 +489,7 @@ CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliveryEnabled [
 
-	^ deliveryEnabled
+	^ true
 ]
 
 { #category : 'actions' }
@@ -553,7 +553,7 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 { #category : 'actions' }
 CooHistoryEventRecorder >> disableDelivery [
 
-	deliveryEnabled := false
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance.
 ]
 
 { #category : 'actions' }
@@ -571,8 +571,7 @@ CooHistoryEventRecorder >> drainPendingEvents [
 
 { #category : 'actions' }
 CooHistoryEventRecorder >> enableDelivery [
-
-	deliveryEnabled := true
+	CooSession current recorder ifNil: [ CooSession current recorder: self class uniqueInstance ]
 ]
 
 { #category : 'actions' }
