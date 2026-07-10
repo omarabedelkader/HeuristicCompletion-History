@@ -118,7 +118,11 @@ CooHistorySettings class >> remoteDeliveryEnabled [
 CooHistorySettings class >> remoteDeliveryEnabled: aBoolean [
 
 	remoteDeliveryEnabled := aBoolean.
-
+	"To wire the settings with the recorder and session, we can have something like this : 
+	aBoolean
+		ifTrue: [ CooSession current recorder: CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance ]
+	"
 	aBoolean
 		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
 		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
