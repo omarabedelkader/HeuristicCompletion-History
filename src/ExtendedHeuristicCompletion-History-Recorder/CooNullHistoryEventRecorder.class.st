@@ -21,6 +21,11 @@ CooNullHistoryEventRecorder >> deliveryEnabled [
 	^ false
 ]
 
+{ #category : 'actions' }
+CooNullHistoryEventRecorder >> enableDelivery [
+	CooSession current recorder: CooHistoryEventRecorder uniqueInstance 
+]
+
 { #category : 'initialization' }
 CooNullHistoryEventRecorder >> initialize [ 
 	super initialize.

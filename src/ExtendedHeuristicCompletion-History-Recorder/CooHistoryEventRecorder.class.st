@@ -553,7 +553,7 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 { #category : 'actions' }
 CooHistoryEventRecorder >> disableDelivery [
 
-	deliveryEnabled := false
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance.
 ]
 
 { #category : 'actions' }

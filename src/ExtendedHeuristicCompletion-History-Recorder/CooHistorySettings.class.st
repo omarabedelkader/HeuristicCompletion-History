@@ -52,7 +52,7 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 { #category : 'accessing' }
 CooHistorySettings class >> openFirstLaunchSetup [
 
-	| accepted sendRemote message recorder |
+	| accepted sendRemote message |
 
 	message := 'This plugin records Pharo development history.
 
@@ -120,8 +120,8 @@ CooHistorySettings class >> remoteDeliveryEnabled: aBoolean [
 	remoteDeliveryEnabled := aBoolean.
 
 	aBoolean
-		ifTrue: [ CooHistoryEventRecorder enableDelivery ]
-		ifFalse: [ CooHistoryEventRecorder disableDelivery ]
+		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
 ]
 
 { #category : 'accessing' }

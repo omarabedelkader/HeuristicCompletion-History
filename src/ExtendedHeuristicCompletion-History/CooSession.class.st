@@ -430,7 +430,10 @@ CooSession >> programEntityHandler: aCache [
 
 { #category : 'matching' }
 CooSession >> recorder [ 
-	^ recorder ifNil: [ recorder := CooHistoryEventRecorder uniqueInstance ]
+	^ recorder ifNil: [ CooHistorySettings remoteDeliveryEnabled 
+			ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
+		]
 ]
 
 { #category : 'matching' }
