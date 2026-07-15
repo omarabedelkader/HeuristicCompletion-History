@@ -571,7 +571,7 @@ CooHistoryEventRecorder >> drainPendingEvents [
 
 { #category : 'actions' }
 CooHistoryEventRecorder >> enableDelivery [
-	CooSession current recorder ifNil: [ CooSession current recorder: self class uniqueInstance ]
+	CooSession current recorder: self class uniqueInstance
 ]
 
 { #category : 'actions' }

@@ -52,43 +52,34 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 { #category : 'accessing' }
 CooHistorySettings class >> openFirstLaunchSetup [ 
 
-	| accepted sendRemote message |
+	| choice accepted sendRemote |
 
-	message := 'This plugin records Pharo development history.
+	[
+		choice := UIManager default
+			chooseFrom: #('Yes' 'No' 'View Wiki')
+			title: 'Do you agree to send collected history events to the configured server?'.
+		choice = 3
+			ifTrue: [
+				WebBrowser
+					openOn: 'https://github.com/omarabedelkader/HeuristicCompletion-History' asUrl ]
+	] doWhileTrue: [ choice = 3 ].
 
-It may collect:
-- method additions, modifications, and removals
-- class additions, modifications, and removals
-- completion selections, when available
-- timestamps
-- image/session metadata
-
-This history is used for history-based completion.
-
-Do you agree to enable history data collection?'.
-
-	accepted := UIManager default confirm: message.
-
+	sendRemote := choice = 1.
+	accepted := sendRemote.
+	
 	firstLaunchCompleted := true.
 	privacyConsentAccepted := accepted.
 	historyRecordingEnabled := accepted.
-
-	accepted
-		ifTrue: [
-			sendRemote := UIManager default confirm:
-				'Do you also agree to send collected history events to the configured server?'.
-
-			remoteDeliveryEnabled := sendRemote.
-
-			sendRemote
-				ifTrue: [ CooHistoryEventRecorder enableDelivery. CooHistoryEventRecorder install ]
-				ifFalse: [ CooHistoryEventRecorder disableDelivery. CooNullHistoryEventRecorder install ].
-
-			 ]
+	remoteDeliveryEnabled := sendRemote.
+	
+	sendRemote
+		ifTrue: [ 
+			CooHistoryEventRecorder enableDelivery. 
+			CooHistoryEventRecorder install ]
 		ifFalse: [
-			remoteDeliveryEnabled := false.
 			CooHistoryEventRecorder deinstall.
-			CooHistoryEventRecorder disableDelivery ]
+			CooHistoryEventRecorder disableDelivery.
+			CooNullHistoryEventRecorder install ]
 ]
 
 { #category : 'accessing' }
