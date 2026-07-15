@@ -295,6 +295,16 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 	
 ]
 
+{ #category : 'recording' }
+CooSession >> disableDelivery [ 
+	recorder disableDelivery 
+]
+
+{ #category : 'recording' }
+CooSession >> enableDelivey [ 
+	recorder enableDelivery
+]
+
 { #category : 'for benchmark' }
 CooSession >> existingMethodDescriptions [
 

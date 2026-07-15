@@ -61,7 +61,7 @@ CooHistorySettings class >> openFirstLaunchSetup [
 		choice = 3
 			ifTrue: [
 				WebBrowser
-					openOn: 'https://github.com/omarabedelkader/HeuristicCompletion-History' asUrl ]
+					openOn: 'https://github.com/omarabedelkader/HeuristicCompletion-History/wiki/Data-Collection-and-Storage' asUrl ]
 	] doWhileTrue: [ choice = 3 ].
 
 	sendRemote := choice = 1.
