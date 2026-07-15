@@ -337,6 +337,7 @@ CooSession >> initialize [
 	self resetProgramEntities.
 	self resetInteractionItems.
 	self resetNavigationItems.
+	self resetRecorder.
 ]
 
 { #category : 'low-level' }
@@ -430,10 +431,7 @@ CooSession >> programEntityHandler: aCache [
 
 { #category : 'matching' }
 CooSession >> recorder [ 
-	^ recorder ifNil: [ CooHistorySettings remoteDeliveryEnabled 
-			ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
-		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
-		]
+	^ recorder
 ]
 
 { #category : 'matching' }
@@ -512,6 +510,13 @@ CooSession >> resetProgramEntities [
 	classDescriptions := OrderedCollection new.
 	programEntityHandler := CooTemporalHandler new.
 	
+]
+
+{ #category : 'for benchmark' }
+CooSession >> resetRecorder [ 
+	CooHistorySettings remoteDeliveryEnabled 
+		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
 ]
 
 { #category : 'navigation' }
