@@ -57,28 +57,36 @@ I do two things at the same time:
 
    The serialized bytes are sent to the serverUrl using an HTTP PUT request.
 
-   The HTTP request uses the same general wire shape as the old EventRecorder
-   server protocol: multipart/form-data with two fields:
+   The HTTP request uses the Pharo-XP/EventRecorder server protocol:
+   multipart/form-data with two fields:
 
      - category
      - data
 
-   The category field contains my category, usually #history.
+   The category field contains a STON dictionary with the PX metadata keys:
+
+     - category
+     - experienceId
+     - participantUUID
+     - taskOrSurveyId
+
    The data field contains the serialized event envelope.
 
 Typical usage:
 
 	CooHistoryEventRecorder reset.
-	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
-	CooHistoryEventRecorder category: #history.
+	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
+	CooHistoryEventRecorder category: #complishon.
 	CooHistoryEventRecorder saveOnDisk: false.
 	CooHistoryEventRecorder install.
 
-Events are kept in memory and sent in batches. By default, the recorder sends
-pending events when the queue reaches 100 records. It also tries to send pending
-events before the image is saved. When saveOnDisk is false, pending events are
-cleared before the image is saved so event data is not persisted in the image
-file.
+Events are kept in memory and sent in batches. By default, the low-level
+recorder sends pending events when the queue reaches 100 records. The
+Metacello first-launch consent flow changes the batch size to 1 after the user
+answers Yes, so installed users begin sending events immediately. The recorder
+also tries to send pending events before the image is saved. When saveOnDisk is
+false, pending events are cleared before the image is saved so event data is not
+persisted in the image file.
 
 To force delivery manually:
 
@@ -99,7 +107,7 @@ failed.
 
 Examples of local Transcript logs:
 
-	CooHistoryEventRecorder installed. Server: https://rmod-xp.lille.inria.fr/
+	CooHistoryEventRecorder installed. Server: https://rmod-xp.lille.inria.fr/complishon
 	CooHistoryEventRecorder delivered 1 event(s).
 	CooHistoryEventRecorder delivery failed: ConnectionTimedOut: ...
 
@@ -111,8 +119,8 @@ Server-side logging depends on the server implementation.
 From the server point of view, each delivery is an HTTP PUT request containing a
 multipart form. A server that logs only HTTP requests may show something like:
 
-	PUT /gt/events 200
-	category=history
+	PUT /complishon 200
+	category={#category:#complishon,#experienceId:#complishon,...}
 	data=1842 bytes
 
 A server that decodes the data field can log the actual history content, for
@@ -161,16 +169,16 @@ and, optionally:
 Installation:
 ```
 CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080/gt/events'.
-CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080'.
+CooHistoryEventRecorder category: #complishon.
 CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
 
 ```
 CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
-CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
+CooHistoryEventRecorder category: #complishon.
 CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
@@ -251,7 +259,7 @@ CooHistoryEventRecorder class >> codeChangeAnnouncer [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultCategory [
 
-	^ defaultCategory ifNil: [ defaultCategory := #history ]
+	^ defaultCategory ifNil: [ defaultCategory := #complishon ]
 ]
 
 { #category : 'cleanup' }
@@ -265,12 +273,12 @@ CooHistoryEventRecorder class >> defaultServerUrl [
 
 	"Default server used by the DebuggingSpy/EventRecorder setup.
 	Change this with:
-		CooHistoryEventRecorder serverUrl: 'http://localhost:8080/gt/events'
+		CooHistoryEventRecorder serverUrl: 'http://localhost:8080'
 	or:
-		CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'"
+		CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'"
 
 	^ defaultServerUrl ifNil: [
-		  defaultServerUrl := 'https://rmod-xp.lille.inria.fr/' asZnUrl ]
+		  defaultServerUrl := 'https://rmod-xp.lille.inria.fr/complishon' asZnUrl ]
 ]
 
 { #category : 'cleanup' }
@@ -438,7 +446,7 @@ CooHistoryEventRecorder >> deinstall [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliverNow [
 
-	| events payload bytes |
+	| events payload bytes response |
 	self deliveryEnabled ifFalse: [ ^ self ].
 
 	events := self drainPendingEvents.
@@ -448,12 +456,14 @@ CooHistoryEventRecorder >> deliverNow [
 	bytes := self serializePayload: payload.
 
 	[
-		logger log: bytes.
+		response := self putBytes: bytes category: self category.
+		lastDeliveryResponse := response.
 		lastDeliveryError := nil.
 	]
 		on: Error
 		do: [ :ex |
 			lastDeliveryError := ex.
+			lastDeliveryResponse := nil.
 			self requeueEvents: events.].
 
 	^ lastDeliveryResponse
@@ -489,7 +499,7 @@ CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliveryEnabled [
 
-	^ true
+	^ deliveryEnabled ifNil: [ deliveryEnabled := true ]
 ]
 
 { #category : 'actions' }
@@ -553,6 +563,7 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 { #category : 'actions' }
 CooHistoryEventRecorder >> disableDelivery [
 
+	deliveryEnabled := false.
 	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance.
 ]
 
@@ -571,6 +582,7 @@ CooHistoryEventRecorder >> drainPendingEvents [
 
 { #category : 'actions' }
 CooHistoryEventRecorder >> enableDelivery [
+	deliveryEnabled := true.
 	CooSession current recorder: self class uniqueInstance
 ]
 
@@ -621,6 +633,14 @@ CooHistoryEventRecorder >> imageInfo [
 	^ info
 ]
 
+{ #category : 'serializing' }
+CooHistoryEventRecorder >> participantUUID [
+
+	^ self
+		  safeValue: [ GlobalIdentifier uniqueInstance computerUUID asString ]
+		  ifError: [ nil ]
+]
+
 { #category : 'helpers' }
 CooHistoryEventRecorder >> includesInstanceOf: aClass in: aCollection [
 
@@ -653,9 +673,7 @@ CooHistoryEventRecorder >> install [
 
 	installed := true.
 	
-	logger := EMEventRecorderLogger new.
-	
-	logger authorizeDataSending.
+	logger := nil.
 	
 
 	^ self
@@ -699,6 +717,42 @@ CooHistoryEventRecorder >> prepareForImageSave [
 		ifNil: [ self clearPendingEvents. ].
 
 	^ self
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> putBytes: bytes category: aCategory [
+
+	| entity |
+	entity := ZnMultiPartFormDataEntity new.
+	entity
+		addPart: (ZnMimePart
+			 fieldName: 'category'
+			 value: (STON toString: (self pxMetadataForCategory: aCategory)));
+		addPart: (ZnMimePart
+			 fieldName: 'data'
+			 entity: (ZnByteArrayEntity bytes: bytes)).
+
+	^ ZnClient new
+		  beOneShot;
+		  timeout: 10;
+		  numberOfRetries: 0;
+		  url: self serverUrl;
+		  enforceHttpSuccess: true;
+		  entity: entity;
+		  put;
+		  response
+]
+
+{ #category : 'serializing' }
+CooHistoryEventRecorder >> pxMetadataForCategory: aCategory [
+
+	| metadata |
+	metadata := Dictionary new.
+	metadata at: 'category' put: aCategory asString.
+	metadata at: 'experienceId' put: 'complishon'.
+	metadata at: 'participantUUID' put: self participantUUID.
+	metadata at: 'taskOrSurveyId' put: nil.
+	^ metadata
 ]
 
 { #category : 'printing' }

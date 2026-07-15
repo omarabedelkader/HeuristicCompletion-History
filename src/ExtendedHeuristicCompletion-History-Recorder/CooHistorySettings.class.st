@@ -26,6 +26,37 @@ CooHistorySettings class >> firstLaunchCompleted: aBoolean [
 	firstLaunchCompleted := aBoolean
 ]
 
+{ #category : 'actions' }
+CooHistorySettings class >> confirmRemoteDeliveryDisable [
+
+	| choice |
+	[
+	choice := UIManager default
+		          chooseFrom: #('Keep sending' 'Turn off')
+		          title:
+		          'Dommage :( Sending history events helps us improve the completion engine inside Pharo. Do you still want to turn it off?' ]
+		on: Error
+		do: [ :ex | ^ true ].
+
+	^ choice = 2
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> enableRemoteHistoryRecording [
+
+	firstLaunchCompleted := true.
+	privacyConsentAccepted := true.
+	historyRecordingEnabled := true.
+	remoteDeliveryEnabled := true.
+
+	CooSession install.
+	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
+	CooHistoryEventRecorder category: #complishon.
+	CooHistoryEventRecorder install.
+	CooHistoryEventRecorder deliveryBatchSize: 1.
+	CooHistoryEventRecorder enableDelivery
+]
+
 { #category : 'accessing' }
 CooHistorySettings class >> historyRecordingEnabled [
 
@@ -41,45 +72,51 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 				self openFirstLaunchSetup.
 				^ self ].
 
-			historyRecordingEnabled := true.
-			CooHistoryEventRecorder install ]
+			self enableRemoteHistoryRecording ]
 		ifFalse: [
-			historyRecordingEnabled := false.
-			CooHistoryEventRecorder deinstall.
-			CooHistoryEventRecorder disableDelivery ]
+			self remoteDeliveryEnabled
+				ifFalse: [
+					self useNullHistoryRecorder.
+					^ self ].
+
+			self confirmRemoteDeliveryDisable
+				ifTrue: [ self useNullHistoryRecorder ]
+				ifFalse: [ historyRecordingEnabled := true ] ]
 ]
 
 { #category : 'accessing' }
 CooHistorySettings class >> openFirstLaunchSetup [ 
 
-	| choice accepted sendRemote |
+	| choice sendRemote |
 
 	[
 		choice := UIManager default
-			chooseFrom: #('Yes' 'No' 'View Wiki')
-			title: 'Do you agree to send collected history events to the configured server?'.
+			          chooseFrom: #('Yes' 'No' 'View Privacy')
+			          title:
+			          'Help improve Pharo completion by sending history events to the configured server?'.
 		choice = 3
-			ifTrue: [
-				WebBrowser
-					openOn: 'https://github.com/omarabedelkader/HeuristicCompletion-History/wiki/Data-Collection-and-Storage' asUrl ]
+			ifTrue: [ self openPrivacyPage ]
 	] doWhileTrue: [ choice = 3 ].
 
 	sendRemote := choice = 1.
-	accepted := sendRemote.
 	
 	firstLaunchCompleted := true.
-	privacyConsentAccepted := accepted.
-	historyRecordingEnabled := accepted.
-	remoteDeliveryEnabled := sendRemote.
+	privacyConsentAccepted := sendRemote.
 	
 	sendRemote
-		ifTrue: [ 
-			CooHistoryEventRecorder enableDelivery. 
-			CooHistoryEventRecorder install ]
+		ifTrue: [ self enableRemoteHistoryRecording ]
 		ifFalse: [
-			CooHistoryEventRecorder deinstall.
-			CooHistoryEventRecorder disableDelivery.
-			CooNullHistoryEventRecorder install ]
+			historyRecordingEnabled := false.
+			remoteDeliveryEnabled := false.
+			self useNullHistoryRecorder ]
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> openPrivacyPage [
+
+	WebBrowser openOn:
+		'https://github.com/omarabedelkader/HeuristicCompletion-History/wiki/Data-Collection-and-Storage'
+			asUrl
 ]
 
 { #category : 'accessing' }
@@ -103,15 +140,29 @@ CooHistorySettings class >> remoteDeliveryEnabled [
 { #category : 'accessing' }
 CooHistorySettings class >> remoteDeliveryEnabled: aBoolean [
 
-	remoteDeliveryEnabled := aBoolean.
-	"To wire the settings with the recorder and session, we can have something like this : 
 	aBoolean
-		ifTrue: [ CooSession current recorder: CooHistoryEventRecorder uniqueInstance ]
-		ifFalse: [ CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance ]
-	"
-	aBoolean
-		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
-		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
+		ifTrue: [ self enableRemoteHistoryRecording ]
+		ifFalse: [
+			self remoteDeliveryEnabled
+				ifFalse: [
+					self useNullHistoryRecorder.
+					^ self ].
+
+			self confirmRemoteDeliveryDisable
+				ifTrue: [ self useNullHistoryRecorder ]
+				ifFalse: [ remoteDeliveryEnabled := true ] ]
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> useNullHistoryRecorder [
+
+	historyRecordingEnabled := false.
+	remoteDeliveryEnabled := false.
+
+	CooHistoryEventRecorder disableDelivery.
+	CooHistoryEventRecorder deinstall.
+	CooNullHistoryEventRecorder install.
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
 ]
 
 { #category : 'accessing' }

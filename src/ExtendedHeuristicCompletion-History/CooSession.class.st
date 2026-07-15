@@ -297,12 +297,20 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 
 { #category : 'recording' }
 CooSession >> disableDelivery [ 
-	recorder disableDelivery 
+
+	CooHistorySettings remoteDeliveryEnabled: false
+]
+
+{ #category : 'recording' }
+CooSession >> enableDelivery [
+
+	CooHistorySettings remoteDeliveryEnabled: true
 ]
 
 { #category : 'recording' }
 CooSession >> enableDelivey [ 
-	recorder enableDelivery
+
+	self enableDelivery
 ]
 
 { #category : 'for benchmark' }

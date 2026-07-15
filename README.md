@@ -20,14 +20,4 @@ Metacello new
   load.
 ```
 
-Recorder setup:
-
-```smalltalk
-CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/'.
-CooHistoryEventRecorder category: #history.
-CooHistoryEventRecorder saveOnDisk: false.
-CooHistoryEventRecorder install.
-```
-
-The recorder keeps events in memory, updates `CooSession`, and sends to the server only when the pending queue reaches 100 records, when `saveOnDisk: false` flushes before image save, or when `deliverNow` is called manually.
+After the Metacello load, the privacy dialog asks `Yes`, `No`, or `View Privacy`. `Yes` installs `CooSession`, enables the real recorder, points it at `https://rmod-xp.lille.inria.fr/complishon`, and sets the delivery batch size to `1`, so the first recorded event is sent immediately under the `complishon/complishon` collector path. `No` installs the null recorder and sends nothing.
