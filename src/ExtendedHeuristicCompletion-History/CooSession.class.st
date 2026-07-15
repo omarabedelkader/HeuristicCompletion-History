@@ -514,7 +514,7 @@ CooSession >> resetProgramEntities [
 
 { #category : 'for benchmark' }
 CooSession >> resetRecorder [ 
-	CooHistorySettings remoteDeliveryEnabled 
+	recorder := CooHistorySettings remoteDeliveryEnabled 
 		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
 		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
 ]
