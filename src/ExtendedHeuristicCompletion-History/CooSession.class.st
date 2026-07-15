@@ -295,6 +295,16 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 	
 ]
 
+{ #category : 'recording' }
+CooSession >> disableDelivery [ 
+	recorder disableDelivery 
+]
+
+{ #category : 'recording' }
+CooSession >> enableDelivery [ 
+	recorder enableDelivery 
+]
+
 { #category : 'for benchmark' }
 CooSession >> existingMethodDescriptions [
 
@@ -512,7 +522,7 @@ CooSession >> resetProgramEntities [
 	
 ]
 
-{ #category : 'for benchmark' }
+{ #category : 'initialization' }
 CooSession >> resetRecorder [ 
 	recorder := CooHistorySettings remoteDeliveryEnabled 
 		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]

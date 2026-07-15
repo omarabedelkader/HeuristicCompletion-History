@@ -1,3 +1,10 @@
+"
+I represent the null value for the recorder.
+I am meant to be used when the user does not give their consent to send their data to the remote server.
+I do not record items nor send them to the remote.
+
+I can be instantiated either when the image starts and the user selects NO on the popup, or when the user disables this extension from the settings menu, or manually via CooSession >> disableDelivery.
+"
 Class {
 	#name : 'CooNullHistoryEventRecorder',
 	#superclass : 'CooHistoryEventRecorder',
