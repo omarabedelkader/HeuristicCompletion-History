@@ -30,6 +30,12 @@ CooHistoryEventRecorderMock >> deliverDataNow [
 	self error
 ]
 
+{ #category : 'logging' }
+CooHistoryEventRecorderMock >> deliverLoggerDataNow [
+
+	^ self deliverDataNow
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorderMock >> deliveryAttempts [
 

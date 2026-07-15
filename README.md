@@ -20,4 +20,4 @@ Metacello new
   load.
 ```
 
-After the Metacello load, the privacy dialog asks `Yes`, `No`, or `View Privacy`. `Yes` installs `CooSession`, creates and authorizes `EMEventRecorderLogger`, points EventRecorder at `https://rmod-xp.lille.inria.fr/complishon`, sets the delivery batch size to `1`, and immediately logs a recorder lifecycle event under the `complishon/complishon` collector path. Later history events are logged through the same ExperimentModel/EventRecorder stack as soon as they are recorded. `No` installs the null recorder and sends nothing.
+After the Metacello load, the privacy dialog asks `Yes`, `No`, or `View Privacy`. `Yes` installs `CooSession`, creates and authorizes `EMEventRecorderLogger`, points EventRecorder at the configured `CooHistoryEventRecorder serverUrl`, sets the delivery batch size to `1`, and immediately logs a recorder lifecycle event under the `complishon/complishon` collector path. Later history events are logged through the same ExperimentModel/EventRecorder stack as soon as they are recorded. `No` installs the null recorder and sends nothing.

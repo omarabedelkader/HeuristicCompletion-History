@@ -411,7 +411,7 @@ CooHistoryEventRecorder >> deliverNow [
 
 	[
 		eventLogger := self logger.
-		eventLogger deliverDataNow.
+		self deliverLoggerDataNow.
 		lastDeliveryResponse := eventLogger.
 		lastDeliveryError := nil.
 		self clearPendingEvents
@@ -422,6 +422,13 @@ CooHistoryEventRecorder >> deliverNow [
 			lastDeliveryResponse := nil ].
 
 	^ lastDeliveryResponse
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliverLoggerDataNow [
+
+	PXEventRecorder uniqueInstance delivery packAndDeliver: false.
+	^ self
 ]
 
 { #category : 'actions' }
