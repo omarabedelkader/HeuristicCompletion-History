@@ -1,6 +1,6 @@
 "
 ""
-I am a self-contained event recorder for the Extended Heuristic Completion history system.
+I am the event recorder for the Extended Heuristic Completion history system.
 
 My job is to listen to Pharo code-change announcements and convert them into
 history items understood by CooSession.
@@ -37,56 +37,28 @@ I do two things at the same time:
 
    I do not modify the history package. I only feed it with events.
 
-2. I send a serialized copy of the events to a remote server.
+2. I pass a copy of each event to the existing ExperimentModel recorder stack.
 
-   Every event is also converted into a Dictionary and added to my internal
-   pendingEvents queue.
+   Every event is converted into a Dictionary, added to my internal
+   pendingEvents queue, and, once I am installed, logged through
+   EMEventRecorderLogger.
 
-   The queued events are wrapped in an envelope dictionary with metadata such as:
-
-     - schema name
-     - recorder class name
-     - timestamp
-     - category
-     - image information
-     - session information
-     - the list of recorded events
-
-   The envelope is serialized using STON when STON is available. If STON is not
-   available, I fall back to printString.
-
-   The serialized bytes are sent to the serverUrl using an HTTP PUT request.
-
-   The HTTP request uses the Pharo-XP/EventRecorder server protocol:
-   multipart/form-data with two fields:
-
-     - category
-     - data
-
-   The category field contains a STON dictionary with the PX metadata keys:
-
-     - category
-     - experienceId
-     - participantUUID
-     - taskOrSurveyId
-
-   The data field contains the serialized event envelope.
+   EMEventRecorderLogger uses PXEventCollector, PXEventRecorder, EventRecorder
+   packing, and the Pharo-XP multipart protocol. I do not build the HTTP
+   multipart request myself.
 
 Typical usage:
 
 	CooHistoryEventRecorder reset.
 	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
 	CooHistoryEventRecorder category: #complishon.
-	CooHistoryEventRecorder saveOnDisk: false.
 	CooHistoryEventRecorder install.
 
-Events are kept in memory and sent in batches. By default, the low-level
-recorder sends pending events when the queue reaches 100 records. The
+Events are kept in memory and logged through EMEventRecorderLogger. By default,
+the recorder asks the logger to deliver when the queue reaches 100 records. The
 Metacello first-launch consent flow changes the batch size to 1 after the user
 answers Yes, so installed users begin sending events immediately. The recorder
-also tries to send pending events before the image is saved. When saveOnDisk is
-false, pending events are cleared before the image is saved so event data is not
-persisted in the image file.
+also asks the logger to deliver pending events before the image is saved.
 
 To force delivery manually:
 
@@ -99,21 +71,6 @@ To inspect delivery state:
 
 Logging behavior:
 
-I log locally to the Pharo Transcript when logToTranscript is true.
-
-The local Transcript logs are only diagnostic messages for the developer. They
-tell whether I was installed, whether delivery succeeded, or whether delivery
-failed.
-
-Examples of local Transcript logs:
-
-	CooHistoryEventRecorder installed. Server: https://rmod-xp.lille.inria.fr/complishon
-	CooHistoryEventRecorder delivered 1 event(s).
-	CooHistoryEventRecorder delivery failed: ConnectionTimedOut: ...
-
-These Transcript messages are not the server log. They only describe what
-happened inside the Pharo image.
-
 Server-side logging depends on the server implementation.
 
 From the server point of view, each delivery is an HTTP PUT request containing a
@@ -121,12 +78,11 @@ multipart form. A server that logs only HTTP requests may show something like:
 
 	PUT /complishon 200
 	category={#category:#complishon,#experienceId:#complishon,...}
-	data=1842 bytes
+	data=EventRecorder-packed bytes
 
 A server that decodes the data field can log the actual history content, for
 example:
 
-	schema=coo-history-event-recorder-v1
 	event.kind=method
 	event.event=added
 	event.className=MyClass
@@ -134,16 +90,10 @@ example:
 
 Delivery failure handling:
 
-When delivery succeeds, the sent events are removed from pendingEvents.
-
-When delivery fails, I store the exception in lastDeliveryError and put the
-events back into pendingEvents, so they can be retried later by sending
-deliverNow again.
-
-I intentionally do not depend on DebuggingSpy, PXEventRecorder,
-PXEventCollector, EREventRecorderSettings, ERPrivacy, or the old EventRecorder
-delivery classes. This makes me usable in Pharo 14 even when those classes do
-not exist.
+When EMEventRecorderLogger accepts an event, EventRecorder is responsible for
+packing, delivery, and retrying failed HTTP sends. When my call to the logger
+raises an exception, I store it in lastDeliveryError and keep the event in
+pendingEvents so it can be retried later by sending deliverNow again.
 
 I am meant to be the bridge between:
 
@@ -159,7 +109,11 @@ and, optionally:
 
 	CooHistoryEventRecorder
 		->
-	HTTP server storing the serialized event logs
+	EMEventRecorderLogger
+		->
+	PXEventRecorder/EventRecorder
+		->
+	HTTP server storing the EventRecorder logs
 ""
 
 
@@ -171,7 +125,6 @@ Installation:
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080'.
 CooHistoryEventRecorder category: #complishon.
-CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
 
@@ -179,7 +132,6 @@ CooHistoryEventRecorder install.
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
 CooHistoryEventRecorder category: #complishon.
-CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
 
@@ -332,6 +284,12 @@ CooHistoryEventRecorder class >> lastDeliveryError [
 	^ self uniqueInstance lastDeliveryError
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> recordRemoteDeliveryEnabled [
+
+	^ self uniqueInstance recordRemoteDeliveryEnabled
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorder class >> lastDeliveryResponse [
 
@@ -446,25 +404,22 @@ CooHistoryEventRecorder >> deinstall [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliverNow [
 
-	| events payload bytes response |
+	| eventLogger |
 	self deliveryEnabled ifFalse: [ ^ self ].
-
-	events := self drainPendingEvents.
-	events isEmpty ifTrue: [ ^ self ].
-
-	payload := self envelopeFor: events.
-	bytes := self serializePayload: payload.
+	self installed ifFalse: [ ^ self ].
+	pendingEvents isEmpty ifTrue: [ ^ self ].
 
 	[
-		response := self putBytes: bytes category: self category.
-		lastDeliveryResponse := response.
+		eventLogger := self logger.
+		eventLogger deliverDataNow.
+		lastDeliveryResponse := eventLogger.
 		lastDeliveryError := nil.
+		self clearPendingEvents
 	]
 		on: Error
 		do: [ :ex |
 			lastDeliveryError := ex.
-			lastDeliveryResponse := nil.
-			self requeueEvents: events.].
+			lastDeliveryResponse := nil ].
 
 	^ lastDeliveryResponse
 ]
@@ -545,6 +500,32 @@ CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
 ]
 
 { #category : 'serializing' }
+CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
+
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #recorder.
+	dictionary at: #event put: anEventSymbol.
+	dictionary at: #timestamp put: DateAndTime now asString.
+	dictionary at: #serverUrl put: self serverUrl asString.
+	dictionary at: #category put: self category asString.
+	^ dictionary
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRecorderEvent: anEventSymbol [
+
+	self enqueueEvent: (self dictionaryForRecorderEvent: anEventSymbol).
+	^ self
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRemoteDeliveryEnabled [
+
+	^ self recordRecorderEvent: #remoteDeliveryEnabled
+]
+
+{ #category : 'serializing' }
 CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnouncement [
 
 	| dictionary |
@@ -594,22 +575,11 @@ CooHistoryEventRecorder >> enqueueEvent: anEventDictionary [
 		pendingEvents addLast: anEventDictionary.
 		shouldDeliver := self shouldDeliverPendingEvents ].
 
+	(self installed and: [ self deliveryEnabled ])
+		ifTrue: [ self logEvent: anEventDictionary ].
+
 	shouldDeliver ifTrue: [ self deliverNowInBackground ].
 	^ self
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> envelopeFor: eventDictionaries [
-
-	| envelope |
-	envelope := Dictionary new.
-	envelope at: #schema put: 'coo-history-event-recorder-v1'.
-	envelope at: #recorder put: self class name.
-	envelope at: #timestamp put: DateAndTime now asString.
-	envelope at: #category put: self category asString.
-	envelope at: #image put: self imageInfo.
-	envelope at: #events put: eventDictionaries asArray.
-	^ envelope
 ]
 
 { #category : 'actions' }
@@ -617,28 +587,6 @@ CooHistoryEventRecorder >> flush [
 
     pendingEvents isEmpty ifTrue: [ ^ self ].
     self deliverNowInBackground.
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> imageInfo [
-
-	| info |
-	info := Dictionary new.
-	info at: #imageVersion put: (self safeValue: [ SystemVersion current version asString ] ifError: [ nil ]).
-	info at: #latestUpdate put: (self safeValue: [ SystemVersion current commitHash asString ] ifError: [ nil ]).
-	info at: #imageHash put: (self safeValue: [ SmalltalkImage current imagePath hash ] ifError: [ nil ]).
-	info at: #sessionUUID put: (self safeValue: [ SmalltalkImage current session id asString ] ifError: [ nil ]).
-	info at: #sessionCreationTime put: (self safeValue: [ SmalltalkImage current session creationTime asString ] ifError: [ nil ]).
-	info at: #computerUUID put: (self safeValue: [ GlobalIdentifier uniqueInstance computerUUID asString ] ifError: [ nil ]).
-	^ info
-]
-
-{ #category : 'serializing' }
-CooHistoryEventRecorder >> participantUUID [
-
-	^ self
-		  safeValue: [ GlobalIdentifier uniqueInstance computerUUID asString ]
-		  ifError: [ nil ]
 ]
 
 { #category : 'helpers' }
@@ -673,10 +621,44 @@ CooHistoryEventRecorder >> install [
 
 	installed := true.
 	
-	logger := nil.
+	logger := self newLogger.
 	
 
 	^ self
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> logger [
+
+	^ logger ifNil: [ logger := self newLogger ]
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> logEvent: anEventDictionary [
+
+	[
+		self logger log: anEventDictionary.
+		lastDeliveryError := nil ]
+		on: Error
+		do: [ :ex | lastDeliveryError := ex ].
+	^ self
+]
+
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> configureEventRecorderSettings [
+
+	EREventRecorderSettings url: self serverUrl.
+	^ self
+]
+
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> newLogger [
+
+	| eventRecorderLogger |
+	eventRecorderLogger := EMEventRecorderLogger new.
+	self configureEventRecorderSettings.
+	eventRecorderLogger authorizeDataSending.
+	^ eventRecorderLogger
 ]
 
 { #category : 'accessing' }
@@ -719,42 +701,6 @@ CooHistoryEventRecorder >> prepareForImageSave [
 	^ self
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder >> putBytes: bytes category: aCategory [
-
-	| entity |
-	entity := ZnMultiPartFormDataEntity new.
-	entity
-		addPart: (ZnMimePart
-			 fieldName: 'category'
-			 value: (STON toString: (self pxMetadataForCategory: aCategory)));
-		addPart: (ZnMimePart
-			 fieldName: 'data'
-			 entity: (ZnByteArrayEntity bytes: bytes)).
-
-	^ ZnClient new
-		  beOneShot;
-		  timeout: 10;
-		  numberOfRetries: 0;
-		  url: self serverUrl;
-		  enforceHttpSuccess: true;
-		  entity: entity;
-		  put;
-		  response
-]
-
-{ #category : 'serializing' }
-CooHistoryEventRecorder >> pxMetadataForCategory: aCategory [
-
-	| metadata |
-	metadata := Dictionary new.
-	metadata at: 'category' put: aCategory asString.
-	metadata at: 'experienceId' put: 'complishon'.
-	metadata at: 'participantUUID' put: self participantUUID.
-	metadata at: 'taskOrSurveyId' put: nil.
-	^ metadata
-]
-
 { #category : 'printing' }
 CooHistoryEventRecorder >> printOn: aStream [
 
@@ -784,21 +730,6 @@ CooHistoryEventRecorder >> safeValue: aBlock ifError: errorBlock [
 	^ [ aBlock value ]
 		  on: Error
 		  do: [ :ex | errorBlock value ]
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> serializePayload: payloadDictionary [
-
-	| string ston |
-	ston := self class environment at: #STON ifAbsent: [ nil ].
-
-	string := ston
-		          ifNil: [ payloadDictionary printString ]
-		          ifNotNil: [ ston toString: payloadDictionary ].
-
-	^ [ string utf8Encoded ]
-		  on: Error
-		  do: [ :ex | string asByteArray ]
 ]
 
 { #category : 'accessing' }

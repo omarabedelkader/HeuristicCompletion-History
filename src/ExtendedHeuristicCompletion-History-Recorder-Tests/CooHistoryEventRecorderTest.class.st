@@ -145,6 +145,53 @@ CooHistoryEventRecorderTest >> testEnqueueEventPreservesOrder [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testRecordRemoteDeliveryEnabledAttemptsImmediateDelivery [
+
+	recorder := CooHistoryEventRecorderMock new.
+	recorder deliveryEnabled: true.
+	recorder deliveryBatchSize: 1.
+	recorder install.
+
+	recorder recordRemoteDeliveryEnabled.
+	recorder waitForDeliveryProcess.
+
+	self assert: recorder loggedEvents size equals: 1.
+	self assert: (recorder loggedEvents first at: #kind) equals: #recorder.
+	self assert: (recorder loggedEvents first at: #event) equals: #remoteDeliveryEnabled.
+	self assert: recorder deliveryAttempts equals: 1.
+	self assert: recorder lastDeliveryError notNil.
+	self assert: recorder pendingEvents size equals: 1.
+	self assert: (recorder pendingEvents first at: #kind) equals: #recorder.
+	self assert: (recorder pendingEvents first at: #event) equals: #remoteDeliveryEnabled.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testInstallAuthorizesEventRecorderLogger [
+
+	recorder := CooHistoryEventRecorderMock new.
+	recorder install.
+
+	self assert: recorder installed.
+	self assert: recorder authorized.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testRecorderEventDictionary [
+
+	| event |
+	recorder serverUrl: 'https://example.com/collector'.
+	recorder category: #complishon.
+
+	event := recorder dictionaryForRecorderEvent: #remoteDeliveryEnabled.
+
+	self assert: (event at: #kind) equals: #recorder.
+	self assert: (event at: #event) equals: #remoteDeliveryEnabled.
+	self assert: (event at: #serverUrl) equals: 'https://example.com/collector'.
+	self assert: (event at: #category) equals: 'complishon'.
+	self assert: (event includesKey: #timestamp).
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testIncludesInstanceOfDoesNotMatchSubclass [
 
     | collection |
@@ -188,6 +235,7 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
  
 	recorder := CooHistoryEventRecorderMock new. 
+	recorder install.
 	
 	1 to: (recorder deliveryBatchSize) do: 
 
@@ -281,18 +329,6 @@ CooHistoryEventRecorderTest >> testRequeueEventsPreservesOrder [
     self assert: recorder pendingEvents first equals: events first.
     self assert: (recorder pendingEvents at: 2) equals: events second.
     self assert: recorder pendingEvents last equals: existingEvents first.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testSerializePayload [
-	| payload result expectedString |
-
-	payload := Dictionary new.
-	payload at: 'key' put: 'value'.
-	expectedString := STON toString: payload .
-	result := recorder serializePayload: payload.
-
-	self assert: result equals: expectedString utf8Encoded.
 ]
 
 { #category : 'tests' }

@@ -52,9 +52,10 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 	CooSession install.
 	CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
 	CooHistoryEventRecorder category: #complishon.
-	CooHistoryEventRecorder install.
 	CooHistoryEventRecorder deliveryBatchSize: 1.
-	CooHistoryEventRecorder enableDelivery
+	CooHistoryEventRecorder install.
+	CooHistoryEventRecorder enableDelivery.
+	CooHistoryEventRecorder recordRemoteDeliveryEnabled
 ]
 
 { #category : 'accessing' }
