@@ -198,7 +198,7 @@ Class {
 	#name : 'CooHistoryEventRecorder',
 	#superclass : 'Object',
 	#instVars : [
-		'announcer',
+		'logger',
 		'installed',
 		'serverUrl',
 		'category',
@@ -278,12 +278,6 @@ CooHistoryEventRecorder class >> deinstall [
 	<script>
 
 	self uniqueInstance deinstall
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverNow [
-
-	^ self uniqueInstance deliverNow
 ]
 
 { #category : 'accessing' }
@@ -416,16 +410,6 @@ CooHistoryEventRecorder class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder >> announcer [
-	^ announcer
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> announcer: anAnnouncer [ 
-	announcer := anAnnouncer.
-]
-
 { #category : 'accessing' }
 CooHistoryEventRecorder >> category [
 
@@ -448,7 +432,6 @@ CooHistoryEventRecorder >> clearPendingEvents [
 { #category : 'installation' }
 CooHistoryEventRecorder >> deinstall [
 
-	announcer ifNotNil: [ announcer unsubscribe: self ].
 	installed := false
 ]
 
@@ -465,7 +448,7 @@ CooHistoryEventRecorder >> deliverNow [
 	bytes := self serializePayload: payload.
 
 	[
-		lastDeliveryResponse := self putBytes: bytes category: self category.
+		logger log: bytes.
 		lastDeliveryError := nil.
 	]
 		on: Error
@@ -506,7 +489,7 @@ CooHistoryEventRecorder >> deliveryBatchSize: anInteger [
 { #category : 'actions' }
 CooHistoryEventRecorder >> deliveryEnabled [
 
-	^ deliveryEnabled
+	^ true
 ]
 
 { #category : 'actions' }
@@ -547,7 +530,7 @@ CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
    dictionary at: #index put: (self safeValue: [ anItem index ] ifError: [ nil ]).
    dictionary at: #selectedItem put: (self safeValue: [ anItem selectedItem asString ] ifError: [ nil ]).
 	dictionary at: #fetchers put: (self safeValue: [ anItem fetchers ] ifError: [ #() ]).
-	dictionary at: #choices put: (self safeValue: anItem choices  ifError: [ #() ]).
+	dictionary at: #choices put: (self safeValue: [ anItem choices collect: [ :each | each asString ] ] ifError: [ #() ]).
    ^ dictionary
 ]
 
@@ -570,7 +553,7 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 { #category : 'actions' }
 CooHistoryEventRecorder >> disableDelivery [
 
-	deliveryEnabled := false
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance.
 ]
 
 { #category : 'actions' }
@@ -588,8 +571,7 @@ CooHistoryEventRecorder >> drainPendingEvents [
 
 { #category : 'actions' }
 CooHistoryEventRecorder >> enableDelivery [
-
-	deliveryEnabled := true
+	CooSession current recorder ifNil: [ CooSession current recorder: self class uniqueInstance ]
 ]
 
 { #category : 'actions' }
@@ -664,12 +646,16 @@ CooHistoryEventRecorder >> install [
 	self deinstall.
 	self class registerForImageLifecycle.
 
-	announcer := self class codeChangeAnnouncer.
+	Iceberg announcer unsubscribe: self.
 	
-	announcer when: IcePushed send: #onIcePushed: to: self class uniqueInstance.
+	Iceberg announcer when: IceCommited send: #onIcePushed: to: self. 
 	
 
 	installed := true.
+	
+	logger := EMEventRecorderLogger new.
+	
+	logger authorizeDataSending.
 	
 
 	^ self
@@ -691,19 +677,6 @@ CooHistoryEventRecorder >> lastDeliveryError [
 CooHistoryEventRecorder >> lastDeliveryResponse [
 
 	^ lastDeliveryResponse
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCategory [
-
-	| entity |
-	entity := ZnMultiPartFormDataEntity new.
-
-	entity
-		addPart: (ZnMimePart fieldName: 'category' value: aCategory asString);
-		addPart: (ZnMimePart fieldName: 'data' entity: (ZnByteArrayEntity bytes: aByteArray)).
-
-	^ entity
 ]
 
 { #category : 'actions' }
@@ -741,26 +714,6 @@ CooHistoryEventRecorder >> printOn: aStream [
 		space;
 		nextPutAll: 'pending=';
 		print: pendingEvents size
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> putBytes: aByteArray category: aCategory [
-
-	| client entity |
-	entity := self multipartEntityForBytes: aByteArray category: aCategory.
-
-	client := ZnClient new.
-	client
-		beOneShot;
-		timeout: 5;
-		numberOfRetries: 0;
-		url: self serverUrl;
-		enforceHttpSuccess: true;
-		entity: entity.
-
-	client put.
-
-	^ client response
 ]
 
 { #category : 'actions' }

@@ -50,7 +50,7 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [
+CooHistorySettings class >> openFirstLaunchSetup [ 
 
 	| accepted sendRemote message |
 
@@ -81,10 +81,10 @@ Do you agree to enable history data collection?'.
 			remoteDeliveryEnabled := sendRemote.
 
 			sendRemote
-				ifTrue: [ CooHistoryEventRecorder enableDelivery ]
-				ifFalse: [ CooHistoryEventRecorder disableDelivery ].
+				ifTrue: [ CooHistoryEventRecorder enableDelivery. CooHistoryEventRecorder install ]
+				ifFalse: [ CooHistoryEventRecorder disableDelivery. CooNullHistoryEventRecorder install ].
 
-			CooHistoryEventRecorder install ]
+			 ]
 		ifFalse: [
 			remoteDeliveryEnabled := false.
 			CooHistoryEventRecorder deinstall.
@@ -113,10 +113,14 @@ CooHistorySettings class >> remoteDeliveryEnabled [
 CooHistorySettings class >> remoteDeliveryEnabled: aBoolean [
 
 	remoteDeliveryEnabled := aBoolean.
-
+	"To wire the settings with the recorder and session, we can have something like this : 
 	aBoolean
-		ifTrue: [ CooHistoryEventRecorder enableDelivery ]
-		ifFalse: [ CooHistoryEventRecorder disableDelivery ]
+		ifTrue: [ CooSession current recorder: CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance ]
+	"
+	aBoolean
+		ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
+		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
 ]
 
 { #category : 'accessing' }
