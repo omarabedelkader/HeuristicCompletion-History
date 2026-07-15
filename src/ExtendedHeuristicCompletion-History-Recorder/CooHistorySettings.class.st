@@ -85,27 +85,55 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [ 
-
-	| choice sendRemote presenter window semaphore |
+CooHistorySettings class >> openFirstLaunchSetup [
+	| choice sendRemote presenter window semaphore label yesButton noButton privacyButton |
 	choice := nil.
 	semaphore := Semaphore new.
+
 	presenter := SpPresenter new.
-	
+
+	label := presenter newLabel.
+	label label: 'Would you like to send anonymous usage history remotely?'.
+
+	yesButton := presenter newButton.
+	yesButton
+		label: 'Yes';
+		action: [ choice := #yes. window close ].
+
+	noButton := presenter newButton.
+	noButton
+		label: 'No';
+		action: [ choice := #no. window close ].
+
+	privacyButton := presenter newButton.
+	privacyButton
+		label: 'Privacy Policy';
+		action: [ choice := #privacy. window close ].
+
 	presenter
-    layout: (SpBoxLayout newVertical
-        spacing: 2;
-        yourself).
-		window := presenter open.
-	window label: 'First Launch Setup'.
-	window initialExtent: 500@120.
+		layout: (SpBoxLayout newVertical
+			spacing: 2;
+			add: label expand: false;
+			add: (SpBoxLayout newHorizontal
+				spacing: 2;
+				add: yesButton expand: false;
+				add: noButton expand: false;
+				add: privacyButton expand: false;
+				yourself) expand: false;
+			yourself);
+		initialExtent: 500@120.
+
+	window := presenter open.
+	window title: 'First Launch Setup'.
 	window whenClosedDo: [ semaphore signal ].
+
 	semaphore wait.
-	
+
 	choice = #privacy
 		ifTrue: [
 			self openPrivacyPage.
 			^ self openFirstLaunchSetup ].
+
 	sendRemote := choice = #yes.
 	firstLaunchCompleted := true.
 	privacyConsentAccepted := sendRemote.
