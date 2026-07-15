@@ -14,18 +14,6 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
 }
 
-{ #category : 'accessing' }
-CooHistorySettings class >> firstLaunchCompleted [
-
-	^ firstLaunchCompleted ifNil: [ firstLaunchCompleted := false ]
-]
-
-{ #category : 'accessing' }
-CooHistorySettings class >> firstLaunchCompleted: aBoolean [
-
-	firstLaunchCompleted := aBoolean
-]
-
 { #category : 'actions' }
 CooHistorySettings class >> confirmRemoteDeliveryDisable [
 
@@ -58,6 +46,18 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 ]
 
 { #category : 'accessing' }
+CooHistorySettings class >> firstLaunchCompleted [
+
+	^ firstLaunchCompleted ifNil: [ firstLaunchCompleted := false ]
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> firstLaunchCompleted: aBoolean [
+
+	firstLaunchCompleted := aBoolean
+]
+
+{ #category : 'accessing' }
 CooHistorySettings class >> historyRecordingEnabled [
 
 	^ historyRecordingEnabled ifNil: [ historyRecordingEnabled := false ]
@@ -87,22 +87,28 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 { #category : 'accessing' }
 CooHistorySettings class >> openFirstLaunchSetup [ 
 
-	| choice sendRemote |
-
-	[
-		choice := UIManager default
-			          chooseFrom: #('Yes' 'No' 'View Privacy')
-			          title:
-			          'Help improve Pharo completion by sending history events to the configured server?'.
-		choice = 3
-			ifTrue: [ self openPrivacyPage ]
-	] doWhileTrue: [ choice = 3 ].
-
-	sendRemote := choice = 1.
+	| choice sendRemote presenter window semaphore |
+	choice := nil.
+	semaphore := Semaphore new.
+	presenter := SpPresenter new.
 	
+	presenter
+    layout: (SpBoxLayout newVertical
+        spacing: 2;
+        yourself).
+		window := presenter open.
+	window label: 'First Launch Setup'.
+	window initialExtent: 500@120.
+	window whenClosedDo: [ semaphore signal ].
+	semaphore wait.
+	
+	choice = #privacy
+		ifTrue: [
+			self openPrivacyPage.
+			^ self openFirstLaunchSetup ].
+	sendRemote := choice = #yes.
 	firstLaunchCompleted := true.
 	privacyConsentAccepted := sendRemote.
-	
 	sendRemote
 		ifTrue: [ self enableRemoteHistoryRecording ]
 		ifFalse: [
@@ -153,18 +159,6 @@ CooHistorySettings class >> remoteDeliveryEnabled: aBoolean [
 				ifFalse: [ remoteDeliveryEnabled := true ] ]
 ]
 
-{ #category : 'actions' }
-CooHistorySettings class >> useNullHistoryRecorder [
-
-	historyRecordingEnabled := false.
-	remoteDeliveryEnabled := false.
-
-	CooHistoryEventRecorder disableDelivery.
-	CooHistoryEventRecorder deinstall.
-	CooNullHistoryEventRecorder install.
-	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
-]
-
 { #category : 'accessing' }
 CooHistorySettings class >> settingsOn: aBuilder [
 
@@ -188,4 +182,16 @@ CooHistorySettings class >> settingsOn: aBuilder [
 				setSelector: #remoteDeliveryEnabled:;
 				default: self remoteDeliveryEnabled;
 				description: 'When enabled, collected history events are sent to the configured server URL.' ]
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> useNullHistoryRecorder [
+
+	historyRecordingEnabled := false.
+	remoteDeliveryEnabled := false.
+
+	CooHistoryEventRecorder disableDelivery.
+	CooHistoryEventRecorder deinstall.
+	CooNullHistoryEventRecorder install.
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
 ]

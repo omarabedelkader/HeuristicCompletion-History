@@ -284,16 +284,16 @@ CooHistoryEventRecorder class >> lastDeliveryError [
 	^ self uniqueInstance lastDeliveryError
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> recordRemoteDeliveryEnabled [
-
-	^ self uniqueInstance recordRemoteDeliveryEnabled
-]
-
 { #category : 'accessing' }
 CooHistoryEventRecorder class >> lastDeliveryResponse [
 
 	^ self uniqueInstance lastDeliveryResponse
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> recordRemoteDeliveryEnabled [
+
+	^ self uniqueInstance recordRemoteDeliveryEnabled
 ]
 
 { #category : 'system startup' }
@@ -395,10 +395,24 @@ CooHistoryEventRecorder >> clearPendingEvents [
 	^ self
 ]
 
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> configureEventRecorderSettings [
+
+	EREventRecorderSettings url: self serverUrl.
+	^ self
+]
+
 { #category : 'installation' }
 CooHistoryEventRecorder >> deinstall [
 
 	installed := false
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliverLoggerDataNow [
+
+	PXEventRecorder uniqueInstance delivery packAndDeliver: false.
+	^ self
 ]
 
 { #category : 'actions' }
@@ -422,13 +436,6 @@ CooHistoryEventRecorder >> deliverNow [
 			lastDeliveryResponse := nil ].
 
 	^ lastDeliveryResponse
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> deliverLoggerDataNow [
-
-	PXEventRecorder uniqueInstance delivery packAndDeliver: false.
-	^ self
 ]
 
 { #category : 'actions' }
@@ -507,32 +514,6 @@ CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
 ]
 
 { #category : 'serializing' }
-CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
-
-	| dictionary |
-	dictionary := Dictionary new.
-	dictionary at: #kind put: #recorder.
-	dictionary at: #event put: anEventSymbol.
-	dictionary at: #timestamp put: DateAndTime now asString.
-	dictionary at: #serverUrl put: self serverUrl asString.
-	dictionary at: #category put: self category asString.
-	^ dictionary
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordRecorderEvent: anEventSymbol [
-
-	self enqueueEvent: (self dictionaryForRecorderEvent: anEventSymbol).
-	^ self
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordRemoteDeliveryEnabled [
-
-	^ self recordRecorderEvent: #remoteDeliveryEnabled
-]
-
-{ #category : 'serializing' }
 CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnouncement [
 
 	| dictionary |
@@ -545,6 +526,19 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 	dictionary at: #live put: true.
 	dictionary at: #deltaMessages put: (item deltaMessages collect: [ :each | each asString ]) asArray.
 	dictionary at: #announcementClass put: anAnnouncement class name.
+	^ dictionary
+]
+
+{ #category : 'serializing' }
+CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
+
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #recorder.
+	dictionary at: #event put: anEventSymbol.
+	dictionary at: #timestamp put: DateAndTime now asString.
+	dictionary at: #serverUrl put: self serverUrl asString.
+	dictionary at: #category put: self category asString.
 	^ dictionary
 ]
 
@@ -635,40 +629,6 @@ CooHistoryEventRecorder >> install [
 ]
 
 { #category : 'accessing' }
-CooHistoryEventRecorder >> logger [
-
-	^ logger ifNil: [ logger := self newLogger ]
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> logEvent: anEventDictionary [
-
-	[
-		self logger log: anEventDictionary.
-		lastDeliveryError := nil ]
-		on: Error
-		do: [ :ex | lastDeliveryError := ex ].
-	^ self
-]
-
-{ #category : 'initialization' }
-CooHistoryEventRecorder >> configureEventRecorderSettings [
-
-	EREventRecorderSettings url: self serverUrl.
-	^ self
-]
-
-{ #category : 'initialization' }
-CooHistoryEventRecorder >> newLogger [
-
-	| eventRecorderLogger |
-	eventRecorderLogger := EMEventRecorderLogger new.
-	self configureEventRecorderSettings.
-	eventRecorderLogger authorizeDataSending.
-	^ eventRecorderLogger
-]
-
-{ #category : 'accessing' }
 CooHistoryEventRecorder >> installed [
 
 	^ installed
@@ -684,6 +644,33 @@ CooHistoryEventRecorder >> lastDeliveryError [
 CooHistoryEventRecorder >> lastDeliveryResponse [
 
 	^ lastDeliveryResponse
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> logEvent: anEventDictionary [
+
+	[
+		self logger log: anEventDictionary.
+		lastDeliveryError := nil ]
+		on: Error
+		do: [ :ex | lastDeliveryError := ex ].
+	^ self
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> logger [
+
+	^ logger ifNil: [ logger := self newLogger ]
+]
+
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> newLogger [
+
+	| eventRecorderLogger |
+	eventRecorderLogger := EMEventRecorderLogger new.
+	self configureEventRecorderSettings.
+	eventRecorderLogger authorizeDataSending.
+	^ eventRecorderLogger
 ]
 
 { #category : 'actions' }
@@ -721,6 +708,19 @@ CooHistoryEventRecorder >> printOn: aStream [
 		space;
 		nextPutAll: 'pending=';
 		print: pendingEvents size
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRecorderEvent: anEventSymbol [
+
+	self enqueueEvent: (self dictionaryForRecorderEvent: anEventSymbol).
+	^ self
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRemoteDeliveryEnabled [
+
+	^ self recordRecorderEvent: #remoteDeliveryEnabled
 ]
 
 { #category : 'actions' }
