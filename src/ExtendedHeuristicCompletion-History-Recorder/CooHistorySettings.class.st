@@ -123,9 +123,8 @@ CooHistorySettings class >> openFirstLaunchSetup [
 				yourself) expand: false;
 			yourself).
 
-	window := presenter open.
+	window := presenter openDialog.
 	window title: 'First Launch Setup'.
-	window extent: 330@90.
 	window whenClosedDo: [ semaphore signal ].
 	semaphore wait.
 
