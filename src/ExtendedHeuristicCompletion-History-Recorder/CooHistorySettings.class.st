@@ -89,7 +89,6 @@ CooHistorySettings class >> openFirstLaunchSetup [
 	| choice sendRemote presenter window semaphore label yesButton noButton privacyButton |
 	choice := nil.
 	semaphore := Semaphore new.
-
 	presenter := SpPresenter new.
 
 	label := presenter newLabel.
@@ -112,21 +111,22 @@ CooHistorySettings class >> openFirstLaunchSetup [
 
 	presenter
 		layout: (SpBoxLayout newVertical
-			spacing: 2;
+			spacing: 5;
+			hAlignCenter;
 			add: label expand: false;
 			add: (SpBoxLayout newHorizontal
-				spacing: 2;
+				spacing: 5;
+				hAlignCenter;
 				add: yesButton expand: false;
 				add: noButton expand: false;
 				add: privacyButton expand: false;
 				yourself) expand: false;
-			yourself);
-		initialExtent: 500@120.
+			yourself).
 
 	window := presenter open.
 	window title: 'First Launch Setup'.
+	window initialExtent: 380@110.
 	window whenClosedDo: [ semaphore signal ].
-
 	semaphore wait.
 
 	choice = #privacy
@@ -148,9 +148,7 @@ CooHistorySettings class >> openFirstLaunchSetup [
 { #category : 'actions' }
 CooHistorySettings class >> openPrivacyPage [
 
-	WebBrowser openOn:
-		'https://github.com/omarabedelkader/HeuristicCompletion-History/wiki/Data-Collection-and-Storage'
-			asUrl
+	WebBrowser openOn: 'https://github.com/omarabedelkader/HeuristicCompletion-History/wiki/Data-Collection-and-Storage' asZnUrl
 ]
 
 { #category : 'accessing' }
