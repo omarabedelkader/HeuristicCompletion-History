@@ -85,10 +85,13 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [ 
-| choice sendRemote presenter |
+CooHistorySettings class >> openFirstLaunchSetup [
+	| choice sendRemote presenter window semaphore |
 	presenter := CooFirstLaunchPresenter new.
-	presenter openModal.
+	semaphore := Semaphore new.
+	window := presenter open.
+	window whenClosedDo: [ semaphore signal ].
+	semaphore wait.
 	choice := presenter choice.
 	choice = #privacy
 		ifTrue: [
