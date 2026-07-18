@@ -1,3 +1,7 @@
+"
+A dialog presenter shown once on first launch to ask the user for consent to send anonymous usage history remotely.
+
+"
 Class {
 	#name : 'CooFirstLaunchPresenter',
 	#superclass : 'SpPresenter',
