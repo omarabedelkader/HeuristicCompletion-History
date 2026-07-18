@@ -125,8 +125,23 @@ Installation:
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080'.
 CooHistoryEventRecorder category: #complishon.
+CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:9091/'.
+CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder experienceId: 'heuristic-completion-history'.
+CooHistoryEventRecorder participantUUID: 'participant-01'.
+CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
+CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder install.
 ```
+
+The Pharo-XP server requires the multipart 'category' field to be a STON
+dictionary carrying exactly these four keys: category, experienceId,
+participantUUID and taskOrSurveyId. They also define the on-disk directory
+data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>. Sending a
+bare category string makes the server reject the request, so nothing is stored.
+
+The serverUrl path must match the route the server maps (the provided server
+maps '/'), so use the server root, not a sub-path.
 
 ```
 CooHistoryEventRecorder reset.
@@ -169,6 +184,12 @@ Class {
 		'lastDeliveryError',
 		'lastDeliveryResponse',
 		'deliveryBatchSize'
+		'logToTranscript',
+		'saveOnDisk',
+		'deliveryBatchSize',
+		'experienceId',
+		'participantUUID',
+		'taskOrSurveyId'
 	],
 	#classInstVars : [
 		'uniqueInstance',
@@ -217,7 +238,33 @@ CooHistoryEventRecorder class >> defaultCategory [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultDeliveryBatchSize [
 
-	^ defaultDeliveryBatchSize ifNil: [ defaultDeliveryBatchSize := 100 ]
+	"Deliver every event as soon as it is recorded so data appears on the
+	server during a normal typing session. Raise this with
+	CooHistoryEventRecorder deliveryBatchSize: n to batch instead."
+
+	^ defaultDeliveryBatchSize ifNil: [ defaultDeliveryBatchSize := 1 ]
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultExperienceId [
+
+	^ defaultExperienceId ifNil: [
+		  defaultExperienceId := 'heuristic-completion-history' ]
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultParticipantUUID [
+
+	^ defaultParticipantUUID ifNil: [
+		  defaultParticipantUUID := [ GlobalIdentifier uniqueInstance computerUUID asString ]
+			                            on: Error
+			                            do: [ :ex | 'unknown-participant' ] ]
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
+
+	^ defaultTaskOrSurveyId ifNil: [ defaultTaskOrSurveyId := 'history' ]
 ]
 
 { #category : 'cleanup' }
@@ -238,6 +285,45 @@ CooHistoryEventRecorder class >> deinstall [
 	<script>
 
 	self uniqueInstance deinstall
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> experienceId [
+
+	^ self uniqueInstance experienceId
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> experienceId: aString [
+
+	defaultExperienceId := aString.
+	self uniqueInstance experienceId: aString
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> participantUUID [
+
+	^ self uniqueInstance participantUUID
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> participantUUID: aString [
+
+	defaultParticipantUUID := aString.
+	self uniqueInstance participantUUID: aString
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> taskOrSurveyId [
+
+	^ self uniqueInstance taskOrSurveyId
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> taskOrSurveyId: aString [
+
+	defaultTaskOrSurveyId := aString.
+	self uniqueInstance taskOrSurveyId: aString
 ]
 
 { #category : 'accessing' }
@@ -383,11 +469,105 @@ CooHistoryEventRecorder >> category [
 ]
 
 { #category : 'accessing' }
-CooHistoryEventRecorder >> category: aSymbolOrString [ 
+CooHistoryEventRecorder >> category: aSymbolOrString [
 
 	category := aSymbolOrString
 ]
 
+<<<<<<< HEAD
+=======
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> experienceId [
+
+	^ experienceId ifNil: [ experienceId := self class defaultExperienceId ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> experienceId: aString [
+
+	experienceId := aString
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> participantUUID [
+
+	^ participantUUID ifNil: [ participantUUID := self class defaultParticipantUUID ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> participantUUID: aString [
+
+	participantUUID := aString
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> taskOrSurveyId [
+
+	^ taskOrSurveyId ifNil: [ taskOrSurveyId := self class defaultTaskOrSurveyId ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> taskOrSurveyId: aString [
+
+	taskOrSurveyId := aString
+]
+
+{ #category : 'events-class' }
+CooHistoryEventRecorder >> classAdded: anAnnouncement [
+
+	self
+		addClassItemOf: CooAddedClassHistoryItem
+		from: anAnnouncement
+		selectors: #(classAdded classAffected affectedClass behaviorAffected behavior)
+
+]
+
+{ #category : 'events-class' }
+CooHistoryEventRecorder >> classModified: anAnnouncement [
+
+	(self class environment includesKey: #CooModifiedClassHistoryItem)
+		ifFalse: [ ^ self ].
+
+	self
+		addClassItemOf: CooModifiedClassHistoryItem
+		from: anAnnouncement
+		selectors: #(classModified classAffected affectedClass behaviorAffected behavior)
+
+]
+
+{ #category : 'helpers' }
+CooHistoryEventRecorder >> classNameFrom: anAnnouncement selectors: selectorSymbols [
+
+	selectorSymbols do: [ :eachSelector |
+		| value |
+		value := self valueFrom: anAnnouncement selector: eachSelector.
+		value ifNotNil: [ ^ self normalizedClassNameFrom: value ] ].
+
+	^ nil
+]
+
+{ #category : 'helpers' }
+CooHistoryEventRecorder >> classNameFromMethod: aCompiledMethod announcement: anAnnouncement [
+
+	| methodClass |
+	methodClass := self valueFrom: aCompiledMethod selector: #methodClass.
+	methodClass ifNotNil: [ ^ self normalizedClassNameFrom: methodClass ].
+
+	^ self
+		  classNameFrom: anAnnouncement
+		  selectors: #(methodClass classAffected affectedClass behaviorAffected behavior classRemoved classAdded)
+]
+
+{ #category : 'events-class' }
+CooHistoryEventRecorder >> classRemoved: anAnnouncement [
+
+	self
+		addClassItemOf: CooRemovedClassHistoryItem
+		from: anAnnouncement
+		selectors: #(classRemoved classAffected affectedClass behaviorAffected behavior)
+]
+
+>>>>>>> f4a948d (some fixes)
 { #category : 'actions' }
 CooHistoryEventRecorder >> clearPendingEvents [
 
@@ -613,6 +793,10 @@ CooHistoryEventRecorder >> initialize [
 	deliveryMutex := Mutex new.
 	installed := false.
 	deliveryBatchSize := self class defaultDeliveryBatchSize.
+	experienceId := self class defaultExperienceId.
+	participantUUID := self class defaultParticipantUUID.
+	taskOrSurveyId := self class defaultTaskOrSurveyId.
+	logToTranscript := true
 ]
 
 { #category : 'actions' }
@@ -690,6 +874,72 @@ CooHistoryEventRecorder >> lastDeliveryResponse [
 CooHistoryEventRecorder >> onIcePushed: anIcePushedAnnouncement [
 
     self flush.
+CooHistoryEventRecorder >> categoryFieldValue: aCategory [
+
+	"The Pharo-XP server does not accept a bare category string. Its
+	PXEventRecorderPutHandler>>hasCategoryAndDataParts: STON-decodes the
+	'category' multipart field and requires a dictionary holding exactly the
+	four PXEventMultiBundle metadata keys: category, experienceId,
+	participantUUID and taskOrSurveyId. These values also become the on-disk
+	directory path data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>.
+	We therefore send a STON-encoded metadata dictionary, not a plain string."
+
+	| metadata ston |
+	metadata := Dictionary new.
+	metadata at: 'category' put: aCategory asString.
+	metadata at: 'experienceId' put: self experienceId asString.
+	metadata at: 'participantUUID' put: self participantUUID asString.
+	metadata at: 'taskOrSurveyId' put: self taskOrSurveyId asString.
+
+	ston := self class environment at: #STON ifAbsent: [ nil ].
+	^ ston
+		  ifNil: [ metadata printString ]
+		  ifNotNil: [ ston toString: metadata ]
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCategory [
+
+	| entity |
+	entity := ZnMultiPartFormDataEntity new.
+
+	entity
+		addPart: (ZnMimePart
+				 fieldName: 'category'
+				 value: (self categoryFieldValue: aCategory));
+		addPart: (ZnMimePart fieldName: 'data' entity: (ZnByteArrayEntity bytes: aByteArray)).
+
+	^ entity
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> normalizedClassNameFrom: anObject [
+
+	| name |
+	anObject ifNil: [ ^ nil ].
+
+	name := (anObject respondsTo: #name)
+		        ifTrue: [ anObject name ]
+		        ifFalse: [ anObject asString ].
+
+	name := name asString.
+
+	(name beginsWith: 'AnObsolete')
+		ifTrue: [ name := name allButFirst: 'AnObsolete' size ].
+
+	^ name
+]
+
+{ #category : 'events-methods' }
+CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
+
+	#(oldMethod previousMethod oldCompiledMethod) do: [ :eachSelector |
+		| value |
+		value := self valueFrom: anAnnouncement selector: eachSelector.
+		(value notNil and: [ value respondsTo: #selector ])
+			ifTrue: [ ^ value ] ].
+
+	^ nil
 ]
 
 { #category : 'accessing' }
