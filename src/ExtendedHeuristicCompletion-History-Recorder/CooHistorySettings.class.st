@@ -85,7 +85,7 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [ 
+CooHistorySettings class >> openFirstLaunchSetup [
 	| choice sendRemote presenter window semaphore label yesButton noButton privacyButton |
 	choice := nil.
 	semaphore := Semaphore new.
@@ -117,9 +117,12 @@ CooHistorySettings class >> openFirstLaunchSetup [
 				add: privacyButton expand: false;
 				yourself) expand: false;
 			yourself).
-	presenter extent: 380@110.
-	window := presenter open.
+
+	window := presenter buildWindow.
 	window title: 'First Launch Setup'.
+	window initialExtent: 380@110.
+	window open.
+
 	window whenClosedDo: [ semaphore signal ].
 	semaphore wait.
 	choice = #privacy
@@ -135,7 +138,6 @@ CooHistorySettings class >> openFirstLaunchSetup [
 			historyRecordingEnabled := false.
 			remoteDeliveryEnabled := false.
 			self useNullHistoryRecorder ]
-
 ]
 
 { #category : 'actions' }
