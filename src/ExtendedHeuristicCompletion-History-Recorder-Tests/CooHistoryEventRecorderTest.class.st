@@ -17,6 +17,9 @@ CooHistoryEventRecorderTest >> setUp [
 	"Put here a common initialization logic for tests"
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
+	recorder announcer unsubscribe: recorder.
+	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
+
 	recorder deliveryEnabled: true.
 	recorder deliveryBatchSize: 100.
 
@@ -234,10 +237,13 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
  
+	| batchSize |
 	recorder := CooHistoryEventRecorderMock new. 
 	recorder install.
 	
-	1 to: (recorder deliveryBatchSize) do: 
+	batchSize := recorder deliveryBatchSize.
+
+	1 to: batchSize do:
 
 	[ :i | recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
@@ -245,7 +251,7 @@ CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents 
 	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents size equals: 100.
+	self assert: recorder pendingEvents size equals: batchSize.
 	
 	recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
@@ -253,7 +259,7 @@ CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents 
 	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents size equals: 101.
+	self assert: recorder pendingEvents size equals: batchSize + 1.
 ]
 
 { #category : 'tests' }
@@ -332,19 +338,80 @@ CooHistoryEventRecorderTest >> testRequeueEventsPreservesOrder [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testShouldDeliverPendingEventsWhenBatchSizeReached [
+CooHistoryEventRecorderTest >> testSelectorOf [
+	self assert: (recorder selectorOf: (Object >> #printString)) equals: #printString
+]
 
-	recorder deliveryEnabled: false.
-	recorder deliveryBatchSize: 2.
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSelectorOfAnnouncementWhenMethodIsNil [
+	|announcement|
+	announcement := MethodAdded new method: (Object >> #printString).
+	self assert: (recorder selectorOf: nil announcement: announcement) equals: #printString
+]
 
-	recorder enqueueEvent: (Dictionary new
-			 at: #kind put: #test;
-			 yourself).
-	recorder enqueueEvent: (Dictionary new
-			 at: #kind put: #test;
-			 yourself).
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSelectorOfAnnouncementWhenMethodResponds [
+	self assert: (recorder selectorOf: (Object >> #printString) announcement: nil) equals: #printString
+]
 
-	recorder deliveryEnabled: true.
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSelectorOfAnnouncementWhenNoResponse [
+	"We send a random object and a random announcement"
+	self assert: (recorder selectorOf: Object new announcement: MethodAdded new) equals: nil
+]
 
-	self assert: recorder shouldDeliverPendingEvents.
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSelectorOfWhenMethodIsNil [
+	self assert: (recorder selectorOf: nil) equals: nil
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSerializePayload [
+	| payload result expectedString |
+
+	payload := Dictionary new.
+	payload at: 'key' put: 'value'.
+	expectedString := STON toString: payload .
+	result := recorder serializePayload: payload.
+
+	self assert: result equals: expectedString utf8Encoded.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSend [
+
+	recorder subscribeAnnouncementNamed: #ClassRemoved send: #classRemoved:.
+	
+	self assert: (recorder announcer numberOfSubscriptions ) equals: initialSubscriptionNumber + 1.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testSubscribeAnnouncementNamedSendWhenNotAnnouncementClass [
+    | result |
+    result := recorder subscribeAnnouncementNamed: #OrderedCollection send: #classAdded:.
+    self assert: result equals: recorder.
+    self assert: recorder announcer numberOfSubscriptions equals: initialSubscriptionNumber.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelector [
+    self assert: (recorder valueFrom: -1  selector: #abs) equals: 1
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenException [
+
+    self assert: (recorder valueFrom: '1' selector: #abs) equals: nil
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenObjectIsNil [
+	
+	self assert: (recorder valueFrom: (nil) selector: #increment) equals: nil
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testValueFromSelectorWhenUnknownSelector [
+	self assert: (recorder valueFrom: 1 selector: #unknownSelector) equals: nil
+	
 ]
