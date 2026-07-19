@@ -173,6 +173,7 @@ Class {
 	#name : 'CooHistoryEventRecorder',
 	#superclass : 'Object',
 	#instVars : [
+		'announcer',
 		'logger',
 		'installed',
 		'serverUrl',
@@ -183,10 +184,9 @@ Class {
 		'deliveryProcess',
 		'lastDeliveryError',
 		'lastDeliveryResponse',
-		'deliveryBatchSize'
+		'deliveryBatchSize',
 		'logToTranscript',
 		'saveOnDisk',
-		'deliveryBatchSize',
 		'experienceId',
 		'participantUUID',
 		'taskOrSurveyId'
@@ -195,7 +195,11 @@ Class {
 		'uniqueInstance',
 		'defaultServerUrl',
 		'defaultCategory',
-		'defaultDeliveryBatchSize'
+		'defaultDeliveryBatchSize',
+		'defaultSaveOnDisk',
+		'defaultExperienceId',
+		'defaultParticipantUUID',
+		'defaultTaskOrSurveyId'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
@@ -262,6 +266,12 @@ CooHistoryEventRecorder class >> defaultParticipantUUID [
 ]
 
 { #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultSaveOnDisk [
+
+	^ defaultSaveOnDisk ifNil: [ defaultSaveOnDisk := false ]
+]
+
+{ #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
 
 	^ defaultTaskOrSurveyId ifNil: [ defaultTaskOrSurveyId := 'history' ]
@@ -311,6 +321,19 @@ CooHistoryEventRecorder class >> participantUUID: aString [
 
 	defaultParticipantUUID := aString.
 	self uniqueInstance participantUUID: aString
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk [
+
+	^ self uniqueInstance saveOnDisk
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk: aBoolean [
+
+	defaultSaveOnDisk := aBoolean.
+	self uniqueInstance saveOnDisk: aBoolean
 ]
 
 { #category : 'accessing' }
@@ -462,6 +485,12 @@ CooHistoryEventRecorder class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> announcer [
+
+	^ announcer ifNil: [ announcer := self class codeChangeAnnouncer ]
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorder >> category [
 
@@ -474,8 +503,6 @@ CooHistoryEventRecorder >> category: aSymbolOrString [
 	category := aSymbolOrString
 ]
 
-<<<<<<< HEAD
-=======
 { #category : 'accessing' }
 CooHistoryEventRecorder >> experienceId [
 
@@ -567,7 +594,6 @@ CooHistoryEventRecorder >> classRemoved: anAnnouncement [
 		selectors: #(classRemoved classAffected affectedClass behaviorAffected behavior)
 ]
 
->>>>>>> f4a948d (some fixes)
 { #category : 'actions' }
 CooHistoryEventRecorder >> clearPendingEvents [
 
@@ -578,6 +604,8 @@ CooHistoryEventRecorder >> clearPendingEvents [
 { #category : 'installation' }
 CooHistoryEventRecorder >> deinstall [
 
+	announcer ifNotNil: [ announcer unsubscribe: self ].
+	Iceberg announcer unsubscribe: self.
 	installed := false
 ]
 
@@ -793,6 +821,7 @@ CooHistoryEventRecorder >> initialize [
 	deliveryMutex := Mutex new.
 	installed := false.
 	deliveryBatchSize := self class defaultDeliveryBatchSize.
+	saveOnDisk := self class defaultSaveOnDisk.
 	experienceId := self class defaultExperienceId.
 	participantUUID := self class defaultParticipantUUID.
 	taskOrSurveyId := self class defaultTaskOrSurveyId.
@@ -874,6 +903,9 @@ CooHistoryEventRecorder >> lastDeliveryResponse [
 CooHistoryEventRecorder >> onIcePushed: anIcePushedAnnouncement [
 
     self flush.
+]
+
+{ #category : 'actions' }
 CooHistoryEventRecorder >> categoryFieldValue: aCategory [
 
 	"The Pharo-XP server does not accept a bare category string. Its
@@ -990,6 +1022,54 @@ CooHistoryEventRecorder >> safeValue: aBlock ifError: errorBlock [
 ]
 
 { #category : 'accessing' }
+CooHistoryEventRecorder >> saveOnDisk [
+
+	^ saveOnDisk ifNil: [ saveOnDisk := self class defaultSaveOnDisk ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> saveOnDisk: aBoolean [
+
+	saveOnDisk := aBoolean
+]
+
+{ #category : 'events-methods' }
+CooHistoryEventRecorder >> selectorOf: aCompiledMethod [
+
+	^ self valueFrom: aCompiledMethod selector: #selector
+]
+
+{ #category : 'helpers' }
+CooHistoryEventRecorder >> selectorOf: aCompiledMethod announcement: anAnnouncement [
+
+	| selector |
+	selector := self valueFrom: aCompiledMethod selector: #selector.
+	selector ifNotNil: [ ^ selector ].
+
+	#(selector methodSelector) do: [ :eachSelector |
+		| value |
+		value := self valueFrom: anAnnouncement selector: eachSelector.
+		value ifNotNil: [ ^ value ] ].
+
+	^ nil
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> serializePayload: payloadDictionary [
+
+	| string ston |
+	ston := self class environment at: #STON ifAbsent: [ nil ].
+
+	string := ston
+		          ifNil: [ payloadDictionary printString ]
+		          ifNotNil: [ ston toString: payloadDictionary ].
+
+	^ [ string utf8Encoded ]
+		  on: Error
+		  do: [ :ex | string asByteArray ]
+]
+
+{ #category : 'accessing' }
 CooHistoryEventRecorder >> serverUrl [
 
 	^ serverUrl ifNil: [ serverUrl := self class defaultServerUrl ]
@@ -1007,6 +1087,36 @@ CooHistoryEventRecorder >> shouldDeliverPendingEvents [
 
 	^ self deliveryEnabled and: [
 		  pendingEvents size >= self deliveryBatchSize ]
+]
+
+{ #category : 'installation' }
+CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: selector [
+
+	| announcementClass |
+	announcementClass := self class environment
+		                     at: announcementName
+		                     ifAbsent: [ ^ self ].
+
+	(announcementClass inheritsFrom: Announcement)
+		ifFalse: [ ^ self ].
+
+	self announcer
+		when: announcementClass
+		send: selector
+		to: self.
+
+	^ self
+]
+
+{ #category : 'helpers' }
+CooHistoryEventRecorder >> valueFrom: anObject selector: selector [
+
+	anObject ifNil: [ ^ nil ].
+	(anObject respondsTo: selector) ifFalse: [ ^ nil ].
+
+	^ [ anObject perform: selector ]
+		  on: Error
+		  do: [ :ex | nil ]
 ]
 
 { #category : 'actions' }

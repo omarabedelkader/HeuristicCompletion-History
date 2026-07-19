@@ -17,6 +17,9 @@ CooHistoryEventRecorderTest >> setUp [
 	"Put here a common initialization logic for tests"
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
+	recorder announcer unsubscribe: recorder.
+	initialSubscriptionNumber := recorder announcer numberOfSubscriptions.
+
 	recorder deliveryEnabled: true.
 	recorder deliveryBatchSize: 100.
 
@@ -234,10 +237,13 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
  
+	| batchSize |
 	recorder := CooHistoryEventRecorderMock new. 
 	recorder install.
 	
-	1 to: (recorder deliveryBatchSize) do: 
+	batchSize := recorder deliveryBatchSize.
+
+	1 to: batchSize do:
 
 	[ :i | recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
@@ -245,7 +251,7 @@ CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents 
 	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents size equals: 100.
+	self assert: recorder pendingEvents size equals: batchSize.
 	
 	recorder enqueueEvent: (Dictionary new
 			 at: #kind put: #test;
@@ -253,7 +259,7 @@ CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents 
 	
 	recorder prepareForImageSave.
 
-	self assert: recorder pendingEvents size equals: 101.
+	self assert: recorder pendingEvents size equals: batchSize + 1.
 ]
 
 { #category : 'tests' }
