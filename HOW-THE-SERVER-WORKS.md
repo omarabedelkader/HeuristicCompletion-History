@@ -202,7 +202,11 @@ CooHistoryEventRecorder experienceId: 'heuristic-completion-history'.
 CooHistoryEventRecorder participantUUID: 'participant-01'.
 CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
 CooHistoryEventRecorder saveOnDisk: false.
+CooHistoryEventRecorder deliveryBatchSize: 1.
+CooSession install.
 CooHistoryEventRecorder install.
+CooHistoryEventRecorder enableDelivery.
+CooHistoryEventRecorder recordRemoteDeliveryEnabled.
 ```
 
 Then edit a method and check:
@@ -222,3 +226,17 @@ On the server, a new readable file appears under:
 > Note on the URL: the server maps the `/` route. Point `serverUrl` at the
 > server **root** (e.g. `http://host:9091/`). A sub-path like `/gt/events`
 > would not match the server's `/` mapping and would be rejected.
+
+For the hosted RMOD collector currently configured as the recorder default, use
+the hosted route instead:
+
+```smalltalk
+CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
+CooHistoryEventRecorder category: #complishon.
+```
+
+The client cannot discover a collector address automatically. If
+`http://rmod-xp.lille.inria.fr:9092/` times out, that port is not reachable from
+the client machine. If `https://rmod-xp.lille.inria.fr/complishon` answers with
+HTTP 500, the request reached the Pharo server but the server failed while
+handling or storing the payload; that must be fixed on the server side.

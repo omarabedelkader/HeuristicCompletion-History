@@ -51,6 +51,7 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 
 	CooSession install.
 	CooHistoryEventRecorder category: #complishon.
+	CooHistoryEventRecorder experienceId: 'complishon'.
 	CooHistoryEventRecorder deliveryBatchSize: 1.
 	CooHistoryEventRecorder install.
 	CooHistoryEventRecorder enableDelivery.

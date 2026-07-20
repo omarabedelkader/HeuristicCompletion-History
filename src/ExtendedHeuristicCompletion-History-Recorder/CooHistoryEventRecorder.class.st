@@ -37,15 +37,13 @@ I do two things at the same time:
 
    I do not modify the history package. I only feed it with events.
 
-2. I pass a copy of each event to the existing ExperimentModel recorder stack.
+2. I pass a copy of each event to the existing Pharo-XP EventRecorder stack.
 
    Every event is converted into a Dictionary, added to my internal
-   pendingEvents queue, and, once I am installed, logged through
-   EMEventRecorderLogger.
+   pendingEvents queue, and, once I am installed, logged through PXEventCollector.
 
-   EMEventRecorderLogger uses PXEventCollector, PXEventRecorder, EventRecorder
-   packing, and the Pharo-XP multipart protocol. I do not build the HTTP
-   multipart request myself.
+   PXEventCollector uses PXEventRecorder, EventRecorder packing, and the
+   Pharo-XP multipart protocol. I do not build the HTTP multipart request myself.
 
 Typical usage:
 
@@ -54,7 +52,7 @@ Typical usage:
 	CooHistoryEventRecorder category: #complishon.
 	CooHistoryEventRecorder install.
 
-Events are kept in memory and logged through EMEventRecorderLogger. By default,
+Events are kept in memory and logged through PXEventCollector. By default,
 the recorder asks the logger to deliver when the queue reaches 100 records. The
 Metacello first-launch consent flow changes the batch size to 1 after the user
 answers Yes, so installed users begin sending events immediately. The recorder
@@ -90,7 +88,7 @@ example:
 
 Delivery failure handling:
 
-When EMEventRecorderLogger accepts an event, EventRecorder is responsible for
+When PXEventCollector accepts an event, EventRecorder is responsible for
 packing, delivery, and retrying failed HTTP sends. When my call to the logger
 raises an exception, I store it in lastDeliveryError and keep the event in
 pendingEvents so it can be retried later by sending deliverNow again.
@@ -109,7 +107,7 @@ and, optionally:
 
 	CooHistoryEventRecorder
 		->
-	EMEventRecorderLogger
+	PXEventCollector
 		->
 	PXEventRecorder/EventRecorder
 		->
@@ -123,15 +121,17 @@ and, optionally:
 Installation:
 ```
 CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:8080'.
-CooHistoryEventRecorder category: #complishon.
 CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:9091/'.
 CooHistoryEventRecorder category: #history.
-CooHistoryEventRecorder experienceId: 'heuristic-completion-history'.
+CooHistoryEventRecorder experienceId: 'complishon'.
 CooHistoryEventRecorder participantUUID: 'participant-01'.
 CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
 CooHistoryEventRecorder saveOnDisk: false.
+CooHistoryEventRecorder deliveryBatchSize: 1.
+CooSession install.
 CooHistoryEventRecorder install.
+CooHistoryEventRecorder enableDelivery.
+CooHistoryEventRecorder recordRemoteDeliveryEnabled.
 ```
 
 The Pharo-XP server requires the multipart 'category' field to be a STON
@@ -147,7 +147,15 @@ maps '/'), so use the server root, not a sub-path.
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
 CooHistoryEventRecorder category: #complishon.
+CooHistoryEventRecorder experienceId: 'complishon'.
+CooHistoryEventRecorder participantUUID: 'participant-01'.
+CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
+CooHistoryEventRecorder saveOnDisk: false.
+CooHistoryEventRecorder deliveryBatchSize: 1.
+CooSession install.
 CooHistoryEventRecorder install.
+CooHistoryEventRecorder enableDelivery.
+CooHistoryEventRecorder recordRemoteDeliveryEnabled.
 ```
 
 # CHECKING:
@@ -253,16 +261,13 @@ CooHistoryEventRecorder class >> defaultDeliveryBatchSize [
 CooHistoryEventRecorder class >> defaultExperienceId [
 
 	^ defaultExperienceId ifNil: [
-		  defaultExperienceId := 'heuristic-completion-history' ]
+		  defaultExperienceId := 'complishon' ]
 ]
 
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultParticipantUUID [
 
-	^ defaultParticipantUUID ifNil: [
-		  defaultParticipantUUID := [ GlobalIdentifier uniqueInstance computerUUID asString ]
-			                            on: Error
-			                            do: [ :ex | 'unknown-participant' ] ]
+	^ defaultParticipantUUID
 ]
 
 { #category : 'cleanup' }
@@ -274,7 +279,7 @@ CooHistoryEventRecorder class >> defaultSaveOnDisk [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
 
-	^ defaultTaskOrSurveyId ifNil: [ defaultTaskOrSurveyId := 'history' ]
+	^ defaultTaskOrSurveyId
 ]
 
 { #category : 'cleanup' }
@@ -856,8 +861,12 @@ CooHistoryEventRecorder >> logger [
 { #category : 'actions' }
 CooHistoryEventRecorder >> logEvent: anEventDictionary [
 
+	| eventLogger |
 	[
-		self logger log: anEventDictionary.
+		eventLogger := self logger.
+		(eventLogger respondsTo: #add:)
+			ifTrue: [ eventLogger add: anEventDictionary ]
+			ifFalse: [ eventLogger log: anEventDictionary ].
 		lastDeliveryError := nil ]
 		on: Error
 		do: [ :ex | lastDeliveryError := ex ].
@@ -874,11 +883,20 @@ CooHistoryEventRecorder >> configureEventRecorderSettings [
 { #category : 'initialization' }
 CooHistoryEventRecorder >> newLogger [
 
-	| eventRecorderLogger |
-	eventRecorderLogger := EMEventRecorderLogger new.
+	| eventCollector |
+	ERPrivacy sendDiagnosticsAndUsageData: true.
 	self configureEventRecorderSettings.
-	eventRecorderLogger authorizeDataSending.
-	^ eventRecorderLogger
+
+	eventCollector := PXEventCollector new.
+	eventCollector
+		url: self serverUrl;
+		category: self category asString;
+		experienceId: self experienceId asString;
+		participantUUID: (self participantUUID ifNotNil: [ :value | value asString ]);
+		taskOrSurveyId: (self taskOrSurveyId ifNotNil: [ :value | value asString ]);
+		occupant: nil;
+		register.
+	^ eventCollector
 ]
 
 { #category : 'accessing' }
@@ -920,8 +938,12 @@ CooHistoryEventRecorder >> categoryFieldValue: aCategory [
 	metadata := Dictionary new.
 	metadata at: 'category' put: aCategory asString.
 	metadata at: 'experienceId' put: self experienceId asString.
-	metadata at: 'participantUUID' put: self participantUUID asString.
-	metadata at: 'taskOrSurveyId' put: self taskOrSurveyId asString.
+	metadata
+		at: 'participantUUID'
+		put: (self participantUUID ifNotNil: [ :value | value asString ]).
+	metadata
+		at: 'taskOrSurveyId'
+		put: (self taskOrSurveyId ifNotNil: [ :value | value asString ]).
 
 	ston := self class environment at: #STON ifAbsent: [ nil ].
 	^ ston

@@ -35,13 +35,13 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			baseline: 'DSSpyEventRecorder'
 			with: [
 				spec repository:
-					'github://omarabedelkader/DebuggingSpy-EventRecorder:omar' ].
+					'github://Pharo-XP-Tools/DebuggingSpy-EventRecorder:omar' ].
 
 		spec
 			baseline: 'ExperimentModel'
 			with: [
 				spec repository:
-					'github://omarabedelkader/ExperimentModel:omar' ].
+					'github://Pharo-XP-Tools/ExperimentModel:omar' ].
 
 		spec
 			package: 'ExtendedHeuristicCompletion-History'.
