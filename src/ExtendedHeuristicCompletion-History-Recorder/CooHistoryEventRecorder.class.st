@@ -373,6 +373,24 @@ CooHistoryEventRecorder class >> disableDelivery [
 	self uniqueInstance disableDelivery
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverLoggerDataNow [
+
+	^ self uniqueInstance deliverLoggerDataNow
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverNow [
+
+	^ self uniqueInstance deliverNow
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverNowInBackground [
+
+	^ self uniqueInstance deliverNowInBackground
+]
+
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> enableDelivery [
 

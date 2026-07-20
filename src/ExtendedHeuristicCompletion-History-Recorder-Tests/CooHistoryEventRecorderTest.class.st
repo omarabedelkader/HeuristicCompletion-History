@@ -93,6 +93,15 @@ CooHistoryEventRecorderTest >> testDeliverNowWhenEmptyListOfEvents [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testClassSideDeliverNowDelegatesToUniqueInstance [
+
+	recorder drainPendingEvents.
+	self assert: recorder pendingEvents isEmpty.
+
+	self assert: CooHistoryEventRecorder deliverNow equals: recorder
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testEnqueueEventAddsToPendingEvents [
     | item ann event |
     recorder drainPendingEvents.
