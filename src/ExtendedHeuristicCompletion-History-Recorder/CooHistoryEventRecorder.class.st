@@ -611,6 +611,9 @@ CooHistoryEventRecorder >> deinstall [
 
 	announcer ifNotNil: [ announcer unsubscribe: self ].
 	Iceberg announcer unsubscribe: self.
+	logger ifNotNil: [
+		(logger respondsTo: #liberate)
+			ifTrue: [ logger liberate ] ].
 	installed := false
 ]
 
@@ -894,7 +897,7 @@ CooHistoryEventRecorder >> newLogger [
 		experienceId: self experienceId asString;
 		participantUUID: (self participantUUID ifNotNil: [ :value | value asString ]);
 		taskOrSurveyId: (self taskOrSurveyId ifNotNil: [ :value | value asString ]);
-		occupant: nil;
+		occupant: self;
 		register.
 	^ eventCollector
 ]

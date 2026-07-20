@@ -195,6 +195,37 @@ CooHistoryEventRecorderTest >> testRecorderEventDictionary [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testCategoryFieldValueKeepsNilParticipantMetadata [
+
+	| metadata |
+	recorder participantUUID: nil.
+	recorder taskOrSurveyId: nil.
+
+	metadata := STON fromString: (recorder categoryFieldValue: #complishon).
+
+	self assert: (metadata at: 'category') equals: 'complishon'.
+	self assert: (metadata at: 'experienceId') equals: recorder experienceId.
+	self assert: (metadata includesKey: 'participantUUID').
+	self assert: (metadata at: 'participantUUID') isNil.
+	self assert: (metadata includesKey: 'taskOrSurveyId').
+	self assert: (metadata at: 'taskOrSurveyId') isNil.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testNewLoggerKeepsCollectorRegistered [
+
+	| collector |
+	recorder serverUrl: 'https://example.com/collector'.
+	recorder category: #complishon.
+	recorder experienceId: 'complishon'.
+
+	collector := recorder newLogger.
+
+	self deny: collector registry isLiberated.
+	collector liberate.
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testIncludesInstanceOfDoesNotMatchSubclass [
 
     | collection |
