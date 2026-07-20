@@ -866,7 +866,8 @@ CooHistoryEventRecorder >> install [
 	
 
 	installed := true.
-	
+
+	self resetEventRecorderTransport.
 	logger := self newLogger.
 	
 
@@ -1054,6 +1055,23 @@ CooHistoryEventRecorder >> requeueEvents: events [
 	deliveryMutex critical: [
 		pendingEvents := events asOrderedCollection , pendingEvents ]
 
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> resetEventRecorderTransport [
+
+	| recorderClass |
+	recorderClass := self class environment
+		                 at: #PXEventRecorder
+		                 ifAbsent: [ nil ].
+	recorderClass ifNil: [ ^ self ].
+
+	[
+	recorderClass reset ]
+		on: Error
+		do: [ :ex | nil ].
+
+	^ self
 ]
 
 { #category : 'actions' }
