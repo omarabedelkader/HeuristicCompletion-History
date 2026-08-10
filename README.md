@@ -20,7 +20,9 @@ Metacello new
   load.
 ```
 
-After the Metacello load, the privacy dialog asks `Yes`, `No`, or `View Privacy`. `Yes` installs `CooSession`, creates the PX event collector, points EventRecorder at the configured `CooHistoryEventRecorder serverUrl`, sets the delivery batch size to `1`, and immediately logs a recorder lifecycle event under the `complishon/complishon` collector path. Later history events are logged through the same EventRecorder stack as soon as they are recorded. `No` installs the null recorder and sends nothing.
+After the Metacello load, the consent dialog asks whether the user agrees to send code-completion history events for research. Telemetry is off by default. `Yes, I agree` installs `CooSession`, creates the PX event collector, points EventRecorder at the configured `CooHistoryEventRecorder serverUrl`, sets the delivery batch size to `1`, and immediately logs a recorder lifecycle event under the `complishon/complishon` collector path. Later history events are logged through the same EventRecorder stack as soon as they are recorded.
+
+`No, don't collect data`, closing the dialog, cancelling it, or any UI error installs the null recorder and sends nothing. The same settings page can later enable or disable history telemetry, but no explicit Yes means no telemetry.
 
 ## Simplest Server Logging
 
