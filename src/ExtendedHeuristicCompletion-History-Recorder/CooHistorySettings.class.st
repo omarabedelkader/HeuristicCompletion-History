@@ -180,6 +180,20 @@ CooHistorySettings class >> historyRecordingConsentState [
 ]
 
 { #category : 'consent' }
+CooHistorySettings class >> historyRecordingDisabledStatusText [
+
+	^ 'Anonymous history telemetry is disabled.', String cr,
+		'The null recorder is installed and no code completion history events are sent.'
+]
+
+{ #category : 'consent' }
+CooHistorySettings class >> historyRecordingEnabledStatusText [
+
+	^ 'Anonymous history telemetry is enabled.', String cr,
+		'Code completion history events are being recorded and sent to the configured research server.'
+]
+
+{ #category : 'consent' }
 CooHistorySettings class >> historyRecordingDisablePrompt [
 
 	^ 'Disable history telemetry?', String cr,
@@ -201,7 +215,28 @@ CooHistorySettings class >> normalizeConsentChoice: choice [
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> openFirstLaunchSetup [ 
+CooHistorySettings class >> openFirstLaunchSetup [
+
+	"Open the first-launch privacy setup. Use the Spec setup wizard when it is
+	available and a user interface is running, otherwise fall back to plain
+	UIManager dialogs."
+
+	| presenterClass |
+	presenterClass := Smalltalk globals
+		at: #CooHistorySetupPresenter
+		ifAbsent: [ nil ].
+
+	(presenterClass notNil and: [ World notNil ])
+		ifTrue: [
+			^ [ presenterClass open ]
+				on: Error
+				do: [ :ex | self openFirstLaunchSetupDialog ] ].
+
+	self openFirstLaunchSetupDialog
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> openFirstLaunchSetupDialog [
 
 	| choice |
 
@@ -312,6 +347,39 @@ CooHistorySettings class >> showHistoryRecordingStudyInformation [
 	Transcript
 		show: message;
 		cr
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyUser: aString [
+
+	"Display a message to the user (UIManager if available, otherwise Transcript)."
+
+	(self notifyViaUIManager: aString) ifTrue: [ ^ self ].
+	self notifyViaTranscript: aString
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyViaTranscript: aString [
+
+	| transcript |
+	transcript := Smalltalk globals at: #Transcript ifAbsent: [ nil ].
+	transcript ifNil: [ ^ false ].
+	(transcript respondsTo: #show:) ifFalse: [ ^ false ].
+
+	transcript show: aString; cr.
+	^ true
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyViaUIManager: aString [
+
+	| ui |
+	ui := self uiManager.
+	(ui notNil and: [ ui respondsTo: #inform: ])
+		ifTrue: [
+			ui inform: aString.
+			^ true ].
+	^ false
 ]
 
 { #category : 'private' }
