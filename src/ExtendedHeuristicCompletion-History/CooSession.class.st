@@ -279,11 +279,9 @@ CooSession >> classEntries [
 { #category : 'helpers' }
 CooSession >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
 
-	^ ((aNewMethodAst allChildren select: [ :each | each isMessage ])
-			collect: [ :each | each selector ])
+	^ (CooMethodHistoryItem messageCompletionSelectorsFromAST: aNewMethodAst)
 		  difference:
-		  ((anOldMethodAst allChildren select: [ :each | each isMessage ]) 
-				collect: [ :each | each selector ])
+		  (CooMethodHistoryItem messageCompletionSelectorsFromAST: anOldMethodAst)
 ]
 
 { #category : 'helpers' }
