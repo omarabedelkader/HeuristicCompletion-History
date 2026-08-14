@@ -90,6 +90,25 @@ HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenReturnsNewSelectors [
 ]
 
 { #category : 'running' }
+HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenFiltersBinarySelectors [
+
+	| oldAst newAst deltaMessages |
+	oldAst := RBParser parseMethod: 'sample ^ self alpha'.
+	newAst := RBParser parseMethod:
+		          'sample | text |
+		          text := ''a'' , ''b''.
+		          self beta: text.
+		          ^ 1 + 2'.
+	deltaMessages := populator
+		                 computeDeltaMessageBetween: newAst
+		                 andOld: oldAst.
+
+	self assert: (deltaMessages includes: #beta:).
+	self deny: (deltaMessages includes: #,).
+	self deny: (deltaMessages includes: #+)
+]
+
+{ #category : 'running' }
 HistoryCachePopulatorTest >> testExtractMethodFromDiffNodeRejectsNonMethods [
 
 	| operation |

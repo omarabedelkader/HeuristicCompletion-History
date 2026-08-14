@@ -20,7 +20,8 @@ CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
 
 	| entries |
 	entries := self session programEntityHandler selectorEntries ifNil: [ #(  ) ].
-	^ (entries flatCollect: [ :each | each deltaMessages ]) asSet
+	^ ((entries flatCollect: [ :each | each deltaMessages ])
+		   select: [ :each | self shouldBenchmarkMessageSelector: each ]) asSet
 ]
 
 { #category : 'running' }
@@ -40,7 +41,9 @@ CooStaticBenchmarksMessageHistory >> run [
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
-							(node isMessage and: [ cachedSelectors includes: node selector ]) ifTrue: [
+							(node isMessage and: [
+								 (cachedSelectors includes: node selector) and: [
+									 self shouldBenchmarkMessageSelector: node selector ] ]) ifTrue: [
 									Transcript
 										cr;
 										show: '## Benched messages: ';
@@ -61,4 +64,11 @@ CooStaticBenchmarksMessageHistory >> session [
 CooStaticBenchmarksMessageHistory >> session: aSession [
 
 	session := aSession
+]
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksMessageHistory >> shouldBenchmarkMessageSelector: aSelector [
+
+	^ (CooMethodHistoryItem isMessageCompletionSelector: aSelector)
+		  and: [ aSelector asString size >= 2 ]
 ]

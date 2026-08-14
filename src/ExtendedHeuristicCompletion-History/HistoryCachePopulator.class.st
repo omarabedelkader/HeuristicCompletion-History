@@ -89,11 +89,9 @@ HistoryCachePopulator >> computeDeltaMessageBetween: aNewMethodAst andOld: anOld
 	but we should be able to indicate that an item is recreated from a git repo or
 	 based on the user interaction.
 	"
-	^ ((aNewMethodAst allChildren select: [ :each | each isMessage ])
-			collect: [ :each | each selector ])
+	^ (CooMethodHistoryItem messageCompletionSelectorsFromAST: aNewMethodAst)
 		  difference:
-		  ((anOldMethodAst allChildren select: [ :each | each isMessage ]) 
-				collect: [ :each | each selector ])
+		  (CooMethodHistoryItem messageCompletionSelectorsFromAST: anOldMethodAst)
 ]
 
 { #category : 'compute population' }
@@ -239,7 +237,7 @@ HistoryCachePopulator >> processMethodAddition: anAddition into: aCollection tim
 	selector ifNil: [ ^ self ].
 
 	ast := self tryParseAST: anAddition leftContents.
-	deltaMessage := ast allChildren select: [ :each | each isMessage ] thenCollect: [ :each | each selector ].
+	deltaMessage := CooMethodHistoryItem messageCompletionSelectorsFromAST: ast.
 
 
 	item := CooAddedMethodHistoryItem new
@@ -288,7 +286,7 @@ HistoryCachePopulator >> processMethodRemoval: aRemoval into: aCollection timest
 	selector ifNil: [ ^ self ].
 
 	ast := self tryParseAST: aRemoval rightContents.
-	deltaMessage := ast allChildren select: [ :each | each isMessage ] thenCollect: [ :each | each selector ].
+	deltaMessage := CooMethodHistoryItem messageCompletionSelectorsFromAST: ast.
 
 
 	item := CooRemovedMethodHistoryItem new

@@ -56,6 +56,40 @@ CooHistoryItemTest >> testMethodItemDefaultDeltaMessagesIsEmpty [
 ]
 
 { #category : 'tests' }
+CooHistoryItemTest >> testMessageCompletionSelectorRejectsPunctuation [
+
+	#( ',' '.' ';' '+' '->' '<=' ) do: [ :selector |
+		self deny:
+			(CooMethodHistoryItem isMessageCompletionSelector: selector) ]
+]
+
+{ #category : 'tests' }
+CooHistoryItemTest >> testMessageCompletionSelectorAcceptsUnaryAndKeywordSelectors [
+
+	self assert:
+		(CooMethodHistoryItem isMessageCompletionSelector: #yourself).
+	self assert:
+		(CooMethodHistoryItem isMessageCompletionSelector: #at:put:)
+]
+
+{ #category : 'tests' }
+CooHistoryItemTest >> testMessageCompletionSelectorsFromASTFiltersBinarySelectors [
+
+	| ast selectors |
+	ast := RBParser parseMethod:
+		       'sample | text |
+		       self alpha; beta: 1.
+		       text := ''a'' , ''b''.
+		       ^ 1 + 2'.
+	selectors := CooMethodHistoryItem messageCompletionSelectorsFromAST: ast.
+
+	self assert: (selectors includes: #alpha).
+	self assert: (selectors includes: #beta:).
+	self deny: (selectors includes: #,).
+	self deny: (selectors includes: #+)
+]
+
+{ #category : 'tests' }
 CooHistoryItemTest >> testMethodItemPrintOnShowsSelector [
 
 	| item |

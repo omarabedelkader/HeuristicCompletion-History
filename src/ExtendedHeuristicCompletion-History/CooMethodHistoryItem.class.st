@@ -15,6 +15,24 @@ Class {
 	#tag : 'StructuralModel'
 }
 
+{ #category : 'testing' }
+CooMethodHistoryItem class >> isMessageCompletionSelector: aSelector [
+
+	| selector |
+	aSelector ifNil: [ ^ false ].
+	selector := aSelector asSymbol.
+	^ selector isUnary or: [ selector isKeyword ]
+]
+
+{ #category : 'accessing' }
+CooMethodHistoryItem class >> messageCompletionSelectorsFromAST: aMethodAst [
+
+	aMethodAst ifNil: [ ^ #(  ) ].
+	^ ((aMethodAst allChildren select: [ :each | each isMessage ])
+		   collect: [ :each | each selector ])
+		  select: [ :each | self isMessageCompletionSelector: each ]
+]
+
 { #category : 'accessing' }
 CooMethodHistoryItem >> ast [
 	^ ast
