@@ -417,6 +417,12 @@ CooHistoryEventRecorder class >> lastDeliveryError [
 ]
 
 { #category : 'actions' }
+CooHistoryEventRecorder class >> recordImageCloseSurveyPayload: payloadDictionary [
+
+	^ self uniqueInstance recordImageCloseSurveyPayload: payloadDictionary
+]
+
+{ #category : 'actions' }
 CooHistoryEventRecorder class >> recordRemoteDeliveryEnabled [
 
 	^ self uniqueInstance recordRemoteDeliveryEnabled
@@ -492,11 +498,17 @@ CooHistoryEventRecorder class >> serverUrl: aStringOrZnUrl [
 { #category : 'system startup' }
 CooHistoryEventRecorder class >> shutDown: quitting [
 
-	uniqueInstance ifNotNil: [ uniqueInstance prepareForImageSave ]
+	uniqueInstance ifNotNil: [
+		quitting ifTrue: [
+			CooHistoryImageCloseSurvey
+				promptBeforeImageQuitUsing: CooHistoryImageCloseSurvey uiManager
+				recorder: uniqueInstance ].
+		uniqueInstance prepareForImageSave ]
 ]
 
 { #category : 'system startup' }
 CooHistoryEventRecorder class >> startUp: resuming [
+	CooHistoryImageCloseSurvey resetPromptState.
 	resuming ifTrue:[
 	(uniqueInstance notNil and: [ uniqueInstance installed ])
 		ifTrue: [ uniqueInstance install ]]
@@ -751,6 +763,27 @@ CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
 	dictionary at: #serverUrl put: self serverUrl asString.
 	dictionary at: #category put: self category asString.
 	^ dictionary
+]
+
+{ #category : 'serializing' }
+CooHistoryEventRecorder >> dictionaryForImageCloseSurveyPayload: payloadDictionary [
+
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #survey.
+	dictionary at: #event put: #imageCloseSurvey.
+	dictionary at: #timestamp put: DateAndTime now asString.
+	dictionary at: #serverUrl put: self serverUrl asString.
+	dictionary at: #category put: self category asString.
+	dictionary at: #payload put: payloadDictionary.
+	^ dictionary
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordImageCloseSurveyPayload: payloadDictionary [
+
+	self enqueueEvent: (self dictionaryForImageCloseSurveyPayload: payloadDictionary).
+	^ self
 ]
 
 { #category : 'actions' }

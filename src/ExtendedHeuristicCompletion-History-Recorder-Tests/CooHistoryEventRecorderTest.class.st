@@ -275,6 +275,24 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testImageCloseSurveyPayloadDictionary [
+
+	| payload event |
+	payload := Dictionary new
+		at: #surveyName put: 'image-close-survey';
+		yourself.
+
+	event := recorder dictionaryForImageCloseSurveyPayload: payload.
+
+	self assert: (event at: #kind) equals: #survey.
+	self assert: (event at: #event) equals: #imageCloseSurvey.
+	self assert: (event at: #payload) equals: payload.
+	self assert: (event includesKey: #timestamp).
+	self assert: (event includesKey: #serverUrl).
+	self assert: (event includesKey: #category)
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents [
  
 	| batchSize |
