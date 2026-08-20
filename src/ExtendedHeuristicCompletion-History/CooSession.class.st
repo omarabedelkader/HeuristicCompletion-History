@@ -58,17 +58,25 @@ CooSession class >> current [
 ]
 
 { #category : 'actions' }
+CooSession class >> completionItemSelectedAnnouncementClass [
+
+	^ self environment at: #CoCompletionItemSelected ifAbsent: [ nil ]
+]
+
+{ #category : 'actions' }
+CooSession class >> completionResultSetBuilderClass [
+
+	^ self environment at: #CoASTHeuristicsResultSetBuilder ifAbsent: [ nil ]
+]
+
+{ #category : 'actions' }
 CooSession class >> deinstall [
 
 	<script>
 	self environment codeChangeAnnouncer unsubscribe: self current.
 	Current := nil.
-	
-	(CoASTHeuristicsResultSetBuilder messagesHeuristic first class = CooSessionMessagesHeuristic)
-		ifTrue: [ CoASTHeuristicsResultSetBuilder messagesHeuristic removeFirst ].
-		
-	(CoASTHeuristicsResultSetBuilder variablesHeuristic first class = CooSessionVariableHeuristic )
-		ifTrue: [ CoASTHeuristicsResultSetBuilder variablesHeuristic removeFirst ].
+
+	self removeCompletionHeuristics
 ]
 
 { #category : 'instance creation' }
@@ -87,7 +95,7 @@ CooSession class >> initialize [
 CooSession class >> install [
 
 	<script>
-	| codeAnnouncer |
+	| codeAnnouncer completionAnnouncementClass |
 	
 	self deinstall.
 
@@ -106,18 +114,58 @@ CooSession class >> install [
 	"now for the user choices
 	We should probably handle the fact that the user may not select and cancel the prompt."	
 		
-	codeAnnouncer 
-		when: CoCompletionItemSelected
-		send: #addCompletionItem: 
-		to: self current. 
-		
-	(CoASTHeuristicsResultSetBuilder messagesHeuristic first class = CooSessionMessagesHeuristic)
-		ifFalse: [ CoASTHeuristicsResultSetBuilder messagesHeuristic addFirst: CooSessionMessagesHeuristic new ].
-		
-	(CoASTHeuristicsResultSetBuilder variablesHeuristic first class = CooSessionVariableHeuristic)
-		ifFalse: [ CoASTHeuristicsResultSetBuilder variablesHeuristic addFirst: CooSessionVariableHeuristic new ].
+	completionAnnouncementClass := self completionItemSelectedAnnouncementClass.
+	completionAnnouncementClass ifNotNil: [
+		codeAnnouncer
+			when: completionAnnouncementClass
+			send: #addCompletionItem:
+			to: self current ].
+
+	self installCompletionHeuristics
 
 
+]
+
+{ #category : 'actions' }
+CooSession class >> installCompletionHeuristics [
+
+	| builderClass messagesHeuristic variablesHeuristic |
+	builderClass := self completionResultSetBuilderClass.
+	(builderClass notNil
+		and: [ (builderClass respondsTo: #messagesHeuristic)
+		and: [ builderClass respondsTo: #variablesHeuristic ] ])
+		ifFalse: [ ^ self ].
+
+	messagesHeuristic := builderClass messagesHeuristic.
+	(messagesHeuristic isEmpty
+		or: [ messagesHeuristic first class ~= CooSessionMessagesHeuristic ])
+		ifTrue: [ messagesHeuristic addFirst: CooSessionMessagesHeuristic new ].
+
+	variablesHeuristic := builderClass variablesHeuristic.
+	(variablesHeuristic isEmpty
+		or: [ variablesHeuristic first class ~= CooSessionVariableHeuristic ])
+		ifTrue: [ variablesHeuristic addFirst: CooSessionVariableHeuristic new ]
+]
+
+{ #category : 'actions' }
+CooSession class >> removeCompletionHeuristics [
+
+	| builderClass messagesHeuristic variablesHeuristic |
+	builderClass := self completionResultSetBuilderClass.
+	(builderClass notNil
+		and: [ (builderClass respondsTo: #messagesHeuristic)
+		and: [ builderClass respondsTo: #variablesHeuristic ] ])
+		ifFalse: [ ^ self ].
+
+	messagesHeuristic := builderClass messagesHeuristic.
+	(messagesHeuristic notEmpty
+		and: [ messagesHeuristic first class = CooSessionMessagesHeuristic ])
+		ifTrue: [ messagesHeuristic removeFirst ].
+
+	variablesHeuristic := builderClass variablesHeuristic.
+	(variablesHeuristic notEmpty
+		and: [ variablesHeuristic first class = CooSessionVariableHeuristic ])
+		ifTrue: [ variablesHeuristic removeFirst ]
 ]
 
 { #category : 'instance creation' }
