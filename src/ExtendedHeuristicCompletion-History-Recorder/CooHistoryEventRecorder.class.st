@@ -118,14 +118,31 @@ and, optionally:
 
 # INSTALLATION
 
-Installation:
+Local development against the PX server (pharo-data-collector project):
+
+Start the server in another Pharo image with:
+
+	PXServer start.
+
+It listens on http://localhost:8008 and maps the '/events' endpoint. Then:
+
+```
+CooHistoryEventRecorder configureForLocalPXServer.
+CooSession install.
+CooHistoryEventRecorder install.
+CooHistoryEventRecorder enableDelivery.
+CooHistoryEventRecorder recordRemoteDeliveryEnabled.
+```
+
+Equivalent explicit configuration:
+
 ```
 CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:9091/'.
-CooHistoryEventRecorder category: #history.
+CooHistoryEventRecorder serverUrl: 'http://localhost:8008/events'.
+CooHistoryEventRecorder category: #complishon.
 CooHistoryEventRecorder experienceId: 'complishon'.
-CooHistoryEventRecorder participantUUID: 'participant-01'.
-CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
+CooHistoryEventRecorder participantUUID: UUID new asString.
+CooHistoryEventRecorder taskOrSurveyId: 'coding-session-1'.
 CooHistoryEventRecorder saveOnDisk: false.
 CooHistoryEventRecorder deliveryBatchSize: 1.
 CooSession install.
@@ -134,14 +151,19 @@ CooHistoryEventRecorder enableDelivery.
 CooHistoryEventRecorder recordRemoteDeliveryEnabled.
 ```
 
-The Pharo-XP server requires the multipart 'category' field to be a STON
+The Pharo-XP server requires the multipart 'category' field to be a STON/JSON
 dictionary carrying exactly these four keys: category, experienceId,
-participantUUID and taskOrSurveyId. They also define the on-disk directory
-data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>. Sending a
-bare category string makes the server reject the request, so nothing is stored.
+participantUUID and taskOrSurveyId, and every value must be a non-empty
+string. These values also define the on-disk directory
+data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId> on the
+server. The recorder validates this contract before creating the PX collector
+(see validateRemoteConfiguration), so misconfiguration fails fast locally.
 
-The serverUrl path must match the route the server maps (the provided server
-maps '/'), so use the server root, not a sub-path.
+The serverUrl path must match the route the server maps. The supplied PXServer
+maps '/events', so use 'http://localhost:8008/events' for local development,
+not the bare server root.
+
+For the production research server use an explicit setup such as:
 
 ```
 CooHistoryEventRecorder reset.
@@ -241,6 +263,32 @@ CooHistoryEventRecorder class >> codeChangeAnnouncer [
 	^ SystemAnnouncer uniqueInstance
 ]
 
+{ #category : 'configuration' }
+CooHistoryEventRecorder class >> configureForLocalPXServer [
+	<script>
+	"Configure the recorder to deliver events to a PXServer started locally
+	with PXServer start in the pharo-data-collector image. The canonical
+	ingest URL of that server is http://localhost:8008/events; the server
+	validates that metadata carries exactly category, experienceId,
+	participantUUID and taskOrSurveyId as non-empty strings, and persists
+	each event under var/data/<category>/<experienceId>/<participantUUID>/
+	<taskOrSurveyId>.
+
+	The anonymous participant UUID and task/session id keep their stable
+	per-image values (they are generated once on first access). Experiments
+	that need explicit study semantics should set them with
+	CooHistoryEventRecorder participantUUID: and taskOrSurveyId:."
+
+	self serverUrl: 'http://localhost:8008/events'.
+	self category: #complishon.
+	self experienceId: 'complishon'.
+	self participantUUID ifNil: [
+		self participantUUID: UUID new asString ].
+	self taskOrSurveyId ifNil: [
+		self taskOrSurveyId: UUID new asString ].
+	self deliveryBatchSize: 1
+]
+
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultCategory [
 
@@ -267,7 +315,13 @@ CooHistoryEventRecorder class >> defaultExperienceId [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultParticipantUUID [
 
-	^ defaultParticipantUUID
+	"Anonymous and stable participant identifier. It is generated once per
+	image installation and reused afterwards so all events of a participant
+	are routed to the same directory on the PX server. Never derive this
+	value from a user name, email address, or machine username."
+
+	^ defaultParticipantUUID ifNil: [
+		  defaultParticipantUUID := UUID new asString ]
 ]
 
 { #category : 'cleanup' }
@@ -279,7 +333,13 @@ CooHistoryEventRecorder class >> defaultSaveOnDisk [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
 
-	^ defaultTaskOrSurveyId
+	"Identifier of the current coding task or session. It is generated once
+	per image and kept stable so events are not fragmented across task
+	directories. Real experiments should inject an explicit identifier with
+	CooHistoryEventRecorder taskOrSurveyId:."
+
+	^ defaultTaskOrSurveyId ifNil: [
+		  defaultTaskOrSurveyId := UUID new asString ]
 ]
 
 { #category : 'cleanup' }
@@ -287,7 +347,9 @@ CooHistoryEventRecorder class >> defaultServerUrl [
 
 	"Default server used by the DebuggingSpy/EventRecorder setup.
 	Change this with:
-		CooHistoryEventRecorder serverUrl: 'http://localhost:8080'
+		CooHistoryEventRecorder configureForLocalPXServer
+	or:
+		CooHistoryEventRecorder serverUrl: 'http://localhost:8008/events'
 	or:
 		CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'"
 
@@ -939,6 +1001,7 @@ CooHistoryEventRecorder >> configureEventRecorderSettings [
 CooHistoryEventRecorder >> newLogger [
 
 	| eventCollector |
+	self validateRemoteConfiguration.
 	ERPrivacy sendDiagnosticsAndUsageData: true.
 	self configureEventRecorderSettings.
 
@@ -947,11 +1010,44 @@ CooHistoryEventRecorder >> newLogger [
 		url: self serverUrl;
 		category: self category asString;
 		experienceId: self experienceId asString;
-		participantUUID: (self participantUUID ifNotNil: [ :value | value asString ]);
-		taskOrSurveyId: (self taskOrSurveyId ifNotNil: [ :value | value asString ]);
+		participantUUID: self participantUUID asString;
+		taskOrSurveyId: self taskOrSurveyId asString;
 		occupant: self;
 		register.
 	^ eventCollector
+]
+
+{ #category : 'validation' }
+CooHistoryEventRecorder >> validateRemoteConfiguration [
+
+	"The Pharo-XP server accepts an upload only when its metadata carries
+	exactly category, experienceId, participantUUID and taskOrSurveyId and
+	every value is a non-empty String (see
+	PXEventRecorderPutHandler>>isValidMetadata: on the server side).
+	Validate that contract here, before PXEventCollector is created and
+	registered, so misconfiguration fails fast with a clear error in this
+	image instead of a cryptic HTTP failure later."
+
+	self category ifNil: [
+		self error: 'History telemetry requires a category' ].
+	self category asString isEmpty ifTrue: [
+		self error: 'History telemetry category cannot be empty' ].
+
+	self experienceId ifNil: [
+		self error: 'History telemetry requires an experienceId' ].
+	self experienceId asString isEmpty ifTrue: [
+		self error: 'History telemetry experienceId cannot be empty' ].
+
+	self participantUUID ifNil: [
+		self error: 'History telemetry requires a participantUUID' ].
+	self participantUUID asString isEmpty ifTrue: [
+		self error: 'History telemetry participantUUID cannot be empty' ].
+
+	self taskOrSurveyId ifNil: [
+		self error: 'History telemetry requires a taskOrSurveyId' ].
+	self taskOrSurveyId asString isEmpty ifTrue: [
+		self error: 'History telemetry taskOrSurveyId cannot be empty' ]
+
 ]
 
 { #category : 'accessing' }
@@ -985,25 +1081,18 @@ CooHistoryEventRecorder >> categoryFieldValue: aCategory [
 	PXEventRecorderPutHandler>>hasCategoryAndDataParts: STON-decodes the
 	'category' multipart field and requires a dictionary holding exactly the
 	four PXEventMultiBundle metadata keys: category, experienceId,
-	participantUUID and taskOrSurveyId. These values also become the on-disk
-	directory path data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>.
+	participantUUID and taskOrSurveyId, all non-empty. These values also
+	become the on-disk directory path
+	data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>.
 	We therefore send a STON-encoded metadata dictionary, not a plain string."
 
-	| metadata ston |
-	metadata := Dictionary new.
-	metadata at: 'category' put: aCategory asString.
-	metadata at: 'experienceId' put: self experienceId asString.
-	metadata
-		at: 'participantUUID'
-		put: (self participantUUID ifNotNil: [ :value | value asString ]).
-	metadata
-		at: 'taskOrSurveyId'
-		put: (self taskOrSurveyId ifNotNil: [ :value | value asString ]).
-
-	ston := self class environment at: #STON ifAbsent: [ nil ].
-	^ ston
-		  ifNil: [ metadata printString ]
-		  ifNotNil: [ ston toString: metadata ]
+	self validateRemoteConfiguration.
+	^ STON toString: (Dictionary new
+			  at: 'category' put: aCategory asString;
+			  at: 'experienceId' put: self experienceId asString;
+			  at: 'participantUUID' put: self participantUUID asString;
+			  at: 'taskOrSurveyId' put: self taskOrSurveyId asString;
+			  yourself)
 ]
 
 { #category : 'actions' }

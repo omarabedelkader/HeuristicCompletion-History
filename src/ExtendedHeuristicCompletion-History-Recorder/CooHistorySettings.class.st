@@ -58,10 +58,12 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 	historyRecordingEnabled := true.
 	remoteDeliveryEnabled := true.
 
+	"Configure all PX routing metadata before installing the collector:
+	the PX server rejects uploads whose category, experienceId,
+	participantUUID or taskOrSurveyId is missing or empty."
+	CooHistoryEventRecorder configureForLocalPXServer.
+
 	CooSession install.
-	CooHistoryEventRecorder category: #complishon.
-	CooHistoryEventRecorder experienceId: 'complishon'.
-	CooHistoryEventRecorder deliveryBatchSize: 1.
 	CooHistoryEventRecorder install.
 	CooHistoryEventRecorder enableDelivery.
 	CooHistoryEventRecorder recordRemoteDeliveryEnabled
