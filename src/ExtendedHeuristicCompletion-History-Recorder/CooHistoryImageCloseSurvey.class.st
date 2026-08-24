@@ -469,12 +469,6 @@ CooHistoryImageCloseSurvey class >> taskQuestionTitle [
 	^ 'Which task did you perform this session?'
 ]
 
-{ #category : 'survey' }
-CooHistoryImageCloseSurvey class >> taskValues [
-
-	^ self taskChoices collect: [ :task | task key ]
-]
-
 { #category : 'private' }
 CooHistoryImageCloseSurvey class >> taskValueFromSurveyResponse: aDictionary [
 
@@ -486,6 +480,12 @@ CooHistoryImageCloseSurvey class >> taskValueFromSurveyResponse: aDictionary [
 	(tasks respondsTo: #isEmpty) ifFalse: [ ^ nil ].
 	tasks isEmpty ifTrue: [ ^ nil ].
 	^ tasks first
+]
+
+{ #category : 'survey' }
+CooHistoryImageCloseSurvey class >> taskValues [
+
+	^ self taskChoices collect: [ :task | task key ]
 ]
 
 { #category : 'private' }
@@ -520,12 +520,6 @@ CooHistoryImageCloseSurvey class >> userExperienceQuestionTitle [
 	^ 'How many years of programming experience do you have?'
 ]
 
-{ #category : 'survey' }
-CooHistoryImageCloseSurvey class >> userExperienceValues [
-
-	^ self userExperienceChoices collect: [ :choice | choice key ]
-]
-
 { #category : 'private' }
 CooHistoryImageCloseSurvey class >> userExperienceValueFromSurveyResponse: aDictionary [
 
@@ -536,6 +530,12 @@ CooHistoryImageCloseSurvey class >> userExperienceValueFromSurveyResponse: aDict
 	userProfile := aDictionary at: #userProfile ifAbsent: [ nil ].
 	(userProfile respondsTo: #at:ifAbsent:) ifFalse: [ ^ nil ].
 	^ userProfile at: #experienceYears ifAbsent: [ nil ]
+]
+
+{ #category : 'survey' }
+CooHistoryImageCloseSurvey class >> userExperienceValues [
+
+	^ self userExperienceChoices collect: [ :choice | choice key ]
 ]
 
 { #category : 'private' }

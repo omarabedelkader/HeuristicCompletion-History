@@ -16,21 +16,6 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
 }
 
-{ #category : 'accessing' }
-CooHistorySettings class >> firstLaunchCompleted [
-
-	^ self historyRecordingConsentState ~= #notAsked
-]
-
-{ #category : 'accessing' }
-CooHistorySettings class >> firstLaunchCompleted: aBoolean [
-
-	firstLaunchCompleted := aBoolean.
-	aBoolean ifFalse: [
-		historyRecordingConsentState := #notAsked.
-		privacyConsentAccepted := false ]
-]
-
 { #category : 'actions' }
 CooHistorySettings class >> confirmRemoteDeliveryDisable [
 
@@ -58,53 +43,31 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 	historyRecordingEnabled := true.
 	remoteDeliveryEnabled := true.
 
+	"Configure all PX routing metadata before installing the collector:
+	the PX server rejects uploads whose category, experienceId,
+	participantUUID or taskOrSurveyId is missing or empty."
+	CooHistoryEventRecorder configureForLocalPXServer.
+	
+	
 	CooSession install.
-	CooHistoryEventRecorder category: #complishon.
-	CooHistoryEventRecorder experienceId: 'complishon'.
-	CooHistoryEventRecorder deliveryBatchSize: 1.
 	CooHistoryEventRecorder install.
 	CooHistoryEventRecorder enableDelivery.
 	CooHistoryEventRecorder recordRemoteDeliveryEnabled
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> historyRecordingEnabled [
+CooHistorySettings class >> firstLaunchCompleted [
 
-	^ self historyRecordingConsentAccepted and: [ historyRecordingEnabled = true ]
+	^ self historyRecordingConsentState ~= #notAsked
 ]
 
 { #category : 'accessing' }
-CooHistorySettings class >> historyRecordingEnabled: aBoolean [
+CooHistorySettings class >> firstLaunchCompleted: aBoolean [
 
-	aBoolean
-		ifTrue: [
-			self privacyConsentAccepted ifFalse: [
-				self openFirstLaunchSetup.
-				^ self ].
-
-			self enableRemoteHistoryRecording ]
-		ifFalse: [
-			remoteDeliveryEnabled = true
-				ifFalse: [
-					self useNullHistoryRecorder.
-					^ self ].
-
-			self confirmRemoteDeliveryDisable
-				ifTrue: [ self useNullHistoryRecorder ]
-				ifFalse: [ historyRecordingEnabled := true ] ]
-]
-
-{ #category : 'accessing' }
-CooHistorySettings class >> imageCloseSurveyEnabled [
-
-	^ self historyRecordingEnabled and: [
-		  imageCloseSurveyEnabled ifNil: [ imageCloseSurveyEnabled := true ] ]
-]
-
-{ #category : 'accessing' }
-CooHistorySettings class >> imageCloseSurveyEnabled: aBoolean [
-
-	imageCloseSurveyEnabled := aBoolean = true
+	firstLaunchCompleted := aBoolean.
+	aBoolean ifFalse: [
+		historyRecordingConsentState := #notAsked.
+		privacyConsentAccepted := false ]
 ]
 
 { #category : 'consent' }
@@ -194,10 +157,46 @@ CooHistorySettings class >> historyRecordingConsentState [
 ]
 
 { #category : 'consent' }
+CooHistorySettings class >> historyRecordingDisablePrompt [
+
+	^ 'Disable history telemetry?', String cr,
+		String cr,
+		'The history recorder will stop sending future code-completion history events to the configured research server.', String cr,
+		'Data already submitted may remain on the research server because it may not be linkable back to you.'
+]
+
+{ #category : 'consent' }
 CooHistorySettings class >> historyRecordingDisabledStatusText [
 
 	^ 'Anonymous history telemetry is disabled.', String cr,
 		'The null recorder is installed and no code completion history events are sent.'
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> historyRecordingEnabled [
+
+	^ self historyRecordingConsentAccepted and: [ historyRecordingEnabled = true ]
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> historyRecordingEnabled: aBoolean [
+
+	aBoolean
+		ifTrue: [
+			self privacyConsentAccepted ifFalse: [
+				self openFirstLaunchSetup.
+				^ self ].
+
+			self enableRemoteHistoryRecording ]
+		ifFalse: [
+			remoteDeliveryEnabled = true
+				ifFalse: [
+					self useNullHistoryRecorder.
+					^ self ].
+
+			self confirmRemoteDeliveryDisable
+				ifTrue: [ self useNullHistoryRecorder ]
+				ifFalse: [ historyRecordingEnabled := true ] ]
 ]
 
 { #category : 'consent' }
@@ -207,13 +206,17 @@ CooHistorySettings class >> historyRecordingEnabledStatusText [
 		'Code completion history events are being recorded and sent to the configured research server.'
 ]
 
-{ #category : 'consent' }
-CooHistorySettings class >> historyRecordingDisablePrompt [
+{ #category : 'accessing' }
+CooHistorySettings class >> imageCloseSurveyEnabled [
 
-	^ 'Disable history telemetry?', String cr,
-		String cr,
-		'The history recorder will stop sending future code-completion history events to the configured research server.', String cr,
-		'Data already submitted may remain on the research server because it may not be linkable back to you.'
+	^ self historyRecordingEnabled and: [
+		  imageCloseSurveyEnabled ifNil: [ imageCloseSurveyEnabled := true ] ]
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> imageCloseSurveyEnabled: aBoolean [
+
+	imageCloseSurveyEnabled := aBoolean = true
 ]
 
 { #category : 'consent' }
@@ -226,6 +229,39 @@ CooHistorySettings class >> normalizeConsentChoice: choice [
 	choice = 2 ifTrue: [ ^ #accept ].
 	choice = 3 ifTrue: [ ^ #learnMore ].
 	^ #decline
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyUser: aString [
+
+	"Display a message to the user (UIManager if available, otherwise Transcript)."
+
+	(self notifyViaUIManager: aString) ifTrue: [ ^ self ].
+	self notifyViaTranscript: aString
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyViaTranscript: aString [
+
+	| transcript |
+	transcript := Smalltalk globals at: #Transcript ifAbsent: [ nil ].
+	transcript ifNil: [ ^ false ].
+	(transcript respondsTo: #show:) ifFalse: [ ^ false ].
+
+	transcript show: aString; cr.
+	^ true
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> notifyViaUIManager: aString [
+
+	| ui |
+	ui := self uiManager.
+	(ui notNil and: [ ui respondsTo: #inform: ])
+		ifTrue: [
+			ui inform: aString.
+			^ true ].
+	^ false
 ]
 
 { #category : 'accessing' }
@@ -345,84 +381,6 @@ CooHistorySettings class >> requestFirstLaunchConsentChoice [
 	] on: Error do: [ :ex | #decline ]
 ]
 
-{ #category : 'consent' }
-CooHistorySettings class >> showHistoryRecordingStudyInformation [
-
-	| ui message |
-	message := self historyRecordingConsentLearnMoreText.
-	ui := self uiManager.
-	ui ifNotNil: [
-		(ui respondsTo: #longMessage:title:) ifTrue: [
-			^ ui
-				longMessage: message
-				title: 'Code Completion History Research' ].
-		(ui respondsTo: #inform:) ifTrue: [ ^ ui inform: message ] ].
-
-	Transcript
-		show: message;
-		cr
-]
-
-{ #category : 'actions' }
-CooHistorySettings class >> notifyUser: aString [
-
-	"Display a message to the user (UIManager if available, otherwise Transcript)."
-
-	(self notifyViaUIManager: aString) ifTrue: [ ^ self ].
-	self notifyViaTranscript: aString
-]
-
-{ #category : 'actions' }
-CooHistorySettings class >> notifyViaTranscript: aString [
-
-	| transcript |
-	transcript := Smalltalk globals at: #Transcript ifAbsent: [ nil ].
-	transcript ifNil: [ ^ false ].
-	(transcript respondsTo: #show:) ifFalse: [ ^ false ].
-
-	transcript show: aString; cr.
-	^ true
-]
-
-{ #category : 'actions' }
-CooHistorySettings class >> notifyViaUIManager: aString [
-
-	| ui |
-	ui := self uiManager.
-	(ui notNil and: [ ui respondsTo: #inform: ])
-		ifTrue: [
-			ui inform: aString.
-			^ true ].
-	^ false
-]
-
-{ #category : 'private' }
-CooHistorySettings class >> uiManager [
-
-	| uiClass |
-	uiClass := Smalltalk globals at: #UIManager ifAbsent: [ ^ nil ].
-	(uiClass respondsTo: #default) ifFalse: [ ^ nil ].
-	^ [ uiClass default ] on: Error do: [ :ex | nil ]
-]
-
-{ #category : 'actions' }
-CooHistorySettings class >> useNullHistoryRecorder [
-
-	self recordHistoryRecordingConsentAccepted: false.
-	historyRecordingEnabled := false.
-	remoteDeliveryEnabled := false.
-
-	(Smalltalk globals at: #ERPrivacy ifAbsent: [ nil ])
-		ifNotNil: [ :privacyClass |
-			(privacyClass respondsTo: #sendDiagnosticsAndUsageData:)
-				ifTrue: [ privacyClass sendDiagnosticsAndUsageData: false ] ].
-
-	CooHistoryEventRecorder disableDelivery.
-	CooHistoryEventRecorder deinstall.
-	CooNullHistoryEventRecorder install.
-	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
-]
-
 { #category : 'accessing' }
 CooHistorySettings class >> settingsOn: aBuilder [
 
@@ -455,4 +413,49 @@ CooHistorySettings class >> settingsOn: aBuilder [
 				setSelector: #imageCloseSurveyEnabled:;
 				default: self imageCloseSurveyEnabled;
 				description: 'Only active when anonymous history telemetry is enabled. When enabled, Code Completion History asks a short feedback form before the Pharo image quits.' ]
+]
+
+{ #category : 'consent' }
+CooHistorySettings class >> showHistoryRecordingStudyInformation [
+
+	| ui message |
+	message := self historyRecordingConsentLearnMoreText.
+	ui := self uiManager.
+	ui ifNotNil: [
+		(ui respondsTo: #longMessage:title:) ifTrue: [
+			^ ui
+				longMessage: message
+				title: 'Code Completion History Research' ].
+		(ui respondsTo: #inform:) ifTrue: [ ^ ui inform: message ] ].
+
+	Transcript
+		show: message;
+		cr
+]
+
+{ #category : 'private' }
+CooHistorySettings class >> uiManager [
+
+	| uiClass |
+	uiClass := Smalltalk globals at: #UIManager ifAbsent: [ ^ nil ].
+	(uiClass respondsTo: #default) ifFalse: [ ^ nil ].
+	^ [ uiClass default ] on: Error do: [ :ex | nil ]
+]
+
+{ #category : 'actions' }
+CooHistorySettings class >> useNullHistoryRecorder [
+
+	self recordHistoryRecordingConsentAccepted: false.
+	historyRecordingEnabled := false.
+	remoteDeliveryEnabled := false.
+
+	(Smalltalk globals at: #ERPrivacy ifAbsent: [ nil ])
+		ifNotNil: [ :privacyClass |
+			(privacyClass respondsTo: #sendDiagnosticsAndUsageData:)
+				ifTrue: [ privacyClass sendDiagnosticsAndUsageData: false ] ].
+
+	CooHistoryEventRecorder disableDelivery.
+	CooHistoryEventRecorder deinstall.
+	CooNullHistoryEventRecorder install.
+	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
 ]

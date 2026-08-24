@@ -19,25 +19,6 @@ CooHistoryImageCloseSurveyTest >> completeSurveyUI [
 	^ ui
 ]
 
-{ #category : 'fixtures' }
-CooHistoryImageCloseSurveyTest >> validSurveyResponse [
-
-	| ratings |
-	ratings := Dictionary new
-		at: #overall put: 5;
-		at: #suggestionQuality put: 4;
-		at: #speed put: 3;
-		at: #usefulness put: 2;
-		yourself.
-
-	^ Dictionary new
-		at: #ratings put: ratings;
-		at: #task put: #codeCompletion;
-		at: #experienceYears put: 5;
-		at: #feedbackComment put: 'Useful overall.';
-		yourself
-]
-
 { #category : 'running' }
 CooHistoryImageCloseSurveyTest >> setUp [
 
@@ -174,4 +155,23 @@ CooHistoryImageCloseSurveyTest >> testValidatedUserExperienceAcceptsConfiguredBu
 	self assert: (CooHistoryImageCloseSurvey validatedUserExperience: 0) equals: 0.
 	self assert: (CooHistoryImageCloseSurvey validatedUserExperience: '10') equals: 10.
 	self assert: (CooHistoryImageCloseSurvey validatedUserExperience: 7) isNil
+]
+
+{ #category : 'fixtures' }
+CooHistoryImageCloseSurveyTest >> validSurveyResponse [
+
+	| ratings |
+	ratings := Dictionary new
+		at: #overall put: 5;
+		at: #suggestionQuality put: 4;
+		at: #speed put: 3;
+		at: #usefulness put: 2;
+		yourself.
+
+	^ Dictionary new
+		at: #ratings put: ratings;
+		at: #task put: #codeCompletion;
+		at: #experienceYears put: 5;
+		at: #feedbackComment put: 'Useful overall.';
+		yourself
 ]
