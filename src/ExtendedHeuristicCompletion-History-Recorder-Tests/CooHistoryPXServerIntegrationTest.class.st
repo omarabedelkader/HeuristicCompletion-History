@@ -30,24 +30,31 @@ CooHistoryPXServerIntegrationTest >> eventsDirectoryForParticipant: participantU
 { #category : 'as yet unclassified' }
 CooHistoryPXServerIntegrationTest >> eventsURL [
 
+	server ifNil: [
+		self skip: 'PX server is not available for this integration test'.
+		^ nil ].
+
 	^ String streamContents: [ :stream |
-		  stream
-			  nextPutAll: 'http://';
-			  nextPutAll: NetNameResolver loopBackName;
-			  nextPut: $:;
-			  print: server serverSocket port;
-			  nextPutAll: '/events' ]
+		stream
+			nextPutAll: 'http://';
+			nextPutAll: NetNameResolver loopBackName;
+			nextPut: $:;
+			print: server serverSocket port;
+			nextPutAll: '/events' ]
 ]
 
 { #category : 'as yet unclassified' }
 CooHistoryPXServerIntegrationTest >> requiresSuppliedPXServer [
-	"The supplied pharo-data-collector PXServer implementation understands
-	#dataDirectory: and maps '/events'. Older PX stacks do not; tests that
-	cannot run against them are skipped instead of failing."
 
-	(PXServerDelegate new respondsTo: #dataDirectory:) ifTrue: [ ^ self ].
+	"The integration tests require the pharo-data-collector PXServerDelegate
+	that understands #dataDirectory: and maps /events."
 
-	self skip: 'Requires the supplied pharo-data-collector PXServerDelegate mapping /events'
+	(PXServerDelegate new respondsTo: #dataDirectory:)
+		ifTrue: [ ^ self ].
+
+	self skip:
+		'Requires the supplied pharo-data-collector PXServerDelegate mapping /events'.
+	^ self
 ]
 
 { #category : 'as yet unclassified' }
@@ -68,11 +75,19 @@ CooHistoryPXServerIntegrationTest >> setUp [
 	super setUp.
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
-	self requiresSuppliedPXServer.
+	delegate := PXServerDelegate new.
+
+	(delegate respondsTo: #dataDirectory:) ifFalse: [
+		self skip:
+			'Requires the supplied pharo-data-collector PXServerDelegate mapping /events'.
+		^ self ].
 
 	fileSystem := FileSystem memory.
-	delegate := PXServerDelegate new.
-	delegate dataDirectory: fileSystem workingDirectory / 'data'.
+
+	delegate
+		perform: #dataDirectory:
+		with: fileSystem workingDirectory / 'data'.
+
 	server := ZnServer on: 0.
 	server delegate: delegate.
 	server start.

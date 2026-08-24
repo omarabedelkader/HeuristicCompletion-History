@@ -50,10 +50,15 @@ CooHistoryEventRecorderTest >> testBlockValueWhenBlockThrowAnException [
 
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testCategoryFieldValueContainsNonEmptyMetadataStrings [
-	"The PX server rejects any metadata whose values are not four non-empty strings."
 
 	| metadata |
-	metadata := STON fromString: (recorder categoryFieldValue: #complishon).
+	recorder category: #complishon.
+	recorder experienceId: 'complishon'.
+	recorder participantUUID: UUID new asString.
+	recorder taskOrSurveyId: UUID new asString.
+
+	metadata := STON fromString:
+		(recorder categoryFieldValue: #complishon).
 
 	self assert: metadata size equals: 4.
 	self assert: (metadata at: 'category') equals: 'complishon'.
@@ -61,11 +66,14 @@ CooHistoryEventRecorderTest >> testCategoryFieldValueContainsNonEmptyMetadataStr
 	self assert: (metadata at: 'participantUUID') equals: recorder participantUUID asString.
 	self assert: (metadata at: 'taskOrSurveyId') equals: recorder taskOrSurveyId asString.
 
-	#('participantUUID' 'taskOrSurveyId') do: [ :eachKey |
-		self assert: (metadata at: eachKey) isString description: eachKey , ' must be a String'.
+	#('category' 'experienceId' 'participantUUID' 'taskOrSurveyId') do: [ :eachKey |
+		self
+			assert: (metadata at: eachKey) isString
+			description: eachKey , ' must be a String'.
 		self
 			deny: (metadata at: eachKey) isEmpty
 			description: eachKey , ' must not be empty' ]
+
 ]
 
 { #category : 'tests' }
@@ -261,39 +269,13 @@ CooHistoryEventRecorderTest >> testNewLoggerKeepsCollectorRegistered [
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingParticipantUUID [
 
-	| originalDefault |
-	originalDefault := CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID.
-	[
-		CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID put: nil.
-		recorder participantUUID: nil.
+	recorder participantUUID: ''.
 
-		self
-			should: [ recorder newLogger ]
-			raise: Error
-			whoseDescriptionIncludes: 'participantUUID'
-			description: 'A PX collector must never be created without a participantUUID' ]
-		ensure: [
-			CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID put: originalDefault.
-			recorder participantUUID: originalDefault ]
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingTaskOrSurveyId [
-
-	| originalDefault |
-	originalDefault := CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId.
-	[
-		CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId put: nil.
-		recorder taskOrSurveyId: nil.
-
-		self
-			should: [ recorder newLogger ]
-			raise: Error
-			whoseDescriptionIncludes: 'taskOrSurveyId'
-			description: 'A PX collector must never be created without a taskOrSurveyId' ]
-		ensure: [
-			CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId put: originalDefault.
-			recorder taskOrSurveyId: originalDefault ]
+	self
+		should: [ recorder newLogger ]
+		raise: Error
+		whoseDescriptionIncludes: 'participantUUID'
+		description: 'A PX collector must never be created without a participantUUID'
 ]
 
 { #category : 'tests' }
@@ -367,29 +349,32 @@ CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyParticipantUUID
 	| participantUUID |
 	participantUUID := recorder participantUUID.
 
-	self deny: participantUUID isNil description: 'participantUUID must never be nil'.
+	self
+		deny: participantUUID isNil
+		description: 'participantUUID must never be nil'.
+
 	self assert: participantUUID isString.
 	self deny: participantUUID isEmpty.
 
-	"It must stay stable so all events of a participant are routed to the
-	same directory on the server."
-	self assert: recorder participantUUID equals: participantUUID.
-	self assert: CooHistoryEventRecorder defaultParticipantUUID equals: participantUUID
+	"It must stay stable on this recorder instance."
+	self assert: recorder participantUUID equals: participantUUID
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyTaskOrSurveyId [
+CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyTaskOrSurveyId [ 
 
 	| taskOrSurveyId |
 	taskOrSurveyId := recorder taskOrSurveyId.
 
-	self deny: taskOrSurveyId isNil description: 'taskOrSurveyId must never be nil'.
+	self
+		deny: taskOrSurveyId isNil
+		description: 'taskOrSurveyId must never be nil'.
+
 	self assert: taskOrSurveyId isString.
 	self deny: taskOrSurveyId isEmpty.
 
-	"It must stay stable so events are not fragmented across task directories."
-	self assert: recorder taskOrSurveyId equals: taskOrSurveyId.
-	self assert: CooHistoryEventRecorder defaultTaskOrSurveyId equals: taskOrSurveyId
+	"It must stay stable on this recorder instance."
+	self assert: recorder taskOrSurveyId equals: taskOrSurveyId
 ]
 
 { #category : 'tests' }
