@@ -30,9 +30,11 @@ CooHistoryBenchmarkSessionOwnershipTest >> testMessageFetcherUsesExperimentSessi
 
 { #category : 'tests' }
 CooHistoryBenchmarkSessionOwnershipTest >> testPopulatorUsesExperimentSession [
+	"Construction must not touch Git or Iceberg: only populateCaches does.
+	The test injects an experiment session and verifies ownership."
 
 	| populator experimentSession |
-	populator := HistoryCachePopulator repo: 'fixture://local'.
+	populator := HistoryCachePopulator new.
 	experimentSession := CooSession new.
 
 	populator session: experimentSession.

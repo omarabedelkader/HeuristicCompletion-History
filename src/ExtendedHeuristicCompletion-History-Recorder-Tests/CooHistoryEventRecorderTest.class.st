@@ -258,38 +258,40 @@ CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyTaskOrSurveyId 
 CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingParticipantUUID [
 
 	| originalDefault |
-	originalDefault := CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID.
+	originalDefault := CooHistoryEventRecorder defaultParticipantUUID.
 	[
-		CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID put: nil.
-		recorder participantUUID: nil.
+	recorder
+		category: #complishon;
+		experienceId: 'complishon'.
+	CooHistoryEventRecorder participantUUID: nil.
 
-		self
-			should: [ recorder newLogger ]
-			raise: Error
-			whoseDescriptionIncludes: 'participantUUID'
-			description: 'A PX collector must never be created without a participantUUID' ]
-		ensure: [
-			CooHistoryEventRecorder class instVarNamed: #defaultParticipantUUID put: originalDefault.
-			recorder participantUUID: originalDefault ]
+	self
+		should: [ recorder newLogger ]
+		raise: Error
+		whoseDescriptionIncludes: 'participantUUID'
+		description:
+			'A PX collector must never be created without a participantUUID' ]
+		ensure: [ CooHistoryEventRecorder participantUUID: originalDefault ]
 ]
 
 { #category : 'tests' }
 CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingTaskOrSurveyId [
 
 	| originalDefault |
-	originalDefault := CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId.
+	originalDefault := CooHistoryEventRecorder defaultTaskOrSurveyId.
 	[
-		CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId put: nil.
-		recorder taskOrSurveyId: nil.
+	recorder
+		category: #complishon;
+		experienceId: 'complishon'.
+	CooHistoryEventRecorder taskOrSurveyId: nil.
 
-		self
-			should: [ recorder newLogger ]
-			raise: Error
-			whoseDescriptionIncludes: 'taskOrSurveyId'
-			description: 'A PX collector must never be created without a taskOrSurveyId' ]
-		ensure: [
-			CooHistoryEventRecorder class instVarNamed: #defaultTaskOrSurveyId put: originalDefault.
-			recorder taskOrSurveyId: originalDefault ]
+	self
+		should: [ recorder newLogger ]
+		raise: Error
+		whoseDescriptionIncludes: 'taskOrSurveyId'
+		description:
+			'A PX collector must never be created without a taskOrSurveyId' ]
+		ensure: [ CooHistoryEventRecorder taskOrSurveyId: originalDefault ]
 ]
 
 { #category : 'tests' }

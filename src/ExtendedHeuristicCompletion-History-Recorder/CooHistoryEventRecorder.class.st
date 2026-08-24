@@ -1028,24 +1028,24 @@ CooHistoryEventRecorder >> validateRemoteConfiguration [
 	registered, so misconfiguration fails fast with a clear error in this
 	image instead of a cryptic HTTP failure later."
 
-	self category ifNil: [
+	category ifNil: [
 		self error: 'History telemetry requires a category' ].
-	self category asString isEmpty ifTrue: [
+	category asString isEmpty ifTrue: [
 		self error: 'History telemetry category cannot be empty' ].
 
-	self experienceId ifNil: [
+	experienceId ifNil: [
 		self error: 'History telemetry requires an experienceId' ].
-	self experienceId asString isEmpty ifTrue: [
+	experienceId asString isEmpty ifTrue: [
 		self error: 'History telemetry experienceId cannot be empty' ].
 
-	self participantUUID ifNil: [
+	participantUUID ifNil: [
 		self error: 'History telemetry requires a participantUUID' ].
-	self participantUUID asString isEmpty ifTrue: [
+	participantUUID asString isEmpty ifTrue: [
 		self error: 'History telemetry participantUUID cannot be empty' ].
 
-	self taskOrSurveyId ifNil: [
+	taskOrSurveyId ifNil: [
 		self error: 'History telemetry requires a taskOrSurveyId' ].
-	self taskOrSurveyId asString isEmpty ifTrue: [
+	taskOrSurveyId asString isEmpty ifTrue: [
 		self error: 'History telemetry taskOrSurveyId cannot be empty' ]
 
 ]
