@@ -22,8 +22,10 @@ CooSessionVariableHeuristic >> appliesForNode: aNode inContext: aContext [
 { #category : 'requests' }
 CooSessionVariableHeuristic >> buildFetcherFor: aVariableNode inContext: aContext [
 
-	^ CooVariableSessionFetcher new astNode: aVariableNode ; yourself 
-	
+	^ CooVariableSessionFetcher new
+		  astNode: aVariableNode;
+		  session: self session;
+		  yourself
 ]
 
 { #category : 'accessing' }

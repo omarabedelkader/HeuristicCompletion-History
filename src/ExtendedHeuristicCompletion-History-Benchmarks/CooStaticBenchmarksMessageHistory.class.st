@@ -51,7 +51,13 @@ CooStaticBenchmarksMessageHistory >> run [
 										space.
 									matchedCallsites := matchedCallsites + 1.
 									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
-									self benchCallsite: node atPosition: pos ] ] ] ]
+									self benchCallsite: node atPosition: pos ] ] ] ].
+
+	Transcript
+		show: 'cached selectors: ', cachedSelectors size asString;
+		show: ' scanned methods: ', scannedMethods asString;
+		show: ' matched callsites: ', matchedCallsites asString;
+		cr
 ]
 
 { #category : 'benchmarks' }

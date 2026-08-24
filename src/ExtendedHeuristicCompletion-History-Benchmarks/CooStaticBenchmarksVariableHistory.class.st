@@ -50,8 +50,8 @@ CooStaticBenchmarksVariableHistory >> run [
 
 	Transcript
 		cr;
-		show: '# Running Message Benchmark';
-		cr..
+		show: '# Running Variable Benchmark';
+		cr.
 	self session existingMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
@@ -64,7 +64,13 @@ CooStaticBenchmarksVariableHistory >> run [
 										cr.
 
 									matchedCallsites := matchedCallsites + 1.
-									self benchCallsite: node atPosition: node start ] ] ] ]
+									self benchCallsite: node atPosition: node start ] ] ] ].
+
+	Transcript
+		show: 'cached class names: ', cachedClassNames size asString;
+		show: ' scanned methods: ', scannedMethods asString;
+		show: ' matched callsites: ', matchedCallsites asString;
+		cr
 ]
 
 { #category : 'benchmarks' }

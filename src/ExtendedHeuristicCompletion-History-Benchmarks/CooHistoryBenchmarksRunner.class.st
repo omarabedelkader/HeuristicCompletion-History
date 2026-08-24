@@ -22,14 +22,19 @@ CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositor
 
 	| populator commits |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: aString .
+	populator := HistoryCachePopulator repo: aString.
+	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 
 "
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
-		                    session: aSession; yourself.
+		                    session: aSession;
+		                    builder: CoASTHeuristicsResultSetBuilder new;
+		                    yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     session: aSession; yourself.
+		                     session: aSession;
+		                     builder: CoASTHeuristicsResultSetBuilder new;
+		                     yourself.
 "
 	
 	commits reverseDo: [ :commit |
@@ -61,7 +66,7 @@ CooHistoryBenchmarksRunner class >> dryRunMicrodown [
 
 	self
 		dryRunLoadingWithSession: CooSession current
-		repositoryString: 'git@github.com:pillar-markup/Microdown.git'
+		repositoryString: 'https://github.com/pillar-markup/Microdown.git'
 		numberOfAnalyzedCommits: 15.
 
 	Transcript show: CooSession current reportString
@@ -77,14 +82,19 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: 'git@github.com:Ducasse/Comix2.git'.
+	populator := HistoryCachePopulator repo: 'https://github.com/Ducasse/Comix2.git'.
+	populator session: aSession.
 	commits := populator commitsForHead: 10.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
-		                    session: aSession; yourself.
+		                    session: aSession;
+		                    builder: CoASTHeuristicsResultSetBuilder new;
+		                    yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     session: aSession; yourself.
-	
+		                     session: aSession;
+		                     builder: CoASTHeuristicsResultSetBuilder new;
+		                     yourself.
+
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
 		messageBenchmark run.
@@ -93,7 +103,7 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 
 	^ {
 		  messageBenchmark.
-		  variableBenchmark } inspect
+		  variableBenchmark }
 ]
 
 { #category : 'running' }
@@ -101,14 +111,19 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString
 
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: aString .
+	populator := HistoryCachePopulator repo: aString.
+	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
-		                    session: aSession; yourself.
+		                    session: aSession;
+		                    builder: CoASTHeuristicsResultSetBuilder new;
+		                    yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     session: aSession; yourself.
-	
+		                     session: aSession;
+		                     builder: CoASTHeuristicsResultSetBuilder new;
+		                     yourself.
+
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
 		messageBenchmark run.
@@ -117,7 +132,7 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString
 
 	^ {
 		  messageBenchmark.
-		  variableBenchmark } inspect
+		  variableBenchmark }
 ]
 
 { #category : 'running' }
@@ -133,7 +148,7 @@ CooHistoryBenchmarksRunner class >> runComix [
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 	Transcript show: CooSession current reportString.
-	(self newRunWithSession: CooSession current repositoryString:  'git@github.com:Ducasse/Comix2.git' numberOfAnalyzedCommits: 10) inspect.
+	(self newRunWithSession: CooSession current repositoryString:  'https://github.com/Ducasse/Comix2.git' numberOfAnalyzedCommits: 10) inspect.
 	Transcript show: CooSession current reportString
 	
 ]
@@ -160,7 +175,7 @@ CooHistoryBenchmarksRunner class >> runMicrodown [
 	Transcript show: CooSession current reportString.
 	
 	
-	(self newRunWithSession: CooSession current repositoryString:  'git@github.com:pillar-markup/Microdown.git' numberOfAnalyzedCommits: 15).
+	(self newRunWithSession: CooSession current repositoryString:  'https://github.com/pillar-markup/Microdown.git' numberOfAnalyzedCommits: 15).
 	
 	Transcript show: CooSession current reportString
 	
@@ -176,7 +191,7 @@ CooHistoryBenchmarksRunner class >> runRoassal [
 			baseline: 'Roassal';
 			repository: 'github://pharo-graphics/Roassal:Pharo' , SystemVersion current major asString;
 			load: 'Full'.
-	(self newRunWithSession: CooSession current repositoryString:  'git@github.com:pharo-graphics/Roassal.git' numberOfAnalyzedCommits: 1) inspect
+	(self newRunWithSession: CooSession current repositoryString:  'https://github.com/pharo-graphics/Roassal.git' numberOfAnalyzedCommits: 1) inspect
 ]
 
 { #category : 'running' }
@@ -186,7 +201,7 @@ CooHistoryBenchmarksRunner class >> runSpc [
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 	Transcript show: CooSession current reportString.
-	self newRunWithSession: CooSession current repositoryString:  'git@github.com:pharo-spec/spec.git' numberOfAnalyzedCommits: 10.
+	self newRunWithSession: CooSession current repositoryString:  'https://github.com/pharo-spec/spec.git' numberOfAnalyzedCommits: 10.
 	Transcript show: CooSession current reportString
 	
 ]

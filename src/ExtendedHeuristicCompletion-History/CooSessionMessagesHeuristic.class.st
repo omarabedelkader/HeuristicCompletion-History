@@ -21,7 +21,10 @@ CooSessionMessagesHeuristic >> appliesForNode: aNode inContext: aContext [
 { #category : 'requests' }
 CooSessionMessagesHeuristic >> buildFetcherFor: aMessageNode inContext: aContext [
 
-	^ CooMessageSessionFetcher new astNode: aMessageNode; yourself
+	^ CooMessageSessionFetcher new
+		  astNode: aMessageNode;
+		  session: self session;
+		  yourself
 ]
 
 { #category : 'accessing' }

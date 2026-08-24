@@ -17,7 +17,7 @@ Class {
 HistoryCachePopulator class >> comix [
 
 	<script>
-	(self populateFromRepo: 'git@github.com:Ducasse/Comix2.git' commits: 5) inspect
+	(self populateFromRepo: 'https://github.com/Ducasse/Comix2.git' commits: 5) inspect
 ]
 
 { #category : 'examples' }
@@ -64,7 +64,7 @@ HistoryCachePopulator class >> spec10 [
 HistoryCachePopulator class >> toplo [
 	<script>
 	
-	(self populateFromRepo:  'git@github.com:pharo-graphics/Toplo.git' commits: 500) inspect 
+	(self populateFromRepo:  'https://github.com/pharo-graphics/Toplo.git' commits: 500) inspect 
 ]
 
 { #category : 'compute population' }
