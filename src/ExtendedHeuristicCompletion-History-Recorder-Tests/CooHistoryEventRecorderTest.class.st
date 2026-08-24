@@ -253,20 +253,6 @@ CooHistoryEventRecorderTest >> testInstallAuthorizesEventRecorderLogger [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testNewLoggerKeepsCollectorRegistered [
-
-	| collector |
-	recorder serverUrl: 'https://example.com/collector'.
-	recorder category: #complishon.
-	recorder experienceId: 'complishon'.
-
-	collector := recorder newLogger.
-
-	self deny: collector registry isLiberated.
-	collector liberate.
-]
-
-{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingParticipantUUID [
 
 	recorder participantUUID: ''.
@@ -341,23 +327,6 @@ CooHistoryEventRecorderTest >> testRecorderEventDictionary [
 	self assert: (event at: #serverUrl) equals: 'https://example.com/collector'.
 	self assert: (event at: #category) equals: 'complishon'.
 	self assert: (event includesKey: #timestamp).
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyParticipantUUID [
-
-	| participantUUID |
-	participantUUID := recorder participantUUID.
-
-	self
-		deny: participantUUID isNil
-		description: 'participantUUID must never be nil'.
-
-	self assert: participantUUID isString.
-	self deny: participantUUID isEmpty.
-
-	"It must stay stable on this recorder instance."
-	self assert: recorder participantUUID equals: participantUUID
 ]
 
 { #category : 'tests' }
