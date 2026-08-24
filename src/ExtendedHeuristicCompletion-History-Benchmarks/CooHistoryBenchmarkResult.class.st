@@ -75,18 +75,6 @@ CooHistoryBenchmarkResult >> hitRateWithin: anInteger [
 ]
 
 { #category : 'accessing' }
-CooHistoryBenchmarkResult >> configurationName [
-
-	^ configurationName
-]
-
-{ #category : 'accessing' }
-CooHistoryBenchmarkResult >> configurationName: aSymbol [
-
-	configurationName := aSymbol
-]
-
-{ #category : 'accessing' }
 CooHistoryBenchmarkResult >> historyWindow [
 
 	^ historyWindow

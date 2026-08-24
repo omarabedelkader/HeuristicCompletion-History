@@ -60,18 +60,6 @@ CooHistoryBenchmarkQuery >> className: aString [
 	className := aString
 ]
 
-{ #category : 'accessing' }
-CooHistoryBenchmarkQuery >> expectedCandidate [
-
-	^ expectedCandidate
-]
-
-{ #category : 'accessing' }
-CooHistoryBenchmarkQuery >> expectedCandidate: anObject [
-
-	expectedCandidate := anObject
-]
-
 { #category : 'comparing' }
 CooHistoryBenchmarkQuery >> hash [
 

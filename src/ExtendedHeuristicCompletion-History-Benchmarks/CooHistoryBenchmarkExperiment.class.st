@@ -125,30 +125,6 @@ CooHistoryBenchmarkExperiment >> repositories: aCollection [
 	repositories := aCollection
 ]
 
-{ #category : 'accessing' }
-CooHistoryBenchmarkExperiment >> targets [
-
-	^ targets
-]
-
-{ #category : 'accessing' }
-CooHistoryBenchmarkExperiment >> targets: aCollection [
-
-	targets := aCollection
-]
-
-{ #category : 'accessing' }
-CooHistoryBenchmarkExperiment >> topK [
-
-	^ topK
-]
-
-{ #category : 'accessing' }
-CooHistoryBenchmarkExperiment >> topK: anInteger [
-
-	topK := anInteger
-]
-
 { #category : 'testing' }
 CooHistoryBenchmarkExperiment >> treatmentCombinationsCount [
 	"Number of repository x window x configuration cells; each cell runs one

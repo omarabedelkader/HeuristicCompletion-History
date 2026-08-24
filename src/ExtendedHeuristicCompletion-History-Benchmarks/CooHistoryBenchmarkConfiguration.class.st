@@ -154,8 +154,9 @@ CooHistoryBenchmarkConfiguration >> buildHeuristicChain: aCollection [
 	"A chain built from an empty list would fail; the null fetcher keeps the
 	builder protocol intact for degenerate cases."
 
-	| chainBuilder |
 	aCollection ifEmpty: [ ^ CoNullFetcherHeuristic new ].
+
+	| chainBuilder |
 	chainBuilder := CoHeuristicBuilder new.
 	aCollection do: [ :each | chainBuilder add: each ].
 	^ chainBuilder build

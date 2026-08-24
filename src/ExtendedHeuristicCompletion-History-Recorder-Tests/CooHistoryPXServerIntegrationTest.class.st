@@ -30,8 +30,7 @@ Class {
 		'originalParticipantUUID',
 		'originalTaskOrSurveyId',
 		'originalDeliveryBatchSize',
-		'originalDeliveryEnabled',
-		'recorderStateCaptured'
+		'originalDeliveryEnabled'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests-Integration',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
@@ -54,7 +53,6 @@ CooHistoryPXServerIntegrationTest >> restoreRecorderState [
 CooHistoryPXServerIntegrationTest >> setUp [
 
 	super setUp.
-	recorderStateCaptured := false.
 	recorder := CooHistoryEventRecorder uniqueInstance.
 
 	self requiresSuppliedPXServer.
@@ -66,20 +64,13 @@ CooHistoryPXServerIntegrationTest >> setUp [
 	server delegate: delegate.
 	server start.
 
-	self captureRecorderState
-]
-
-{ #category : 'running' }
-CooHistoryPXServerIntegrationTest >> captureRecorderState [
-
 	originalServerUrl := recorder serverUrl.
 	originalCategory := recorder category.
 	originalExperienceId := recorder experienceId.
 	originalParticipantUUID := recorder participantUUID.
 	originalTaskOrSurveyId := recorder taskOrSurveyId.
 	originalDeliveryBatchSize := recorder deliveryBatchSize.
-	originalDeliveryEnabled := recorder deliveryEnabled.
-	recorderStateCaptured := true
+	originalDeliveryEnabled := recorder deliveryEnabled
 ]
 
 { #category : 'running' }
@@ -92,7 +83,7 @@ CooHistoryPXServerIntegrationTest >> tearDown [
 		on: Error
 		do: [ "the transport is already gone" nil ].
 	server ifNotNil: [ server stop ].
-	recorderStateCaptured ifTrue: [ self restoreRecorderState ].
+	self restoreRecorderState.
 	super tearDown
 ]
 
