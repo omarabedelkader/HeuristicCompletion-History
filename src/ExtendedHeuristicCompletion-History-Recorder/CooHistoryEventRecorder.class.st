@@ -116,33 +116,53 @@ and, optionally:
 
 
 
+
 # INSTALLATION
 
-Installation:
+Local development against the PX server (pharo-data-collector project):
+
+Start the server in another Pharo image with:
+
+	PXServer start.
+
+It listens on http://localhost:8008 and maps the '/events' endpoint. Then:
+
 ```
-CooHistoryEventRecorder reset.
-CooHistoryEventRecorder serverUrl: 'http://127.0.0.1:9091/'.
-CooHistoryEventRecorder category: #history.
-CooHistoryEventRecorder experienceId: 'complishon'.
-CooHistoryEventRecorder participantUUID: 'participant-01'.
-CooHistoryEventRecorder taskOrSurveyId: 'session-1'.
-CooHistoryEventRecorder saveOnDisk: false.
-CooHistoryEventRecorder deliveryBatchSize: 1.
+CooHistoryEventRecorder configureForLocalPXServer.
 CooSession install.
 CooHistoryEventRecorder install.
 CooHistoryEventRecorder enableDelivery.
 CooHistoryEventRecorder recordRemoteDeliveryEnabled.
 ```
 
-The Pharo-XP server requires the multipart 'category' field to be a STON
+Equivalent explicit configuration:
+
+```
+CooHistoryEventRecorder reset.
+CooHistoryEventRecorder serverUrl: 'http://localhost:8008/events'.
+CooHistoryEventRecorder category: #complishon.
+CooHistoryEventRecorder experienceId: 'complishon'.
+CooHistoryEventRecorder participantUUID: UUID new asString.
+CooHistoryEventRecorder taskOrSurveyId: 'coding-session-1'.
+CooHistoryEventRecorder saveOnDisk: false.
+CooHistoryEventRecorder deliveryBatchSize: 1.
+CooSession install.
+CooHistoryEventRecorder recordRemoteDeliveryEnabled.
+```
+
+The Pharo-XP server requires the multipart 'category' field to be a STON/JSON
 dictionary carrying exactly these four keys: category, experienceId,
-participantUUID and taskOrSurveyId. They also define the on-disk directory
-data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>. Sending a
-bare category string makes the server reject the request, so nothing is stored.
+participantUUID and taskOrSurveyId, and every value must be a non-empty
+string. These values also define the on-disk directory
+data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId> on the
+server. The recorder validates this contract before creating the PX collector
+(see validateRemoteConfiguration), so misconfiguration fails fast locally.
 
-The serverUrl path must match the route the server maps (the provided server
-maps '/'), so use the server root, not a sub-path.
+The serverUrl path must match the route the server maps. The supplied PXServer
+maps '/events', so use 'http://localhost:8008/events' for local development,
+not the bare server root.
 
+For the production research server use an explicit setup such as:
 ```
 CooHistoryEventRecorder reset.
 CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'.
@@ -242,6 +262,32 @@ CooHistoryEventRecorder class >> codeChangeAnnouncer [
 ]
 
 { #category : 'cleanup' }
+CooHistoryEventRecorder class >> configureForLocalPXServer [
+	<script>
+	"Configure the recorder to deliver events to a PXServer started locally
+	with PXServer start in the pharo-data-collector image. The canonical
+	ingest URL of that server is http://localhost:8008/events; the server
+	validates that metadata carries exactly category, experienceId,
+	participantUUID and taskOrSurveyId as non-empty strings, and persists
+	each event under var/data/<category>/<experienceId>/<participantUUID>/
+	<taskOrSurveyId>.
+
+	The anonymous participant UUID and task/session id keep their stable
+	per-image values (they are generated once on first access). Experiments
+	that need explicit study semantics should set them with
+	CooHistoryEventRecorder participantUUID: and taskOrSurveyId:."
+
+	self serverUrl: 'http://localhost:8008/events'.
+	self category: #complishon.
+	self experienceId: 'complishon'.
+	self participantUUID ifNil: [
+		self participantUUID: UUID new asString ].
+	self taskOrSurveyId ifNil: [
+		self taskOrSurveyId: UUID new asString ].
+	self deliveryBatchSize: 1
+]
+
+{ #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultCategory [
 
 	^ defaultCategory ifNil: [ defaultCategory := #complishon ]
@@ -267,7 +313,13 @@ CooHistoryEventRecorder class >> defaultExperienceId [
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultParticipantUUID [
 
-	^ defaultParticipantUUID
+	"Anonymous and stable participant identifier. It is generated once per
+	image installation and reused afterwards so all events of a participant
+	are routed to the same directory on the PX server. Never derive this
+	value from a user name, email address, or machine username."
+
+	^ defaultParticipantUUID ifNil: [
+		  defaultParticipantUUID := UUID new asString ]
 ]
 
 { #category : 'cleanup' }
@@ -277,22 +329,30 @@ CooHistoryEventRecorder class >> defaultSaveOnDisk [
 ]
 
 { #category : 'cleanup' }
-CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
-
-	^ defaultTaskOrSurveyId
-]
-
-{ #category : 'cleanup' }
 CooHistoryEventRecorder class >> defaultServerUrl [
 
 	"Default server used by the DebuggingSpy/EventRecorder setup.
 	Change this with:
-		CooHistoryEventRecorder serverUrl: 'http://localhost:8080'
+		CooHistoryEventRecorder configureForLocalPXServer
+	or:
+		CooHistoryEventRecorder serverUrl: 'http://localhost:8008/events'
 	or:
 		CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'"
 
 	^ defaultServerUrl ifNil: [
 		  defaultServerUrl := 'https://rmod-xp.lille.inria.fr/complishon' asZnUrl ]
+]
+
+{ #category : 'cleanup' }
+CooHistoryEventRecorder class >> defaultTaskOrSurveyId [
+
+	"Identifier of the current coding task or session. It is generated once
+	per image and kept stable so events are not fragmented across task
+	directories. Real experiments should inject an explicit identifier with
+	CooHistoryEventRecorder taskOrSurveyId:."
+
+	^ defaultTaskOrSurveyId ifNil: [
+		  defaultTaskOrSurveyId := UUID new asString ]
 ]
 
 { #category : 'cleanup' }
@@ -302,56 +362,22 @@ CooHistoryEventRecorder class >> deinstall [
 	self uniqueInstance deinstall
 ]
 
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> experienceId [
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverLoggerDataNow [
 
-	^ self uniqueInstance experienceId
+	^ self uniqueInstance deliverLoggerDataNow
 ]
 
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> experienceId: aString [
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverNow [
 
-	defaultExperienceId := aString.
-	self uniqueInstance experienceId: aString
+	^ self uniqueInstance deliverNow
 ]
 
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> participantUUID [
+{ #category : 'actions' }
+CooHistoryEventRecorder class >> deliverNowInBackground [
 
-	^ self uniqueInstance participantUUID
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> participantUUID: aString [
-
-	defaultParticipantUUID := aString.
-	self uniqueInstance participantUUID: aString
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> saveOnDisk [
-
-	^ self uniqueInstance saveOnDisk
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> saveOnDisk: aBoolean [
-
-	defaultSaveOnDisk := aBoolean.
-	self uniqueInstance saveOnDisk: aBoolean
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> taskOrSurveyId [
-
-	^ self uniqueInstance taskOrSurveyId
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> taskOrSurveyId: aString [
-
-	defaultTaskOrSurveyId := aString.
-	self uniqueInstance taskOrSurveyId: aString
+	^ self uniqueInstance deliverNowInBackground
 ]
 
 { #category : 'accessing' }
@@ -373,28 +399,23 @@ CooHistoryEventRecorder class >> disableDelivery [
 	self uniqueInstance disableDelivery
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverLoggerDataNow [
-
-	^ self uniqueInstance deliverLoggerDataNow
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverNow [
-
-	^ self uniqueInstance deliverNow
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder class >> deliverNowInBackground [
-
-	^ self uniqueInstance deliverNowInBackground
-]
-
 { #category : 'cleanup' }
 CooHistoryEventRecorder class >> enableDelivery [
 
 	self uniqueInstance enableDelivery
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> experienceId [
+
+	^ self uniqueInstance experienceId
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> experienceId: aString [
+
+	defaultExperienceId := aString.
+	self uniqueInstance experienceId: aString
 ]
 
 { #category : 'cleanup' }
@@ -416,6 +437,25 @@ CooHistoryEventRecorder class >> lastDeliveryError [
 	^ self uniqueInstance lastDeliveryError
 ]
 
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> lastDeliveryResponse [
+
+	^ self uniqueInstance lastDeliveryResponse
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> participantUUID [
+
+	^ self uniqueInstance participantUUID
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> participantUUID: aString [
+
+	defaultParticipantUUID := aString.
+	self uniqueInstance participantUUID: aString
+]
+
 { #category : 'actions' }
 CooHistoryEventRecorder class >> recordImageCloseSurveyPayload: payloadDictionary [
 
@@ -426,12 +466,6 @@ CooHistoryEventRecorder class >> recordImageCloseSurveyPayload: payloadDictionar
 CooHistoryEventRecorder class >> recordRemoteDeliveryEnabled [
 
 	^ self uniqueInstance recordRemoteDeliveryEnabled
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder class >> lastDeliveryResponse [
-
-	^ self uniqueInstance lastDeliveryResponse
 ]
 
 { #category : 'system startup' }
@@ -483,6 +517,19 @@ CooHistoryEventRecorder class >> reset [
 ]
 
 { #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk [
+
+	^ self uniqueInstance saveOnDisk
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> saveOnDisk: aBoolean [
+
+	defaultSaveOnDisk := aBoolean.
+	self uniqueInstance saveOnDisk: aBoolean
+]
+
+{ #category : 'accessing' }
 CooHistoryEventRecorder class >> serverUrl [
 
 	^ self uniqueInstance serverUrl
@@ -515,6 +562,19 @@ CooHistoryEventRecorder class >> startUp: resuming [
 ]
 
 { #category : 'accessing' }
+CooHistoryEventRecorder class >> taskOrSurveyId [
+
+	^ self uniqueInstance taskOrSurveyId
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder class >> taskOrSurveyId: aString [
+
+	defaultTaskOrSurveyId := aString.
+	self uniqueInstance taskOrSurveyId: aString
+]
+
+{ #category : 'accessing' }
 CooHistoryEventRecorder class >> uniqueInstance [
 
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
@@ -538,40 +598,25 @@ CooHistoryEventRecorder >> category: aSymbolOrString [
 	category := aSymbolOrString
 ]
 
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> experienceId [
+{ #category : 'actions' }
+CooHistoryEventRecorder >> categoryFieldValue: aCategory [
 
-	^ experienceId ifNil: [ experienceId := self class defaultExperienceId ]
-]
+	"The Pharo-XP server does not accept a bare category string. Its
+	PXEventRecorderPutHandler>>hasCategoryAndDataParts: STON-decodes the
+	'category' multipart field and requires a dictionary holding exactly the
+	four PXEventMultiBundle metadata keys: category, experienceId,
+	participantUUID and taskOrSurveyId, all non-empty. These values also
+	become the on-disk directory path
+	data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>.
+	We therefore send a STON-encoded metadata dictionary, not a plain string."
 
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> experienceId: aString [
-
-	experienceId := aString
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> participantUUID [
-
-	^ participantUUID ifNil: [ participantUUID := self class defaultParticipantUUID ]
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> participantUUID: aString [
-
-	participantUUID := aString
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> taskOrSurveyId [
-
-	^ taskOrSurveyId ifNil: [ taskOrSurveyId := self class defaultTaskOrSurveyId ]
-]
-
-{ #category : 'accessing' }
-CooHistoryEventRecorder >> taskOrSurveyId: aString [
-
-	taskOrSurveyId := aString
+	self validateRemoteConfiguration.
+	^ STON toString: (Dictionary new
+			  at: 'category' put: aCategory asString;
+			  at: 'experienceId' put: self experienceId asString;
+			  at: 'participantUUID' put: self participantUUID asString;
+			  at: 'taskOrSurveyId' put: self taskOrSurveyId asString;
+			  yourself)
 ]
 
 { #category : 'events-class' }
@@ -636,6 +681,13 @@ CooHistoryEventRecorder >> clearPendingEvents [
 	^ self
 ]
 
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> configureEventRecorderSettings [
+
+	EREventRecorderSettings url: self serverUrl.
+	^ self
+]
+
 { #category : 'installation' }
 CooHistoryEventRecorder >> deinstall [
 
@@ -645,6 +697,13 @@ CooHistoryEventRecorder >> deinstall [
 		(logger respondsTo: #liberate)
 			ifTrue: [ logger liberate ] ].
 	installed := false
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> deliverLoggerDataNow [
+
+	PXEventRecorder uniqueInstance delivery packAndDeliver: false.
+	^ self
 ]
 
 { #category : 'actions' }
@@ -668,13 +727,6 @@ CooHistoryEventRecorder >> deliverNow [
 			lastDeliveryResponse := nil ].
 
 	^ lastDeliveryResponse
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> deliverLoggerDataNow [
-
-	PXEventRecorder uniqueInstance delivery packAndDeliver: false.
-	^ self
 ]
 
 { #category : 'actions' }
@@ -753,19 +805,6 @@ CooHistoryEventRecorder >> dictionaryForCompletionItem: anItem [
 ]
 
 { #category : 'serializing' }
-CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
-
-	| dictionary |
-	dictionary := Dictionary new.
-	dictionary at: #kind put: #recorder.
-	dictionary at: #event put: anEventSymbol.
-	dictionary at: #timestamp put: DateAndTime now asString.
-	dictionary at: #serverUrl put: self serverUrl asString.
-	dictionary at: #category put: self category asString.
-	^ dictionary
-]
-
-{ #category : 'serializing' }
 CooHistoryEventRecorder >> dictionaryForImageCloseSurveyPayload: payloadDictionary [
 
 	| dictionary |
@@ -777,26 +816,6 @@ CooHistoryEventRecorder >> dictionaryForImageCloseSurveyPayload: payloadDictiona
 	dictionary at: #category put: self category asString.
 	dictionary at: #payload put: payloadDictionary.
 	^ dictionary
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordImageCloseSurveyPayload: payloadDictionary [
-
-	self enqueueEvent: (self dictionaryForImageCloseSurveyPayload: payloadDictionary).
-	^ self
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordRecorderEvent: anEventSymbol [
-
-	self enqueueEvent: (self dictionaryForRecorderEvent: anEventSymbol).
-	^ self
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> recordRemoteDeliveryEnabled [
-
-	^ self recordRecorderEvent: #remoteDeliveryEnabled
 ]
 
 { #category : 'serializing' }
@@ -812,6 +831,19 @@ CooHistoryEventRecorder >> dictionaryForMethodItem: item announcement: anAnnounc
 	dictionary at: #live put: true.
 	dictionary at: #deltaMessages put: (item deltaMessages collect: [ :each | each asString ]) asArray.
 	dictionary at: #announcementClass put: anAnnouncement class name.
+	^ dictionary
+]
+
+{ #category : 'serializing' }
+CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
+
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #recorder.
+	dictionary at: #event put: anEventSymbol.
+	dictionary at: #timestamp put: DateAndTime now asString.
+	dictionary at: #serverUrl put: self serverUrl asString.
+	dictionary at: #category put: self category asString.
 	^ dictionary
 ]
 
@@ -854,6 +886,18 @@ CooHistoryEventRecorder >> enqueueEvent: anEventDictionary [
 
 	shouldDeliver ifTrue: [ self deliverNowInBackground ].
 	^ self
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> experienceId [
+
+	^ experienceId ifNil: [ experienceId := self class defaultExperienceId ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> experienceId: aString [
+
+	experienceId := aString
 ]
 
 { #category : 'actions' }
@@ -908,53 +952,6 @@ CooHistoryEventRecorder >> install [
 ]
 
 { #category : 'accessing' }
-CooHistoryEventRecorder >> logger [
-
-	^ logger ifNil: [ logger := self newLogger ]
-]
-
-{ #category : 'actions' }
-CooHistoryEventRecorder >> logEvent: anEventDictionary [
-
-	| eventLogger |
-	[
-		eventLogger := self logger.
-		(eventLogger respondsTo: #add:)
-			ifTrue: [ eventLogger add: anEventDictionary ]
-			ifFalse: [ eventLogger log: anEventDictionary ].
-		lastDeliveryError := nil ]
-		on: Error
-		do: [ :ex | lastDeliveryError := ex ].
-	^ self
-]
-
-{ #category : 'initialization' }
-CooHistoryEventRecorder >> configureEventRecorderSettings [
-
-	EREventRecorderSettings url: self serverUrl.
-	^ self
-]
-
-{ #category : 'initialization' }
-CooHistoryEventRecorder >> newLogger [
-
-	| eventCollector |
-	ERPrivacy sendDiagnosticsAndUsageData: true.
-	self configureEventRecorderSettings.
-
-	eventCollector := PXEventCollector new.
-	eventCollector
-		url: self serverUrl;
-		category: self category asString;
-		experienceId: self experienceId asString;
-		participantUUID: (self participantUUID ifNotNil: [ :value | value asString ]);
-		taskOrSurveyId: (self taskOrSurveyId ifNotNil: [ :value | value asString ]);
-		occupant: self;
-		register.
-	^ eventCollector
-]
-
-{ #category : 'accessing' }
 CooHistoryEventRecorder >> installed [
 
 	^ installed
@@ -973,37 +970,24 @@ CooHistoryEventRecorder >> lastDeliveryResponse [
 ]
 
 { #category : 'actions' }
-CooHistoryEventRecorder >> onIcePushed: anIcePushedAnnouncement [
+CooHistoryEventRecorder >> logEvent: anEventDictionary [
 
-    self flush.
+	| eventLogger |
+	[
+		eventLogger := self logger.
+		(eventLogger respondsTo: #add:)
+			ifTrue: [ eventLogger add: anEventDictionary ]
+			ifFalse: [ eventLogger log: anEventDictionary ].
+		lastDeliveryError := nil ]
+		on: Error
+		do: [ :ex | lastDeliveryError := ex ].
+	^ self
 ]
 
-{ #category : 'actions' }
-CooHistoryEventRecorder >> categoryFieldValue: aCategory [
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> logger [
 
-	"The Pharo-XP server does not accept a bare category string. Its
-	PXEventRecorderPutHandler>>hasCategoryAndDataParts: STON-decodes the
-	'category' multipart field and requires a dictionary holding exactly the
-	four PXEventMultiBundle metadata keys: category, experienceId,
-	participantUUID and taskOrSurveyId. These values also become the on-disk
-	directory path data/<category>/<experienceId>/<participantUUID>/<taskOrSurveyId>.
-	We therefore send a STON-encoded metadata dictionary, not a plain string."
-
-	| metadata ston |
-	metadata := Dictionary new.
-	metadata at: 'category' put: aCategory asString.
-	metadata at: 'experienceId' put: self experienceId asString.
-	metadata
-		at: 'participantUUID'
-		put: (self participantUUID ifNotNil: [ :value | value asString ]).
-	metadata
-		at: 'taskOrSurveyId'
-		put: (self taskOrSurveyId ifNotNil: [ :value | value asString ]).
-
-	ston := self class environment at: #STON ifAbsent: [ nil ].
-	^ ston
-		  ifNil: [ metadata printString ]
-		  ifNotNil: [ ston toString: metadata ]
+	^ logger ifNil: [ logger := self newLogger ]
 ]
 
 { #category : 'actions' }
@@ -1019,6 +1003,26 @@ CooHistoryEventRecorder >> multipartEntityForBytes: aByteArray category: aCatego
 		addPart: (ZnMimePart fieldName: 'data' entity: (ZnByteArrayEntity bytes: aByteArray)).
 
 	^ entity
+]
+
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> newLogger [
+
+	| eventCollector |
+	self validateRemoteConfiguration.
+	ERPrivacy sendDiagnosticsAndUsageData: true.
+	self configureEventRecorderSettings.
+
+	eventCollector := PXEventCollector new.
+	eventCollector
+		url: self serverUrl;
+		category: self category asString;
+		experienceId: self experienceId asString;
+		participantUUID: self participantUUID asString;
+		taskOrSurveyId: self taskOrSurveyId asString;
+		occupant: self;
+		register.
+	^ eventCollector
 ]
 
 { #category : 'actions' }
@@ -1051,6 +1055,24 @@ CooHistoryEventRecorder >> oldMethodFrom: anAnnouncement [
 	^ nil
 ]
 
+{ #category : 'actions' }
+CooHistoryEventRecorder >> onIcePushed: anIcePushedAnnouncement [
+
+    self flush.
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> participantUUID [
+
+	^ participantUUID ifNil: [ participantUUID := self class defaultParticipantUUID ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> participantUUID: aString [
+
+	participantUUID := aString
+]
+
 { #category : 'accessing' }
 CooHistoryEventRecorder >> pendingEvents [
 	^ pendingEvents 
@@ -1080,6 +1102,26 @@ CooHistoryEventRecorder >> printOn: aStream [
 		space;
 		nextPutAll: 'pending=';
 		print: pendingEvents size
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordImageCloseSurveyPayload: payloadDictionary [
+
+	self enqueueEvent: (self dictionaryForImageCloseSurveyPayload: payloadDictionary).
+	^ self
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRecorderEvent: anEventSymbol [
+
+	self enqueueEvent: (self dictionaryForRecorderEvent: anEventSymbol).
+	^ self
+]
+
+{ #category : 'actions' }
+CooHistoryEventRecorder >> recordRemoteDeliveryEnabled [
+
+	^ self recordRecorderEvent: #remoteDeliveryEnabled
 ]
 
 { #category : 'actions' }
@@ -1200,6 +1242,50 @@ CooHistoryEventRecorder >> subscribeAnnouncementNamed: announcementName send: se
 		to: self.
 
 	^ self
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> taskOrSurveyId [
+
+	^ taskOrSurveyId ifNil: [ taskOrSurveyId := self class defaultTaskOrSurveyId ]
+]
+
+{ #category : 'accessing' }
+CooHistoryEventRecorder >> taskOrSurveyId: aString [
+
+	taskOrSurveyId := aString
+]
+
+{ #category : 'initialization' }
+CooHistoryEventRecorder >> validateRemoteConfiguration [
+
+	"The Pharo-XP server accepts an upload only when its metadata carries
+	exactly category, experienceId, participantUUID and taskOrSurveyId and
+	every value is a non-empty String (see
+	PXEventRecorderPutHandler>>isValidMetadata: on the server side).
+	Validate that contract here, before PXEventCollector is created and
+	registered, so misconfiguration fails fast with a clear error in this
+	image instead of a cryptic HTTP failure later."
+
+	self category ifNil: [
+		self error: 'History telemetry requires a category' ].
+	self category asString isEmpty ifTrue: [
+		self error: 'History telemetry category cannot be empty' ].
+
+	self experienceId ifNil: [
+		self error: 'History telemetry requires an experienceId' ].
+	self experienceId asString isEmpty ifTrue: [
+		self error: 'History telemetry experienceId cannot be empty' ].
+
+	self participantUUID ifNil: [
+		self error: 'History telemetry requires a participantUUID' ].
+	self participantUUID asString isEmpty ifTrue: [
+		self error: 'History telemetry participantUUID cannot be empty' ].
+
+	self taskOrSurveyId ifNil: [
+		self error: 'History telemetry requires a taskOrSurveyId' ].
+	self taskOrSurveyId asString isEmpty ifTrue: [
+		self error: 'History telemetry taskOrSurveyId cannot be empty' ]
 ]
 
 { #category : 'helpers' }

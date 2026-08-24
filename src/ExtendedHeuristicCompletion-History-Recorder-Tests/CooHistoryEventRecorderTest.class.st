@@ -49,6 +49,43 @@ CooHistoryEventRecorderTest >> testBlockValueWhenBlockThrowAnException [
 ]
 
 { #category : 'tests' }
+CooHistoryEventRecorderTest >> testCategoryFieldValueContainsNonEmptyMetadataStrings [
+
+	| metadata |
+	recorder category: #complishon.
+	recorder experienceId: 'complishon'.
+	recorder participantUUID: UUID new asString.
+	recorder taskOrSurveyId: UUID new asString.
+
+	metadata := STON fromString:
+		(recorder categoryFieldValue: #complishon).
+
+	self assert: metadata size equals: 4.
+	self assert: (metadata at: 'category') equals: 'complishon'.
+	self assert: (metadata at: 'experienceId') equals: recorder experienceId asString.
+	self assert: (metadata at: 'participantUUID') equals: recorder participantUUID asString.
+	self assert: (metadata at: 'taskOrSurveyId') equals: recorder taskOrSurveyId asString.
+
+	#('category' 'experienceId' 'participantUUID' 'taskOrSurveyId') do: [ :eachKey |
+		self
+			assert: (metadata at: eachKey) isString
+			description: eachKey , ' must be a String'.
+		self
+			deny: (metadata at: eachKey) isEmpty
+			description: eachKey , ' must not be empty' ]
+
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testClassSideDeliverNowDelegatesToUniqueInstance [
+
+	recorder drainPendingEvents.
+	self assert: recorder pendingEvents isEmpty.
+
+	self assert: CooHistoryEventRecorder deliverNow equals: recorder
+]
+
+{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testDeliverNowInBackgroundDoesNotForkWhenProcessAlreadyRunning [
     | firstProcess |
 	"we try to fork two times, if the fork is not terminated we will not create another one "
@@ -90,15 +127,6 @@ CooHistoryEventRecorderTest >> testDeliverNowWhenEmptyListOfEvents [
 	recorder drainPendingEvents.
 	self assert: recorder pendingEvents isEmpty.
 	self assert: (recorder deliverNow ) equals: recorder 
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testClassSideDeliverNowDelegatesToUniqueInstance [
-
-	recorder drainPendingEvents.
-	self assert: recorder pendingEvents isEmpty.
-
-	self assert: CooHistoryEventRecorder deliverNow equals: recorder
 ]
 
 { #category : 'tests' }
@@ -157,81 +185,21 @@ CooHistoryEventRecorderTest >> testEnqueueEventPreservesOrder [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testRecordRemoteDeliveryEnabledAttemptsImmediateDelivery [
+CooHistoryEventRecorderTest >> testImageCloseSurveyPayloadDictionary [
 
-	recorder := CooHistoryEventRecorderMock new.
-	recorder deliveryEnabled: true.
-	recorder deliveryBatchSize: 1.
-	recorder install.
+	| payload event |
+	payload := Dictionary new
+		at: #surveyName put: 'image-close-survey';
+		yourself.
 
-	recorder recordRemoteDeliveryEnabled.
-	recorder waitForDeliveryProcess.
+	event := recorder dictionaryForImageCloseSurveyPayload: payload.
 
-	self assert: recorder loggedEvents size equals: 1.
-	self assert: (recorder loggedEvents first at: #kind) equals: #recorder.
-	self assert: (recorder loggedEvents first at: #event) equals: #remoteDeliveryEnabled.
-	self assert: recorder deliveryAttempts equals: 1.
-	self assert: recorder lastDeliveryError notNil.
-	self assert: recorder pendingEvents size equals: 1.
-	self assert: (recorder pendingEvents first at: #kind) equals: #recorder.
-	self assert: (recorder pendingEvents first at: #event) equals: #remoteDeliveryEnabled.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testInstallAuthorizesEventRecorderLogger [
-
-	recorder := CooHistoryEventRecorderMock new.
-	recorder install.
-
-	self assert: recorder installed.
-	self assert: recorder authorized.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testRecorderEventDictionary [
-
-	| event |
-	recorder serverUrl: 'https://example.com/collector'.
-	recorder category: #complishon.
-
-	event := recorder dictionaryForRecorderEvent: #remoteDeliveryEnabled.
-
-	self assert: (event at: #kind) equals: #recorder.
-	self assert: (event at: #event) equals: #remoteDeliveryEnabled.
-	self assert: (event at: #serverUrl) equals: 'https://example.com/collector'.
-	self assert: (event at: #category) equals: 'complishon'.
+	self assert: (event at: #kind) equals: #survey.
+	self assert: (event at: #event) equals: #imageCloseSurvey.
+	self assert: (event at: #payload) equals: payload.
 	self assert: (event includesKey: #timestamp).
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testCategoryFieldValueKeepsNilParticipantMetadata [
-
-	| metadata |
-	recorder participantUUID: nil.
-	recorder taskOrSurveyId: nil.
-
-	metadata := STON fromString: (recorder categoryFieldValue: #complishon).
-
-	self assert: (metadata at: 'category') equals: 'complishon'.
-	self assert: (metadata at: 'experienceId') equals: recorder experienceId.
-	self assert: (metadata includesKey: 'participantUUID').
-	self assert: (metadata at: 'participantUUID') isNil.
-	self assert: (metadata includesKey: 'taskOrSurveyId').
-	self assert: (metadata at: 'taskOrSurveyId') isNil.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testNewLoggerKeepsCollectorRegistered [
-
-	| collector |
-	recorder serverUrl: 'https://example.com/collector'.
-	recorder category: #complishon.
-	recorder experienceId: 'complishon'.
-
-	collector := recorder newLogger.
-
-	self deny: collector registry isLiberated.
-	collector liberate.
+	self assert: (event includesKey: #serverUrl).
+	self assert: (event includesKey: #category)
 ]
 
 { #category : 'tests' }
@@ -275,21 +243,25 @@ CooHistoryEventRecorderTest >> testIncludesInstanceOfReturnsTrueWhenPresent [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testImageCloseSurveyPayloadDictionary [
+CooHistoryEventRecorderTest >> testInstallAuthorizesEventRecorderLogger [
 
-	| payload event |
-	payload := Dictionary new
-		at: #surveyName put: 'image-close-survey';
-		yourself.
+	recorder := CooHistoryEventRecorderMock new.
+	recorder install.
 
-	event := recorder dictionaryForImageCloseSurveyPayload: payload.
+	self assert: recorder installed.
+	self assert: recorder authorized.
+]
 
-	self assert: (event at: #kind) equals: #survey.
-	self assert: (event at: #event) equals: #imageCloseSurvey.
-	self assert: (event at: #payload) equals: payload.
-	self assert: (event includesKey: #timestamp).
-	self assert: (event includesKey: #serverUrl).
-	self assert: (event includesKey: #category)
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testNewLoggerRejectsMissingParticipantUUID [
+
+	recorder participantUUID: ''.
+
+	self
+		should: [ recorder newLogger ]
+		raise: Error
+		whoseDescriptionIncludes: 'participantUUID'
+		description: 'A PX collector must never be created without a participantUUID'
 ]
 
 { #category : 'tests' }
@@ -318,6 +290,60 @@ CooHistoryEventRecorderTest >> testPrepareForImageSaveWhenErrorShouldKeepEvents 
 	recorder prepareForImageSave.
 
 	self assert: recorder pendingEvents size equals: batchSize + 1.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testRecordRemoteDeliveryEnabledAttemptsImmediateDelivery [
+
+	recorder := CooHistoryEventRecorderMock new.
+	recorder deliveryEnabled: true.
+	recorder deliveryBatchSize: 1.
+	recorder install.
+
+	recorder recordRemoteDeliveryEnabled.
+	recorder waitForDeliveryProcess.
+
+	self assert: recorder loggedEvents size equals: 1.
+	self assert: (recorder loggedEvents first at: #kind) equals: #recorder.
+	self assert: (recorder loggedEvents first at: #event) equals: #remoteDeliveryEnabled.
+	self assert: recorder deliveryAttempts equals: 1.
+	self assert: recorder lastDeliveryError notNil.
+	self assert: recorder pendingEvents size equals: 1.
+	self assert: (recorder pendingEvents first at: #kind) equals: #recorder.
+	self assert: (recorder pendingEvents first at: #event) equals: #remoteDeliveryEnabled.
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testRecorderEventDictionary [
+
+	| event |
+	recorder serverUrl: 'https://example.com/collector'.
+	recorder category: #complishon.
+
+	event := recorder dictionaryForRecorderEvent: #remoteDeliveryEnabled.
+
+	self assert: (event at: #kind) equals: #recorder.
+	self assert: (event at: #event) equals: #remoteDeliveryEnabled.
+	self assert: (event at: #serverUrl) equals: 'https://example.com/collector'.
+	self assert: (event at: #category) equals: 'complishon'.
+	self assert: (event includesKey: #timestamp).
+]
+
+{ #category : 'tests' }
+CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyTaskOrSurveyId [ 
+
+	| taskOrSurveyId |
+	taskOrSurveyId := recorder taskOrSurveyId.
+
+	self
+		deny: taskOrSurveyId isNil
+		description: 'taskOrSurveyId must never be nil'.
+
+	self assert: taskOrSurveyId isString.
+	self deny: taskOrSurveyId isEmpty.
+
+	"It must stay stable on this recorder instance."
+	self assert: recorder taskOrSurveyId equals: taskOrSurveyId
 ]
 
 { #category : 'tests' }
