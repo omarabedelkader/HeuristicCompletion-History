@@ -78,7 +78,22 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			with: [
 				spec requires: #(
 					'ExtendedHeuristicCompletion-History'
+					'ExtendedHeuristicCompletion-History-Recorder'
 					'ExtendedHeuristicCompletionBenchmarks'
+				) ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Benchmarks-Fixtures'
+			with: [
+				spec requires:
+					'ExtendedHeuristicCompletion-History-Benchmarks' ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Benchmarks-Tests'
+			with: [
+				spec requires: #(
+					'ExtendedHeuristicCompletion-History-Benchmarks'
+					'ExtendedHeuristicCompletion-History-Benchmarks-Fixtures'
 				) ].
 
 		spec

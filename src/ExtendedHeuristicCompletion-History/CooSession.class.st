@@ -481,6 +481,12 @@ CooSession >> printOn: aStream [
 ]
 
 { #category : 'accessing - handlers' }
+CooSession >> interactionItemsSize [
+
+	^ completionItems size
+]
+
+{ #category : 'accessing - handlers' }
 CooSession >> programEntityHandler [
 
 	^ programEntityHandler 

@@ -310,6 +310,12 @@ HistoryCachePopulator >> scrapper: aHistoryScrapper [
 	scrapper := aHistoryScrapper
 ]
 
+{ #category : 'accessing' }
+HistoryCachePopulator >> session [
+
+	^ session
+]
+
 { #category : 'utils' }
 HistoryCachePopulator >> selectorFromNode: aDiffNode [
 	"Extract method information from a diff node if it's a method change."
