@@ -6,7 +6,8 @@ Class {
 		'originalPrivacyConsentAccepted',
 		'originalHistoryRecordingEnabled',
 		'originalRemoteDeliveryEnabled',
-		'originalHistoryRecordingConsentState'
+		'originalHistoryRecordingConsentState',
+		'originalImageCloseSurveyEnabled'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder-Tests-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder-Tests',
@@ -20,7 +21,8 @@ CooHistorySettingsTest >> resetConsentState [
 	CooHistorySettings instVarNamed: #privacyConsentAccepted put: nil.
 	CooHistorySettings instVarNamed: #historyRecordingEnabled put: nil.
 	CooHistorySettings instVarNamed: #remoteDeliveryEnabled put: nil.
-	CooHistorySettings instVarNamed: #historyRecordingConsentState put: nil
+	CooHistorySettings instVarNamed: #historyRecordingConsentState put: nil.
+	CooHistorySettings instVarNamed: #imageCloseSurveyEnabled put: nil
 ]
 
 { #category : 'running' }
@@ -33,6 +35,7 @@ CooHistorySettingsTest >> setUp [
 	originalHistoryRecordingEnabled := CooHistorySettings instVarNamed: #historyRecordingEnabled.
 	originalRemoteDeliveryEnabled := CooHistorySettings instVarNamed: #remoteDeliveryEnabled.
 	originalHistoryRecordingConsentState := CooHistorySettings instVarNamed: #historyRecordingConsentState.
+	originalImageCloseSurveyEnabled := CooHistorySettings instVarNamed: #imageCloseSurveyEnabled.
 
 	self resetConsentState
 ]
@@ -45,6 +48,7 @@ CooHistorySettingsTest >> tearDown [
 	CooHistorySettings instVarNamed: #historyRecordingEnabled put: originalHistoryRecordingEnabled.
 	CooHistorySettings instVarNamed: #remoteDeliveryEnabled put: originalRemoteDeliveryEnabled.
 	CooHistorySettings instVarNamed: #historyRecordingConsentState put: originalHistoryRecordingConsentState.
+	CooHistorySettings instVarNamed: #imageCloseSurveyEnabled put: originalImageCloseSurveyEnabled.
 
 	super tearDown
 ]
@@ -86,6 +90,20 @@ CooHistorySettingsTest >> testDeclinedConsentDisablesEnabledFlags [
 	self deny: CooHistorySettings privacyConsentAccepted.
 	self deny: CooHistorySettings historyRecordingEnabled.
 	self deny: CooHistorySettings remoteDeliveryEnabled
+]
+
+{ #category : 'tests' }
+CooHistorySettingsTest >> testImageCloseSurveyRequiresEnabledHistoryTelemetry [
+
+	CooHistorySettings imageCloseSurveyEnabled: true.
+	self deny: CooHistorySettings imageCloseSurveyEnabled.
+
+	CooHistorySettings recordHistoryRecordingConsentAccepted: true.
+	CooHistorySettings instVarNamed: #historyRecordingEnabled put: true.
+	self assert: CooHistorySettings imageCloseSurveyEnabled.
+
+	CooHistorySettings imageCloseSurveyEnabled: false.
+	self deny: CooHistorySettings imageCloseSurveyEnabled
 ]
 
 { #category : 'tests' }

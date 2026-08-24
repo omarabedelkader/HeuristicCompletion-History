@@ -9,7 +9,8 @@ Class {
 		'privacyConsentAccepted',
 		'historyRecordingEnabled',
 		'remoteDeliveryEnabled',
-		'historyRecordingConsentState'
+		'historyRecordingConsentState',
+		'imageCloseSurveyEnabled'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
@@ -91,6 +92,19 @@ CooHistorySettings class >> historyRecordingEnabled: aBoolean [
 			self confirmRemoteDeliveryDisable
 				ifTrue: [ self useNullHistoryRecorder ]
 				ifFalse: [ historyRecordingEnabled := true ] ]
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> imageCloseSurveyEnabled [
+
+	^ self historyRecordingEnabled and: [
+		  imageCloseSurveyEnabled ifNil: [ imageCloseSurveyEnabled := true ] ]
+]
+
+{ #category : 'accessing' }
+CooHistorySettings class >> imageCloseSurveyEnabled: aBoolean [
+
+	imageCloseSurveyEnabled := aBoolean = true
 ]
 
 { #category : 'consent' }
@@ -431,5 +445,14 @@ CooHistorySettings class >> settingsOn: aBuilder [
 				getSelector: #remoteDeliveryEnabled;
 				setSelector: #remoteDeliveryEnabled:;
 				default: self remoteDeliveryEnabled;
-				description: 'When enabled, collected history events are sent to the configured server URL.' ]
+				description: 'When enabled, collected history events are sent to the configured server URL.'.
+
+			(aBuilder setting: #imageCloseSurveyEnabled)
+				order: 3;
+				label: 'Ask for feedback on image close';
+				target: self;
+				getSelector: #imageCloseSurveyEnabled;
+				setSelector: #imageCloseSurveyEnabled:;
+				default: self imageCloseSurveyEnabled;
+				description: 'Only active when anonymous history telemetry is enabled. When enabled, Code Completion History asks a short feedback form before the Pharo image quits.' ]
 ]
