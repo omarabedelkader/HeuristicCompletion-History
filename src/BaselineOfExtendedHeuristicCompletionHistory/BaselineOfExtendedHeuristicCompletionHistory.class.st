@@ -32,17 +32,10 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 					'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
 
 		spec
-			baseline: 'DSSpyEventRecorder'
+			baseline: 'PharoXPEventRecorder'
 			with: [
 				spec repository:
-					'github://Pharo-XP-Tools/DebuggingSpy-EventRecorder:omar' ].
-
-		spec
-			baseline: 'ExperimentModel'
-			with: [
-				spec repository:
-					'github://Pharo-XP-Tools/ExperimentModel:omar' ].
-
+					'github://omarabedelkader/pharo-data-collector:main' ].
 		spec
 			package: 'ExtendedHeuristicCompletion-History'.
 
@@ -50,9 +43,8 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			package: 'ExtendedHeuristicCompletion-History-Recorder'
 			with: [
 				spec requires: #(
+					'PharoXPEventRecorder'
 					'ExtendedHeuristicCompletion-History'
-					'DSSpyEventRecorder'
-					'ExperimentModel'
 				) ].
 
 		spec
