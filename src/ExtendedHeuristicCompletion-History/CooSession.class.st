@@ -481,15 +481,12 @@ CooSession >> programEntityHandler: aCache [
 	programEntityHandler := aCache
 ]
 
-{ #category : 'matching' }
+{ #category : 'accessing' }
 CooSession >> recorder [ 
-	^ recorder ifNil: [ CooHistorySettings remoteDeliveryEnabled 
-			ifTrue: [ CooHistoryEventRecorder uniqueInstance ]
-		ifFalse: [ CooNullHistoryEventRecorder uniqueInstance ]
-		]
+	^ recorder
 ]
 
-{ #category : 'matching' }
+{ #category : 'accessing' }
 CooSession >> recorder: aRecorder [
 	recorder := aRecorder 
 ]
@@ -581,7 +578,7 @@ CooSession >> selectorEntries [
 	decide if the user is looking for a global or not."
 
 	^ userSelectionHandler sortedUserLowercasedEntries
-		, self navigationSelectorEntries
+		", self navigationSelectorEntries"
 		, programEntityHandler selectorEntries
 ]
 
