@@ -51,12 +51,6 @@ Class {
 	#tag : 'Session'
 }
 
-{ #category : 'accessing' }
-CooSession class >> current [
-
-	^ Current ifNil: [ Current := self new ]
-]
-
 { #category : 'actions' }
 CooSession class >> completionItemSelectedAnnouncementClass [
 
@@ -67,6 +61,12 @@ CooSession class >> completionItemSelectedAnnouncementClass [
 CooSession class >> completionResultSetBuilderClass [
 
 	^ self environment at: #CoASTHeuristicsResultSetBuilder ifAbsent: [ nil ]
+]
+
+{ #category : 'accessing' }
+CooSession class >> current [
+
+	^ Current ifNil: [ Current := self new ]
 ]
 
 { #category : 'actions' }
@@ -318,10 +318,17 @@ CooSession >> classDescriptions [
 
 { #category : 'matching' }
 CooSession >> classEntries [
-
+	
 	^ userSelectionHandler sortedUserUppercasedEntries
-		, self navigationClassEntries
+		", self navigationClassEntries"
 		, programEntityHandler classEntries
+]
+
+{ #category : 'matching' }
+CooSession >> completionClassSpies [
+	"return the first result recorded completion items and the information about the completion items"
+	
+	^ {userSelectionHandler sortedUserUppercasedEntries first . completionItems first}
 ]
 
 { #category : 'helpers' }

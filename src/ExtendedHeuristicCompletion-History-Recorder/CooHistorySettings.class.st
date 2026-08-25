@@ -449,7 +449,7 @@ CooHistorySettings class >> useNullHistoryRecorder [
 	historyRecordingEnabled := false.
 	remoteDeliveryEnabled := false.
 
-	(Smalltalk globals at: #ERPrivacy ifAbsent: [ nil ])
+	(Smalltalk globals at: #ERPrivacySettings ifAbsent: [ nil ])
 		ifNotNil: [ :privacyClass |
 			(privacyClass respondsTo: #sendDiagnosticsAndUsageData:)
 				ifTrue: [ privacyClass sendDiagnosticsAndUsageData: false ] ].

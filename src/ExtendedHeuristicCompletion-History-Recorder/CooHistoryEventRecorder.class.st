@@ -684,7 +684,7 @@ CooHistoryEventRecorder >> clearPendingEvents [
 { #category : 'initialization' }
 CooHistoryEventRecorder >> configureEventRecorderSettings [
 
-	EREventRecorderSettings url: self serverUrl.
+	ERPrivacySettings url: self serverUrl.
 	^ self
 ]
 
