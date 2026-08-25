@@ -1010,7 +1010,7 @@ CooHistoryEventRecorder >> newLogger [
 
 	| eventCollector |
 	self validateRemoteConfiguration.
-	ERPrivacy sendDiagnosticsAndUsageData: true.
+	ERPrivacySettings sendDiagnosticsAndUsageData: true.
 	self configureEventRecorderSettings.
 
 	eventCollector := PXEventCollector new.
