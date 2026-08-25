@@ -265,7 +265,6 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 	
 	self addMethodItem: item.
 	
-	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: item announcement: anAnn).
 ]
 
 { #category : 'navigation' }
@@ -286,16 +285,17 @@ CooSession >> addNewClassInVocabulary: ann [
 			timestamp: DateAndTime now;
 			yourself.
 
-	self addClassItem: historyItem.  "we could also decide that when a class gets a new method the name of the class is getting more important. 
-	Focus of attention. So this can be computed latter based on such information. "
+	self addClassItem: historyItem.  
 	
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: ann)
+	"we could also decide that when a class gets a new method the name of the class is getting more important. 
+	Focus of attention. So this can be computed latter based on such information. "
+
 ]
 
 { #category : 'method handling' }
 CooSession >> addNewMethodInVocabulary: anAnn [
 
-	|historyItem|
+	| historyItem |
 
 	historyItem := CooAddedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -307,7 +307,6 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 	self addMethodItem: historyItem. "we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 
-	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: historyItem announcement: anAnn )
 ]
 
 { #category : 'low-level' }
@@ -346,6 +345,49 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 		computeDeltaMessageBetween: aMethodModifiedAnnouncement method ast
 		andOld: aMethodModifiedAnnouncement oldMethod ast 
 	
+]
+
+{ #category : 'emit' }
+CooSession >> dictionaryForClassItem: item announcement: anAnnouncement [ 
+
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #class.
+	dictionary at: #event put: item event.
+	dictionary at: #className put: item nameOfClass.
+	dictionary at: #timestamp put: item timestamp asString.
+	dictionary at: #live put: true.
+	dictionary at: #announcementClass put: anAnnouncement class name.
+	^ dictionary
+]
+
+{ #category : 'emit' }
+CooSession >> dictionaryForMethodItem: item announcement: anAnnouncement [
+	"we should find a way to avoid to pass the announcement."
+	
+	| dictionary |
+	dictionary := Dictionary new.
+	dictionary at: #kind put: #method.
+	dictionary at: #event put: item event.
+	dictionary at: #className put: item nameOfClass.
+	dictionary at: #selector put: item selector asString.
+	dictionary at: #timestamp put: item timestamp asString.
+	dictionary at: #live put: true.
+	dictionary at: #deltaMessages put: (item deltaMessages collect: [ :each | each asString ]) asArray.
+	dictionary at: #announcementClass put: anAnnouncement class name.
+	^ dictionary
+]
+
+{ #category : 'emit' }
+CooSession >> emitClass: historyItem announcement: ann [
+	
+	self recorder enqueueEvent: (self dictionaryForClassItem: historyItem announcement: ann)
+]
+
+{ #category : 'emit' }
+CooSession >> emitMethod: historyItem announcement: ann [
+	
+	self recorder enqueueEvent: (self dictionaryForMethodItem: historyItem announcement: ann)
 ]
 
 { #category : 'for benchmark' }
@@ -506,15 +548,13 @@ CooSession >> removeClassFromVocabulary: ann [
 			timestamp: DateAndTime now;
 			yourself.
 
-	self addClassItem: historyItem.
-
-	self recorder enqueueEvent: (self recorder dictionaryForClassItem: historyItem announcement: ann)
+	self addClassItem: historyItem
 ]
 
 { #category : 'method handling' }
 CooSession >> removeMethodFromVocabulary: anAnn [
 
-	|historyItem|
+	| historyItem |
 
 	historyItem := CooRemovedMethodHistoryItem new
 			 selector: anAnn method selector;
@@ -523,9 +563,7 @@ CooSession >> removeMethodFromVocabulary: anAnn [
 			 nameOfClass: anAnn method methodClass name;
 			 yourself.
 
-	self addMethodItem:  historyItem.
-	
-	self recorder enqueueEvent: (self recorder dictionaryForMethodItem: historyItem announcement: anAnn)
+	self addMethodItem:  historyItem
 ]
 
 { #category : 'printing' }
