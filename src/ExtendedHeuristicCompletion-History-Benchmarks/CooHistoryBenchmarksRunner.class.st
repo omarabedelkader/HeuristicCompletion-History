@@ -23,6 +23,7 @@ CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositor
 	| populator commits messageBenchmark variableBenchmark |
 	"fill up the history"
 	populator := HistoryCachePopulator repo: aString .
+	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 
 
@@ -33,12 +34,11 @@ CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositor
 
 	
 	commits reverseDo: [ :commit |
-		populator loadFromOldToNewCommit: commit.
-
-		messageBenchmark run.
-		variableBenchmark run.
-
+		populator loadFromOldToNewCommit: commit
 	].
+
+	messageBenchmark run.
+	variableBenchmark run.
 
 ^ {
 
@@ -86,6 +86,7 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
 	populator := HistoryCachePopulator repo: 'git@github.com:Ducasse/Comix2.git'.
+	populator session: aSession.
 	commits := populator commitsForHead: 10.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
@@ -94,10 +95,11 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 		                     session: aSession; yourself.
 	
 	commits reverseDo: [ :commit |
-		populator loadFromOldToNewCommit: commit.
-		messageBenchmark run.
-		variableBenchmark run.
+		populator loadFromOldToNewCommit: commit
 	].
+
+	messageBenchmark run.
+	variableBenchmark run.
 
 	^ {
 		  messageBenchmark.
@@ -110,6 +112,7 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
 	populator := HistoryCachePopulator repo: aString .
+	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
@@ -118,10 +121,11 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString
 		                     session: aSession; yourself.
 	
 	commits reverseDo: [ :commit |
-		populator loadFromOldToNewCommit: commit.
-		messageBenchmark run.
-		variableBenchmark run.
+		populator loadFromOldToNewCommit: commit
 	].
+
+	messageBenchmark run.
+	variableBenchmark run.
 
 	^ {
 		  messageBenchmark.
@@ -172,6 +176,13 @@ CooHistoryBenchmarksRunner class >> runMicrodown [
 	
 	Transcript show: CooSession current reportString
 	
+]
+
+{ #category : 'running' }
+CooHistoryBenchmarksRunner class >> runMicrodownExperiment [
+
+	<script>
+	^ CooHistoryExperimentRunner runMicrodown
 ]
 
 { #category : 'running' }

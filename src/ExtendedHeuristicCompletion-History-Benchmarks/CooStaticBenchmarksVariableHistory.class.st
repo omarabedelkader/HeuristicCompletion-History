@@ -8,7 +8,9 @@ Class {
 	#superclass : 'CooStaticBenchmarksVariables',
 	#instVars : [
 		'selectorCache',
-		'session'
+		'session',
+		'scannedMethods',
+		'matchedCallsites'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
@@ -43,15 +45,15 @@ CooStaticBenchmarksVariableHistory >> methodsInScopeDo: aBlock [
 { #category : 'running' }
 CooStaticBenchmarksVariableHistory >> run [
 
-	| cachedClassNames scannedMethods matchedCallsites |
+	| cachedClassNames |
 	cachedClassNames := self cachedClassNames.
 	scannedMethods := 0.
 	matchedCallsites := 0.
 
 	Transcript
 		cr;
-		show: '# Running Message Benchmark';
-		cr..
+		show: '# Running Variable Benchmark';
+		cr.
 	self session existingMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
@@ -65,6 +67,8 @@ CooStaticBenchmarksVariableHistory >> run [
 
 									matchedCallsites := matchedCallsites + 1.
 									self benchCallsite: node atPosition: node start ] ] ] ]
+	.
+	^ self
 ]
 
 { #category : 'benchmarks' }
@@ -76,4 +80,16 @@ CooStaticBenchmarksVariableHistory >> session [
 CooStaticBenchmarksVariableHistory >> session: aSession [
 
 	session := aSession
+]
+
+{ #category : 'accessing' }
+CooStaticBenchmarksVariableHistory >> matchedCallsites [
+
+	^ matchedCallsites ifNil: [ 0 ]
+]
+
+{ #category : 'accessing' }
+CooStaticBenchmarksVariableHistory >> scannedMethods [
+
+	^ scannedMethods ifNil: [ 0 ]
 ]

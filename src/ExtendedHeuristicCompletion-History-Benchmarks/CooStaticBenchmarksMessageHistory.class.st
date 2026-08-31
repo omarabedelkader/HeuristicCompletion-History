@@ -9,7 +9,9 @@ Class {
 	#superclass : 'CooStaticBenchmarksMessage',
 	#instVars : [
 		'selectorCache',
-		'session'
+		'session',
+		'scannedMethods',
+		'matchedCallsites'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
@@ -27,7 +29,7 @@ CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
 { #category : 'running' }
 CooStaticBenchmarksMessageHistory >> run [
 
-	| cachedSelectors pos scannedMethods matchedCallsites |
+	| cachedSelectors pos |
 	cachedSelectors := self deltaMessageSelectors.
 	scannedMethods := 0.
 	matchedCallsites := 0. "we should look for the methods that are in the history and not in the package.
@@ -52,6 +54,8 @@ CooStaticBenchmarksMessageHistory >> run [
 									matchedCallsites := matchedCallsites + 1.
 									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ]
+	.
+	^ self
 ]
 
 { #category : 'benchmarks' }
@@ -64,6 +68,18 @@ CooStaticBenchmarksMessageHistory >> session [
 CooStaticBenchmarksMessageHistory >> session: aSession [
 
 	session := aSession
+]
+
+{ #category : 'accessing' }
+CooStaticBenchmarksMessageHistory >> matchedCallsites [
+
+	^ matchedCallsites ifNil: [ 0 ]
+]
+
+{ #category : 'accessing' }
+CooStaticBenchmarksMessageHistory >> scannedMethods [
+
+	^ scannedMethods ifNil: [ 0 ]
 ]
 
 { #category : 'benchmarks' }
