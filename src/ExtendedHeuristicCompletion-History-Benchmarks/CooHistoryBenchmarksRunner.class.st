@@ -20,25 +20,33 @@ Class {
 { #category : 'running' }
 CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositoryString: aString numberOfAnalyzedCommits: anInteger [
 
-	| populator commits |
+	| populator commits messageBenchmark variableBenchmark |
 	"fill up the history"
 	populator := HistoryCachePopulator repo: aString .
 	commits := populator commitsForHead: anInteger.
 
-"
+
 	messageBenchmark := CooStaticBenchmarksMessageHistory new
 		                    session: aSession; yourself.
 	variableBenchmark := CooStaticBenchmarksVariableHistory new
 		                     session: aSession; yourself.
-"
+
 	
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
-"	
+
 		messageBenchmark run.
 		variableBenchmark run.
-"
+
 	].
+
+^ {
+
+        messageBenchmark.
+
+        variableBenchmark
+
+    }
 
 ]
 
