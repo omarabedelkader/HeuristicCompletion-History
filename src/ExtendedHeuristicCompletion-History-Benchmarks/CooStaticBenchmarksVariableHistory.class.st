@@ -24,6 +24,12 @@ CooStaticBenchmarksVariableHistory >> cachedClassNames [
 	^ (entries collect: [ :each | each contents ]) asSet
 ]
 
+{ #category : 'accessing' }
+CooStaticBenchmarksVariableHistory >> matchedCallsites [
+
+	^ matchedCallsites ifNil: [ 0 ]
+]
+
 { #category : 'running' }
 CooStaticBenchmarksVariableHistory >> methodsInScopeDo: aBlock [
 
@@ -71,6 +77,12 @@ CooStaticBenchmarksVariableHistory >> run [
 	^ self
 ]
 
+{ #category : 'accessing' }
+CooStaticBenchmarksVariableHistory >> scannedMethods [
+
+	^ scannedMethods ifNil: [ 0 ]
+]
+
 { #category : 'benchmarks' }
 CooStaticBenchmarksVariableHistory >> session [ 
 	^ session ifNil: [ CooSession current ]
@@ -80,16 +92,4 @@ CooStaticBenchmarksVariableHistory >> session [
 CooStaticBenchmarksVariableHistory >> session: aSession [
 
 	session := aSession
-]
-
-{ #category : 'accessing' }
-CooStaticBenchmarksVariableHistory >> matchedCallsites [
-
-	^ matchedCallsites ifNil: [ 0 ]
-]
-
-{ #category : 'accessing' }
-CooStaticBenchmarksVariableHistory >> scannedMethods [
-
-	^ scannedMethods ifNil: [ 0 ]
 ]

@@ -24,7 +24,7 @@ CooHistoryExperimentRunner class >> runMicrodown [
 { #category : 'private' }
 CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration session: aSession [
 
-	| statistics commits comparison |
+	| statistics commits  |
 	statistics := CooHistoryProjectStatistics new.
 	statistics collectRepositoryStatisticsFrom: aConfiguration.
 
@@ -35,12 +35,32 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 	statistics historyCommitCount: commits size.
 	statistics collectHistoryStatisticsFrom: aSession.
 
-	comparison := CooHistoryBenchmarkComparison new.
+	self halt.
+"	comparison := CooHistoryBenchmarkComparison new.
 	^ comparison
 		  runForConfiguration: aConfiguration
 		  session: aSession
 		  commitCount: commits size
-		  statistics: statistics
+		  statistics: statistics"
+]
+
+{ #category : 'builders' }
+CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoDependencyMessageHeuristics new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
 ]
 
 { #category : 'private' }
@@ -56,15 +76,23 @@ CooHistoryExperimentRunner >> loadProjectFrom: aConfiguration [
 { #category : 'private' }
 CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSession [
 
-	| populator commits |
+	| populator commits benchmark |
 	populator := HistoryCachePopulator repo: aConfiguration repository.
 	populator session: aSession.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
-	commits reverseDo: [ :commit |
-		populator loadFromOldToNewCommit: commit ].
 
-	^ commits
+	benchmark := CooStaticBenchmarksMessageHistory new.
+	benchmark
+		name: 'Dependency';
+		session: aSession;
+		builder: self completeDirectDependencyMessageBuilder.
+
+	commits reverseDo: [ :commit |
+		populator loadFromOldToNewCommit: commit.
+		benchmark run.].
+
+	^ { commits . benchmark }
 ]
 
 { #category : 'private' }

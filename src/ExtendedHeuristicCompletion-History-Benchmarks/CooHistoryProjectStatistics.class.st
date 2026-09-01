@@ -27,29 +27,6 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
 }
 
-{ #category : 'converting' }
-CooHistoryProjectStatistics >> asDictionary [
-
-	^ Dictionary newFrom: {
-		  #project -> projectName.
-		  #packages -> packageCount.
-		  #classes -> classCount.
-		  #methods -> methodCount.
-		  #historyCommits -> historyCommitCount.
-		  #historyMethods -> historyMethodCount.
-		  #historyClasses -> historyClassCount.
-		  #addedMethods -> addedMethods.
-		  #modifiedMethods -> modifiedMethods.
-		  #removedMethods -> removedMethods.
-		  #addedClasses -> addedClasses.
-		  #modifiedClasses -> modifiedClasses.
-		  #removedClasses -> removedClasses.
-		  #messageCallsites -> messageCallsites.
-		  #variableCallsites -> variableCallsites.
-		  #uniqueHistorySelectors -> uniqueHistorySelectors.
-		  #uniqueHistoryClasses -> uniqueHistoryClasses }
-]
-
 { #category : 'accessing' }
 CooHistoryProjectStatistics >> addedClasses [
 
@@ -74,12 +51,27 @@ CooHistoryProjectStatistics >> addedMethods: anInteger [
 	addedMethods := anInteger
 ]
 
-{ #category : 'private' }
-CooHistoryProjectStatistics >> classesIn: aPackage [
+{ #category : 'converting' }
+CooHistoryProjectStatistics >> asDictionary [
 
-	(aPackage respondsTo: #definedClasses)
-		ifTrue: [ ^ aPackage definedClasses ].
-	^ #(  )
+	^ Dictionary newFrom: {
+		  #project -> projectName.
+		  #packages -> packageCount.
+		  #classes -> classCount.
+		  #methods -> methodCount.
+		  #historyCommits -> historyCommitCount.
+		  #historyMethods -> historyMethodCount.
+		  #historyClasses -> historyClassCount.
+		  #addedMethods -> addedMethods.
+		  #modifiedMethods -> modifiedMethods.
+		  #removedMethods -> removedMethods.
+		  #addedClasses -> addedClasses.
+		  #modifiedClasses -> modifiedClasses.
+		  #removedClasses -> removedClasses.
+		  #messageCallsites -> messageCallsites.
+		  #variableCallsites -> variableCallsites.
+		  #uniqueHistorySelectors -> uniqueHistorySelectors.
+		  #uniqueHistoryClasses -> uniqueHistoryClasses }
 ]
 
 { #category : 'accessing' }
@@ -92,6 +84,14 @@ CooHistoryProjectStatistics >> classCount [
 CooHistoryProjectStatistics >> classCount: anInteger [
 
 	classCount := anInteger
+]
+
+{ #category : 'private' }
+CooHistoryProjectStatistics >> classesIn: aPackage [
+
+	(aPackage respondsTo: #definedClasses)
+		ifTrue: [ ^ aPackage definedClasses ].
+	^ #(  )
 ]
 
 { #category : 'collecting' }
@@ -217,6 +217,18 @@ CooHistoryProjectStatistics >> messageCallsites: anInteger [
 	messageCallsites := anInteger
 ]
 
+{ #category : 'accessing' }
+CooHistoryProjectStatistics >> methodCount [
+
+	^ methodCount
+]
+
+{ #category : 'accessing' }
+CooHistoryProjectStatistics >> methodCount: anInteger [
+
+	methodCount := anInteger
+]
+
 { #category : 'private' }
 CooHistoryProjectStatistics >> methodsIn: aPackage [
 
@@ -230,18 +242,6 @@ CooHistoryProjectStatistics >> methodsIn: aPackage [
 			aPackage methodsDo: [ :method |
 				methods add: method ] ].
 	^ methods
-]
-
-{ #category : 'accessing' }
-CooHistoryProjectStatistics >> methodCount [
-
-	^ methodCount
-]
-
-{ #category : 'accessing' }
-CooHistoryProjectStatistics >> methodCount: anInteger [
-
-	methodCount := anInteger
 ]
 
 { #category : 'accessing' }

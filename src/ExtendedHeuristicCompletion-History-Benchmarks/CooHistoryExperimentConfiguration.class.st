@@ -47,15 +47,8 @@ CooHistoryExperimentConfiguration >> allPackages [
 	| organizer allPackages |
 	organizer := PackageOrganizer default.
 	allPackages := OrderedCollection new.
-
-	(organizer respondsTo: #packages)
-		ifTrue: [ allPackages addAll: organizer packages ]
-		ifFalse: [
-			(organizer respondsTo: #packagesDo:)
-				ifTrue: [
-					organizer packagesDo: [ :package |
-						allPackages add: package ] ] ].
-
+	allPackages addAll: organizer packages.
+		
 	^ allPackages
 ]
 
@@ -130,14 +123,6 @@ CooHistoryExperimentConfiguration >> outputDirectory: aFileReference [
 	outputDirectory := aFileReference
 ]
 
-{ #category : 'private' }
-CooHistoryExperimentConfiguration >> packageNamed: aString [
-
-	^ [ PackageOrganizer default packageNamed: aString ]
-		  on: Error
-		  do: [ :exception | nil ]
-]
-
 { #category : 'accessing' }
 CooHistoryExperimentConfiguration >> packageNamePrefix [
 
@@ -164,7 +149,8 @@ CooHistoryExperimentConfiguration >> packageNames: aCollection [
 
 { #category : 'accessing' }
 CooHistoryExperimentConfiguration >> packages [
-
+	"Return packages from the list of package names if given or the prefix."
+	
 	| selected |
 	packageNames ifNotNil: [
 		packageNames isEmpty
@@ -183,8 +169,9 @@ CooHistoryExperimentConfiguration >> packagesNamed: aCollection [
 	selected := OrderedCollection new.
 	aCollection do: [ :packageName |
 		| package |
-		package := self packageNamed: packageName.
-		package ifNotNil: [ selected add: package ] ].
+		package := PackageOrganizer default  
+			packageNamed: packageName 
+			ifPresent: [ :p | selected add: p ] ].
 	^ selected asArray
 ]
 

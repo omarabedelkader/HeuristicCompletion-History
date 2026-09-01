@@ -26,11 +26,17 @@ CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
 		   select: [ :each | self shouldBenchmarkMessageSelector: each ]) asSet
 ]
 
+{ #category : 'accessing' }
+CooStaticBenchmarksMessageHistory >> matchedCallsites [
+
+	^ matchedCallsites ifNil: [ 0 ]
+]
+
 { #category : 'running' }
 CooStaticBenchmarksMessageHistory >> run [
 
-	| cachedSelectors pos |
-	cachedSelectors := self deltaMessageSelectors.
+	| changedSelectors pos |
+	changedSelectors := self deltaMessageSelectors.
 	scannedMethods := 0.
 	matchedCallsites := 0. "we should look for the methods that are in the history and not in the package.
 	Because the bench is simulating a dev behavior. We are only interested in added, modified methods. "
@@ -44,7 +50,7 @@ CooStaticBenchmarksMessageHistory >> run [
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
 							(node isMessage and: [
-								 (cachedSelectors includes: node selector) and: [
+								 (changedSelectors includes: node selector) and: [
 									 self shouldBenchmarkMessageSelector: node selector ] ]) ifTrue: [
 									Transcript
 										cr;
@@ -58,6 +64,12 @@ CooStaticBenchmarksMessageHistory >> run [
 	^ self
 ]
 
+{ #category : 'accessing' }
+CooStaticBenchmarksMessageHistory >> scannedMethods [
+
+	^ scannedMethods ifNil: [ 0 ]
+]
+
 { #category : 'benchmarks' }
 CooStaticBenchmarksMessageHistory >> session [
 
@@ -68,18 +80,6 @@ CooStaticBenchmarksMessageHistory >> session [
 CooStaticBenchmarksMessageHistory >> session: aSession [
 
 	session := aSession
-]
-
-{ #category : 'accessing' }
-CooStaticBenchmarksMessageHistory >> matchedCallsites [
-
-	^ matchedCallsites ifNil: [ 0 ]
-]
-
-{ #category : 'accessing' }
-CooStaticBenchmarksMessageHistory >> scannedMethods [
-
-	^ scannedMethods ifNil: [ 0 ]
 ]
 
 { #category : 'benchmarks' }

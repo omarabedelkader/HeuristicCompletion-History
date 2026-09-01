@@ -13,27 +13,6 @@ Class {
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
 }
 
-{ #category : 'builders' }
-CooHistoryBenchmarkComparison >> completeDirectDependencyMessageBuilder [
-
-	| builder |
-	builder := CoASTHeuristicsResultSetBuilder new.
-	builder messageHeuristic: (builder newHeuristicBuilder
-			 add: CoSelfMessageHeuristic new;
-			 add: CoSuperMessageHeuristic new;
-			 add: CoTypedReceiverMessageHeuristic new;
-			 add: CoInitializeInferencedMessageHeuristic new;
-			 add: CoLiteralMessageHeuristic new;
-			 add: CoGlobalVariableMessageHeuristic new;
-			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: (CooUnknownMessageHeuristic new
-					  globalMessageFetcherClass:
-						  CoLocalDependencyPackageSelectorFetcher);
-			 add: CoUnknownMessageHeuristic new;
-			 build).
-	^ builder
-]
-
 { #category : 'benchmarks' }
 CooHistoryBenchmarkComparison >> completeDirectDependencyMessageBenchmarkFor: aScope session: aSession [
 
@@ -49,15 +28,20 @@ CooHistoryBenchmarkComparison >> completeDirectDependencyMessageBenchmarkFor: aS
 ]
 
 { #category : 'builders' }
-CooHistoryBenchmarkComparison >> completeDirectDependencyVariableBuilder [
+CooHistoryBenchmarkComparison >> completeDirectDependencyMessageBuilder [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
-	builder variablesHeuristic: (builder newHeuristicBuilder
-			 add: CoInstanceAccessibleVariablesHeuristic new;
-			 add: (CoGlobalVariablesHeuristic new
-					  globalVariableFetcherClass:
-						  CoDependencyGlobalVariableFetcher);
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoDependencyMessageHeuristics new;
+			 add: CoUnknownMessageHeuristic new;
 			 build).
 	^ builder
 ]
@@ -76,31 +60,24 @@ CooHistoryBenchmarkComparison >> completeDirectDependencyVariableBenchmarkFor: a
 	^ benchmark
 ]
 
+{ #category : 'builders' }
+CooHistoryBenchmarkComparison >> completeDirectDependencyVariableBuilder [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoInstanceAccessibleVariablesHeuristic new;
+			 add: (CoGlobalVariablesHeuristic new
+					  globalVariableFetcherClass:
+						  CoDependencyGlobalVariableFetcher);
+			 build).
+	^ builder
+]
+
 { #category : 'accessing' }
 CooHistoryBenchmarkComparison >> dependencyConfigurationName [
 
 	^ 'Complete + Direct Package Dependencies'
-]
-
-{ #category : 'builders' }
-CooHistoryBenchmarkComparison >> historyMessageBuilderWithSession: aSession [
-
-	| builder |
-	builder := CoASTHeuristicsResultSetBuilder new.
-	builder messageHeuristic: (builder newHeuristicBuilder
-			 add: CoSelfMessageHeuristic new;
-			 add: CoSuperMessageHeuristic new;
-			 add: CoTypedReceiverMessageHeuristic new;
-			 add: CoInitializeInferencedMessageHeuristic new;
-			 add: CoLiteralMessageHeuristic new;
-			 add: CoGlobalVariableMessageHeuristic new;
-			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: (CooSessionMessagesHeuristic new
-					  session: aSession;
-					  yourself);
-			 add: CoUnknownMessageHeuristic new;
-			 build).
-	^ builder
 ]
 
 { #category : 'benchmarks' }
@@ -118,15 +95,22 @@ CooHistoryBenchmarkComparison >> historyMessageBenchmarkWithSession: aSession sc
 ]
 
 { #category : 'builders' }
-CooHistoryBenchmarkComparison >> historyVariableBuilderWithSession: aSession [
+CooHistoryBenchmarkComparison >> historyMessageBuilderWithSession: aSession [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
-	builder variablesHeuristic: (builder newHeuristicBuilder
-			 add: CoInstanceAccessibleVariablesHeuristic new;
-			 add: (CooSessionVariableHeuristic new
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: (CooSessionMessagesHeuristic new
 					  session: aSession;
 					  yourself);
+			 add: CoUnknownMessageHeuristic new;
 			 build).
 	^ builder
 ]
@@ -143,6 +127,20 @@ CooHistoryBenchmarkComparison >> historyVariableBenchmarkWithSession: aSession s
 		builder: (self historyVariableBuilderWithSession: aSession).
 	benchmark run.
 	^ benchmark
+]
+
+{ #category : 'builders' }
+CooHistoryBenchmarkComparison >> historyVariableBuilderWithSession: aSession [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoInstanceAccessibleVariablesHeuristic new;
+			 add: (CooSessionVariableHeuristic new
+					  session: aSession;
+					  yourself);
+			 build).
+	^ builder
 ]
 
 { #category : 'running' }
