@@ -255,7 +255,6 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 	"When a nmethod is modified we compute in addition the delta so that we can only bench the difference"
 	
 	| deltaMessage item |
-	anAnn method selector = #extractLine: ifTrue: [ self halt. ].
 	deltaMessage := self computeDeltaMessageOf: anAnn.
 	item := CooModifiedMethodHistoryItem new
 		        selector: anAnn method selector;

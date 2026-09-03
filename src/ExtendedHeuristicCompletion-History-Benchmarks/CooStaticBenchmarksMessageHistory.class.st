@@ -49,7 +49,7 @@ CooStaticBenchmarksMessageHistory >> run [
 		for added methods:
 			we should bench all call sites
 	"
-	Halt onCount: 4.
+
 	Transcript
 		cr;
 		show: '# Running Message Benchmark'.
