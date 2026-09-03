@@ -18,16 +18,6 @@ Class {
 	#tag : 'Core'
 }
 
-{ #category : 'benchmarks' }
-CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
-
-	| entries |
-	self halt.
-	entries := self session modifiedMethodDescriptions ifNil: [ #(  ) ].
-	^ ((entries flatCollect: [ :each | each deltaMessages ])
-		   select: [ :each | self shouldBenchmarkMessageSelector: each ]) asSet
-]
-
 { #category : 'accessing' }
 CooStaticBenchmarksMessageHistory >> matchedCallsites [
 
@@ -36,10 +26,6 @@ CooStaticBenchmarksMessageHistory >> matchedCallsites [
 
 { #category : 'running' }
 CooStaticBenchmarksMessageHistory >> run [
-
-	| pos |
-	scannedMethods := 0.
-	matchedCallsites := 0.
 	
 	"we should look for the methods that are in the history and not in the package.
 	Because the bench is simulating a dev behavior. We are only interested in added, modified methods. 
@@ -47,12 +33,13 @@ CooStaticBenchmarksMessageHistory >> run [
 		for modified methods;
 			we should bench only sites that got modified (this is to simulate the dev behavior)
 		for added methods:
-			we should bench all call sites
-	"
-
-	Transcript
-		cr;
-		show: '# Running Message Benchmark'.
+			we should bench all call sites"
+	
+	| pos |
+	scannedMethods := 0.
+	matchedCallsites := 0.
+	
+	Transcript cr; show: '# Running Message Benchmark'.
 	
 	self session modifiedMethodsAndDescriptions do: [ :methodAndDescription |
 			| method description |
@@ -66,12 +53,12 @@ CooStaticBenchmarksMessageHistory >> run [
 								 (description deltaMessages includes: node selector) and: [
 									 self shouldBenchmarkMessageSelector: node selector ] ]) ifTrue: [
 									Transcript
-										cr;
-										show: '## Benched modified method: ', method selector, ' for message: ';
-										show: node selector;
-										space.
+										cr; show: '## Benched modified method: ', method selector, ' for message: ';
+										show: node selector; space.
 									matchedCallsites := matchedCallsites + 1.
-									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
+									
+									pos := node selectorInterval 
+										ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ].
 					
 	self session addedMethods do: [ :method |
@@ -80,10 +67,8 @@ CooStaticBenchmarksMessageHistory >> run [
 					parseTree nodesDo: [ :node |
 							(node isMessage and: [ self shouldBenchmarkMessageSelector: node selector ]) ifTrue: [
 									Transcript
-										cr;
-										show: '## Bench added method: ', method selector, 'for message: ';
-										show: node selector;
-										space.
+										cr; show: '## Bench added method: ', method selector, 'for message: ';
+										show: node selector; space.
 									matchedCallsites := matchedCallsites + 1.
 									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ]				
