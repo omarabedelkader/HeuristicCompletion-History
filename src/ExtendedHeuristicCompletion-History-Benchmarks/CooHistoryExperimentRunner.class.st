@@ -4,8 +4,9 @@ I orchestrate a complete project-level History experiment and write its report a
 Class {
 	#name : 'CooHistoryExperimentRunner',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Core'
 }
 
 { #category : 'running' }

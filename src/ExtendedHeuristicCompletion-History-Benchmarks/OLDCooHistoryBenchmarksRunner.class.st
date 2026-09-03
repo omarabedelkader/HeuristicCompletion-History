@@ -11,14 +11,15 @@ CooHistoryBenchmarksRunner run.
 ```
 "
 Class {
-	#name : 'CooHistoryBenchmarksRunner',
+	#name : 'OLDCooHistoryBenchmarksRunner',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Limbo',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Limbo'
 }
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositoryString: aString numberOfAnalyzedCommits: anInteger [
+OLDCooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositoryString: aString numberOfAnalyzedCommits: anInteger [
 
 	| populator commits messageBenchmark variableBenchmark |
 	"fill up the history"
@@ -51,7 +52,7 @@ CooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession repositor
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> dryRunMicrodown [
+OLDCooHistoryBenchmarksRunner class >> dryRunMicrodown [
 
 	<script>
 	Smalltalk globals at: #BaselineOfMicrodown ifPresent: [ :c | c removeFromSystem ].
@@ -76,7 +77,7 @@ CooHistoryBenchmarksRunner class >> dryRunMicrodown [
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [ 
+OLDCooHistoryBenchmarksRunner class >> newRunWithSession: aSession [ 
 	"Run benchmarks with a specific session and scope.
 	Example: CooHistoryBenchmarksRunner runWithSession: CooSession current scope: (RPackage named: 'Kernel')"
 
@@ -107,7 +108,7 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString: aString numberOfAnalyzedCommits: anInteger [
+OLDCooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString: aString numberOfAnalyzedCommits: anInteger [
 
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
@@ -133,13 +134,13 @@ CooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryString
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> run [
+OLDCooHistoryBenchmarksRunner class >> run [
 	
 	^ self newRunWithSession: CooSession current
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> runComix [
+OLDCooHistoryBenchmarksRunner class >> runComix [
 	<script>
 	
 	CooSession resetProgramEntities.
@@ -151,7 +152,7 @@ CooHistoryBenchmarksRunner class >> runComix [
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> runMicrodown [
+OLDCooHistoryBenchmarksRunner class >> runMicrodown [
 	<script>
 	
 	
@@ -179,14 +180,14 @@ CooHistoryBenchmarksRunner class >> runMicrodown [
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> runMicrodownExperiment [
+OLDCooHistoryBenchmarksRunner class >> runMicrodownExperiment [
 
 	<script>
 	^ CooHistoryExperimentRunner runMicrodown
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> runRoassal [
+OLDCooHistoryBenchmarksRunner class >> runRoassal [
 	<script>
 	
 	CooSession resetProgramEntities.
@@ -199,7 +200,7 @@ CooHistoryBenchmarksRunner class >> runRoassal [
 ]
 
 { #category : 'running' }
-CooHistoryBenchmarksRunner class >> runSpc [
+OLDCooHistoryBenchmarksRunner class >> runSpc [
 	<script>
 	
 	CooSession resetProgramEntities.

@@ -8,8 +8,9 @@ Class {
 		'name',
 		'packages'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Limbo',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Limbo'
 }
 
 { #category : 'instance creation' }

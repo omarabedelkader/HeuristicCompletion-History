@@ -311,6 +311,48 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 
 ]
 
+{ #category : 'for benchmark' }
+CooSession >> addedMethodDescriptions [
+	"this is unclear how to handle removed method when we load commits"
+	
+	| tmps removed existing |
+	tmps := methodDescriptions copy.
+	tmps := tmps select: [ :each | each event = #added  ].
+	existing := Set new.
+	removed := Set new.
+	
+	tmps do: [ :each |
+			"we make sure that if a method was removed we do not handle it.
+			Now this unclear if we get removed method when loading back code so the following
+			test looks useless."
+			each event = #removed ifTrue: [ removed add: each ].
+			(removed anySatisfy: [ :r | r selector = each selector and: [ r nameOfClass = each nameOfClass ] ]) 
+				ifFalse: [ existing add: each ] ].
+	^ existing
+]
+
+{ #category : 'for benchmark' }
+CooSession >> addedMethods [
+	"pay attention this requires that the classes are loaded in Pharo."
+	"we may have some extensions...."
+	
+	| col |
+	col := OrderedCollection new. 
+	
+	self addedMethodDescriptions do: [ :each |
+		| metaclass clss |
+		metaclass := false.
+		clss := each nameOfClass.
+		(each nameOfClass endsWith: ' class') ifTrue: [
+			metaclass := true.
+			clss := each nameOfClass allButLast: 6 ].
+			self class environment at: clss asSymbol ifPresent: [ :myClass |
+				col add: (metaclass
+					ifTrue: [ myClass class >> each selector ]
+				   ifFalse: [ myClass >> each selector ]) ] ].
+	^ col 
+]
+
 { #category : 'low-level' }
 CooSession >> classDescriptions [ 
 	
@@ -452,6 +494,48 @@ CooSession >> initialize [
 CooSession >> methodDescriptions [ 
 	
 	^ methodDescriptions 
+]
+
+{ #category : 'for benchmark' }
+CooSession >> modifiedMethodDescriptions [
+	"this is unclear how to handle removed method when we load commits"
+	
+	| tmps removed existing |
+	tmps := methodDescriptions copy.
+	tmps := tmps select: [ :each | each event = #modified  ].
+	existing := Set new.
+	removed := Set new.
+	
+	tmps do: [ :each |
+			"we make sure that if a method was removed we do not handle it.
+			Now this unclear if we get removed method when loading back code so the following
+			test looks useless."
+			each event = #removed ifTrue: [ removed add: each ].
+			(removed anySatisfy: [ :r | r selector = each selector and: [ r nameOfClass = each nameOfClass ] ]) 
+				ifFalse: [ existing add: each ] ].
+	^ existing
+]
+
+{ #category : 'for benchmark' }
+CooSession >> modifiedMethods [
+	"pay attention this requires that the classes are loaded in Pharo."
+	"we may have some extensions...."
+	
+	| col |
+	col := OrderedCollection new. 
+	
+	self modifiedMethodDescriptions do: [ :each |
+		| metaclass clss |
+		metaclass := false.
+		clss := each nameOfClass.
+		(each nameOfClass endsWith: ' class') ifTrue: [
+			metaclass := true.
+			clss := each nameOfClass allButLast: 6 ].
+			self class environment at: clss asSymbol ifPresent: [ :myClass |
+				col add: (metaclass
+					ifTrue: [ myClass class >> each selector ]
+				   ifFalse: [ myClass >> each selector ]) ] ].
+	^ col 
 ]
 
 { #category : 'interaction configuration' }

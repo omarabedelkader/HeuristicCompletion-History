@@ -4,8 +4,9 @@ I export project comparison plots from a CooHistoryExperimentResult.
 Class {
 	#name : 'CooHistoryBenchmarkPlotter',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Tools',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Tools'
 }
 
 { #category : 'svg' }

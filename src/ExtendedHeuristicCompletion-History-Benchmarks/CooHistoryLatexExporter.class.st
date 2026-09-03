@@ -4,8 +4,9 @@ I export LaTeX tables from a CooHistoryExperimentResult.
 Class {
 	#name : 'CooHistoryLatexExporter',
 	#superclass : 'Object',
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Tools',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Tools'
 }
 
 { #category : 'private' }

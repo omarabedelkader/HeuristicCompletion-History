@@ -12,8 +12,9 @@ Class {
 		'scannedMethods',
 		'matchedCallsites'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Core'
 }
 
 { #category : 'benchmarks' }
