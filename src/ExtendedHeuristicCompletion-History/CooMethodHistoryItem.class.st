@@ -19,6 +19,8 @@ Class {
 CooMethodHistoryItem class >> isMessageCompletionSelector: aSelector [
 
 	| selector |
+	(#(assert: assert:equals: deny: deny:equals: ifNil: ifNotNil: ifTrue: ifFalse: ifTrue:ifFalse: ifFalse:ifTrue: do: collect: detect: select: isNil isNotNil flag: halt cr show:) includes: aSelector) 
+		ifTrue: [ ^ false ].
 	aSelector ifNil: [ ^ false ].
 	selector := aSelector asSymbol.
 	^ selector isUnary or: [ selector isKeyword ]
