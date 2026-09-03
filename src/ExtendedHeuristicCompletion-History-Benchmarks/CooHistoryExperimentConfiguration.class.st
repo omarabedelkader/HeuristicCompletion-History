@@ -72,14 +72,6 @@ CooHistoryExperimentConfiguration >> allPackages [
 	^ allPackages
 ]
 
-{ #category : 'accessing' }
-CooHistoryExperimentConfiguration >> benchmarkScope [
-
-	^ CooHistoryBenchmarkScope
-		  named: self name
-		  packages: self packages
-]
-
 { #category : 'initialization' }
 CooHistoryExperimentConfiguration >> initialize [
 
