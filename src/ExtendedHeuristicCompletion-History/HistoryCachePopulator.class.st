@@ -118,16 +118,21 @@ HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 	"Extract all method selectors and their ASTs from a commit's diff."
 
 	| diff methodInfos |
-	methodInfos := OrderedCollection new. "for the first commit iceberg was barking."
+	methodInfos := OrderedCollection new. 
+	
+	"for the first commit iceberg was barking."
 	aCommit ancestors ifEmpty: [ ^ methodInfos ].
 	diff := aCommit diffToParent.
 	diff ifNil: [ ^ methodInfos ].
 
 	diff tree allChildrenDo: [ :node |
-			node definition isMethodDefinition ifTrue: [
-					node value isRemoval ifTrue: [ self processMethodRemoval: node value into: methodInfos timestamp: aCommit datetime ].
-					node value isAddition ifTrue: [ self processMethodAddition: node value into: methodInfos timestamp: aCommit datetime ].
-					node value isModification ifTrue: [ self processMethodModification: node value into: methodInfos timestamp: aCommit datetime ] ] ].
+		node definition isMethodDefinition ifTrue: [
+			node value isRemoval 
+				ifTrue: [ self processMethodRemoval: node value into: methodInfos timestamp: aCommit datetime ].
+			node value isAddition 
+				ifTrue: [ self processMethodAddition: node value into: methodInfos timestamp: aCommit datetime ].
+			node value isModification 
+				ifTrue: [ self processMethodModification: node value into: methodInfos timestamp: aCommit datetime ] ] ].
 
 	^ methodInfos 
 ]

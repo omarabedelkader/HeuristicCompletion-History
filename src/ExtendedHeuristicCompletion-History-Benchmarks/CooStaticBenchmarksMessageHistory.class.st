@@ -22,8 +22,7 @@ Class {
 CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
 
 	| entries |
-	self halt.
-	entries := self session programEntityHandler selectorEntries ifNil: [ #(  ) ].
+	entries := self session modifiedMethodDescriptions ifNil: [ #(  ) ].
 	^ ((entries flatCollect: [ :each | each deltaMessages ])
 		   select: [ :each | self shouldBenchmarkMessageSelector: each ]) asSet
 ]
@@ -53,7 +52,7 @@ CooStaticBenchmarksMessageHistory >> run [
 	Transcript
 		cr;
 		show: '# Running Message Benchmark'; cr.
-
+	self halt.
 	self session modifiedMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |

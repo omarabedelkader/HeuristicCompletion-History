@@ -43,7 +43,7 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 	statistics historyCommitCount: commits size.
 	statistics collectHistoryStatisticsFrom: aSession.
 
-	self halt.
+
 "	comparison := CooHistoryBenchmarkComparison new.
 	^ comparison
 		  runForConfiguration: aConfiguration
@@ -96,9 +96,18 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 		session: aSession;
 		builder: self completeDirectDependencyMessageBuilder.
 
+	self halt.
+	"We load the last of all commits without extraction information to avoid to have diff
+	from most recent to old."
+	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	aSession resetProgramEntities.
+	
+	"then now we can reload from old to old -1"
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
-		self halt.
+		"I would ignore the first one because we loaded the code and then we go in the past.
+		so the system will compute the diff while loading old code and generate
+		bad "
 		benchmark run.
 		"we should flush items to make sure the next loading will only contain new elements"
 		aSession resetDevelopmentItems ].
