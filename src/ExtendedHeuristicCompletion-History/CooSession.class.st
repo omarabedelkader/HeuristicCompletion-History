@@ -498,6 +498,7 @@ CooSession >> existingMethods [
 CooSession >> initialize [
 
 	super initialize.
+	programEntityHandler := CooTemporalHandler new.
 	self resetProgramEntities.
 	self resetInteractionItems.
 	self resetNavigationItems.
