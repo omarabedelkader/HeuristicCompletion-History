@@ -62,7 +62,7 @@ CooStaticBenchmarksMessageHistory >> run [
 									 self shouldBenchmarkMessageSelector: node selector ] ]) ifTrue: [
 									Transcript
 										cr;
-										show: '## Benched modified messages: ';
+										show: '## Benched modified method: ', method selector, ' for message: ';
 										show: node selector;
 										space.
 									matchedCallsites := matchedCallsites + 1.
@@ -75,7 +75,7 @@ CooStaticBenchmarksMessageHistory >> run [
 							(node isMessage and: [ self shouldBenchmarkMessageSelector: node selector ]) ifTrue: [
 									Transcript
 										cr;
-										show: '## Bench added messages: ';
+										show: '## Bench added method: ', method selector, 'for message: ';
 										show: node selector;
 										space.
 									matchedCallsites := matchedCallsites + 1.
