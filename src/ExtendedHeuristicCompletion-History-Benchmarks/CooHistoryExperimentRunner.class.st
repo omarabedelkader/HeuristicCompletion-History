@@ -99,7 +99,9 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
 		self halt.
-		benchmark run.].
+		benchmark run.
+		"we should flush items to make sure the next loading will only contain new elements"
+		aSession resetDevelopmentItems ].
 
 	^ { commits . benchmark }
 ]
