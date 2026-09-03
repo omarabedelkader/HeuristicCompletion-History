@@ -242,7 +242,8 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 
 { #category : 'method handling' }
 CooSession >> addMethodItem: anItem [
-
+	
+	
 	methodDescriptions addFirst: anItem.
 	"keeping item is needed for bcnhing because we need to know newly defined and modified entities"
 	

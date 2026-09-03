@@ -150,10 +150,13 @@ HistoryCachePopulator >> loadFromOldToNewCommit: commit [
 			Transcript cr; show: 'Loading and importing '; show: commit printString.
 			
 			commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
+			"
+			The session will get notified via announcement related by code load. 
+			
 			infos := self extractMethodsFromCommit: commit.
 			infos do: [ :info | session addMethodItem: info ].
 			infos := self extractClassesFromCommit: commit.
-			infos do: [ :info | session addClassItem: info ]
+			infos do: [ :info | session addClassItem: info ]"
 ]
 
 { #category : 'main API' }
@@ -339,7 +342,7 @@ HistoryCachePopulator >> tryParseAST: sourceCode [
 	
 	sourceCode ifNil: [ ^ nil ].
 	
-	^ [ RBParser parseMethod: sourceCode ]
+	^ [ OCParser parseMethod: sourceCode ]
 		on: Error
 		do: [ :ex | nil ]
 ]

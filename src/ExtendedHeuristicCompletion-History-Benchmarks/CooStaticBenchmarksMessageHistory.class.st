@@ -52,7 +52,7 @@ CooStaticBenchmarksMessageHistory >> run [
 	Transcript
 		cr;
 		show: '# Running Message Benchmark'; cr.
-	self halt.
+	
 	self session modifiedMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |

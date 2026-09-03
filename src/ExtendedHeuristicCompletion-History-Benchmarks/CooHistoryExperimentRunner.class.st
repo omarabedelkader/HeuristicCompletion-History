@@ -96,11 +96,13 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 		session: aSession;
 		builder: self completeDirectDependencyMessageBuilder.
 
-	self halt.
+	
 	"We load the last of all commits without extraction information to avoid to have diff
 	from most recent to old."
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 	aSession resetProgramEntities.
+	self flag: #SD.
+	"here we flush the handler. May be we should reset the current handler because reinitialize it may flush the kind of handler"
 	
 	"then now we can reload from old to old -1"
 	commits reverseDo: [ :commit |
