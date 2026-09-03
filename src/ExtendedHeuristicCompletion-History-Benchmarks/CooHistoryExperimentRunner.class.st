@@ -36,6 +36,7 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 	statistics := CooHistoryProjectStatistics new.
 	statistics collectRepositoryStatisticsFrom: aConfiguration.
 
+	
 	commits := self
 		           populateHistoryFor: aConfiguration
 		           session: aSession.
@@ -74,7 +75,7 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 
-	Transcript cr; show: 'Loading and importing '; show: commit printString.	
+	Transcript cr;cr; show: 'Loading and importing '; show: commit printString.	
 	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
 		
 ]
@@ -105,13 +106,14 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 	
 	"We load the last of all commits without extraction information to avoid to have diff
 	from most recent to old."
+	
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 	aSession resetProgramEntities.
 	self flag: #SD.
 	"here we flush the handler. May be we should reset the current handler because reinitialize it may flush the kind of handler"
 	
 	"then now we can reload from old to old -1"
-	commits reverseDo: [ :commit |
+	commits allButLast reverseDo: [ :commit |
 		self loadFromOldToNewCommit: commit.
 		"I would ignore the first one because we loaded the code and then we go in the past.
 		so the system will compute the diff while loading old code and generate

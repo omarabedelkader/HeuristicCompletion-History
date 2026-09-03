@@ -255,6 +255,7 @@ CooSession >> addModifiedMethodInVocabulary: anAnn [
 	"When a nmethod is modified we compute in addition the delta so that we can only bench the difference"
 	
 	| deltaMessage item |
+	anAnn method selector = #extractLine: ifTrue: [ self halt. ].
 	deltaMessage := self computeDeltaMessageOf: anAnn.
 	item := CooModifiedMethodHistoryItem new
 		        selector: anAnn method selector;
@@ -377,10 +378,22 @@ CooSession >> completionClassSpies [
 
 { #category : 'helpers' }
 CooSession >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
-
-	^ (CooMethodHistoryItem messageCompletionSelectorsFromAST: aNewMethodAst)
-		  difference:
-		  (CooMethodHistoryItem messageCompletionSelectorsFromAST: anOldMethodAst)
+	"Pay attention we do not use difference: because difference is set based. 
+	with difference we may lose a delta
+	see 
+		#( #a #b #c #a) difference: #(a).
+		returns #(b c) while we need to have #(#b #c #a)
+	"
+	
+	
+	
+	| first |
+	first := (CooMethodHistoryItem messageCompletionSelectorsFromAST: aNewMethodAst).
+	 (CooMethodHistoryItem messageCompletionSelectorsFromAST: anOldMethodAst)
+		 do: [ :each | 
+			first remove: each ifAbsent: [  ]].
+	^ first 
+	
 ]
 
 { #category : 'helpers' }
@@ -504,8 +517,8 @@ CooSession >> modifiedMethodDescriptions [
 	| tmps removed existing |
 	tmps := methodDescriptions copy.
 	tmps := tmps select: [ :each | each event = #modified  ].
-	existing := Set new.
-	removed := Set new.
+	existing := OrderedCollection new.
+	removed := OrderedCollection new.
 	
 	tmps do: [ :each |
 			"we make sure that if a method was removed we do not handle it.
@@ -537,6 +550,31 @@ CooSession >> modifiedMethods [
 					ifTrue: [ myClass class >> each selector ]
 				   ifFalse: [ myClass >> each selector ]) ] ].
 	^ col 
+]
+
+{ #category : 'for benchmark' }
+CooSession >> modifiedMethodsAndDescriptions [
+	"pay attention this requires that the classes are loaded in Pharo."
+	"we may have some extensions...."
+	
+	| col modified res |
+	col := OrderedCollection new. 
+	modified := self modifiedMethodDescriptions.
+	modified do: [ :each |
+		| metaclass clss |
+		metaclass := false.
+		clss := each nameOfClass.
+		(each nameOfClass endsWith: ' class') 
+			ifTrue: [
+				metaclass := true.
+				clss := each nameOfClass allButLast: 6 ].
+			self class environment 
+				at: clss asSymbol 
+				ifPresent: [ :myClass |
+				col add: ((metaclass
+							ifTrue: [ myClass class >> each selector ]
+				  			 ifFalse: [ myClass >> each selector ]) -> each) ] ].
+	^ col  
 ]
 
 { #category : 'interaction configuration' }

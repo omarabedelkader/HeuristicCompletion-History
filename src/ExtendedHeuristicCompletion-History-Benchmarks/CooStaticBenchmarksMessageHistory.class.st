@@ -22,6 +22,7 @@ Class {
 CooStaticBenchmarksMessageHistory >> deltaMessageSelectors [
 
 	| entries |
+	self halt.
 	entries := self session modifiedMethodDescriptions ifNil: [ #(  ) ].
 	^ ((entries flatCollect: [ :each | each deltaMessages ])
 		   select: [ :each | self shouldBenchmarkMessageSelector: each ]) asSet
@@ -48,17 +49,21 @@ CooStaticBenchmarksMessageHistory >> run [
 		for added methods:
 			we should bench all call sites
 	"
-
+	Halt onCount: 4.
 	Transcript
 		cr;
-		show: '# Running Message Benchmark'; cr.
+		show: '# Running Message Benchmark'.
 	
-	self session modifiedMethods do: [ :method |
+	self session modifiedMethodsAndDescriptions do: [ :methodAndDescription |
+			| method description |
+			method := methodAndDescription key.
+			description := methodAndDescription value.
+			
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
 							(node isMessage and: [
-								 (self deltaMessageSelectors includes: node selector) and: [
+								 (description deltaMessages includes: node selector) and: [
 									 self shouldBenchmarkMessageSelector: node selector ] ]) ifTrue: [
 									Transcript
 										cr;
@@ -68,6 +73,7 @@ CooStaticBenchmarksMessageHistory >> run [
 									matchedCallsites := matchedCallsites + 1.
 									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ].
+					
 	self session addedMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
