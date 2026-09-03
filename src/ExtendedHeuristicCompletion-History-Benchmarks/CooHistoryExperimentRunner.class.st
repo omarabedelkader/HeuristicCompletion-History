@@ -4,6 +4,9 @@ I orchestrate a complete project-level History experiment and write its report a
 Class {
 	#name : 'CooHistoryExperimentRunner',
 	#superclass : 'Object',
+	#instVars : [
+		'statistics'
+	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#tag : 'Core'
@@ -32,27 +35,17 @@ CooHistoryExperimentRunner class >> runTestRepoForHistory [
 { #category : 'private' }
 CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration session: aSession [
 
-	| statistics commits  |
-	statistics := CooHistoryProjectStatistics new.
+	| commits  |
 	statistics collectRepositoryStatisticsFrom: aConfiguration.
 
 	commits := self
-		           populateHistoryFor: aConfiguration
-		           session: aSession.
-
-	statistics historyCommitCount: commits size.
-	statistics collectHistoryStatisticsFrom: aSession.
-
-
-"	comparison := CooHistoryBenchmarkComparison new.
-	^ comparison
-		  runForConfiguration: aConfiguration
-		  session: aSession
-		  commitCount: commits size
-		  statistics: statistics"
+		loadCommitsAndBench: aConfiguration
+		session: aSession.
+		
+	statistics historyCommitCount: commits first size.
 ]
 
-{ #category : 'builders' }
+{ #category : 'benchs' }
 CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 
 	| builder |
@@ -71,32 +64,19 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 	^ builder
 ]
 
-{ #category : 'private' }
-CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
+{ #category : 'running' }
+CooHistoryExperimentRunner >> initialize [
 
-	Transcript cr;cr; show: 'Loading and importing '; show: commit printString.	
-	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
-		
+	super initialize.
+	statistics := CooHistoryProjectStatistics new.
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> loadProjectFrom: aConfiguration [
-
-	Transcript
-		cr;
-		show: 'Loading project for History experiment: ';
-		show: aConfiguration name.
-	^ aConfiguration loadProject
-]
-
-{ #category : 'private' }
-CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSession [
+CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
 	| populator commits benchmark |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
-
-
 
 	benchmark := CooStaticBenchmarksMessageHistory new.
 	benchmark
@@ -104,9 +84,7 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 		session: aSession;
 		builder: self completeDirectDependencyMessageBuilder.
 
-	
-	"We load the last of all commits without extraction information to avoid to have diff
-	from most recent to old."
+	"We load the last of all commits without extraction information to avoid to have diff from most recent to old."
 	
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 	"note that the handler internal structures are reset but not the kind of handler."
@@ -118,6 +96,7 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 		"We ignore the oldest one because we loaded the code and then we go in the past.
 		so the system computes the diff while loading old code and generate noise in the session"
 		benchmark run.
+		statistics collectHistoryStatisticsFrom: aSession. 
 		"Flush items but not the handlers to make sure the next loading 
 		will only contain new elements but without clearing the handler previously computer logic"
 		aSession resetDevelopmentItems ].
@@ -126,24 +105,27 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> prepareOutputDirectoryFor: aConfiguration [
+CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 
-	aConfiguration outputDirectory ensureCreateDirectory
+	Transcript cr;cr; show: 'Loading and importing '; show: commit printString.	
+	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
+		
 ]
 
 { #category : 'running' }
 CooHistoryExperimentRunner >> run: aConfiguration [
 
 	| result |
-	self prepareOutputDirectoryFor: aConfiguration.
-	self loadProjectFrom: aConfiguration.
+	aConfiguration outputDirectory ensureCreateDirectory.
+	Transcript cr; show: 'Loading project for History experiment: '; show: aConfiguration name.
+	aConfiguration loadProject.
 
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 
 	result := self
-		          analyzeHistoryAndBenchmarksFor: aConfiguration
-		          session: CooSession current.
+		   analyzeHistoryAndBenchmarksFor: aConfiguration
+			session: CooSession current.
 
 	CooHistoryBenchmarkPlotter new
 		exportAllFor: result

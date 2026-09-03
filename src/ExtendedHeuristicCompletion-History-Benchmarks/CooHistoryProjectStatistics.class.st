@@ -102,20 +102,20 @@ CooHistoryProjectStatistics >> collectHistoryStatisticsFrom: aSession [
 	methodItems := aSession methodDescriptions.
 	classItems := aSession classDescriptions.
 
-	historyMethodCount := methodItems size.
-	historyClassCount := classItems size.
+	historyMethodCount := historyMethodCount + methodItems size.
+	historyClassCount := historyMethodCount + classItems size.
 
-	addedMethods := self countEvent: #added in: methodItems.
-	modifiedMethods := self countEvent: #modified in: methodItems.
-	removedMethods := self countEvent: #removed in: methodItems.
+	addedMethods := addedMethods + (self countEvent: #added in: methodItems).
+	modifiedMethods := modifiedMethods + (self countEvent: #modified in: methodItems).
+	removedMethods := removedMethods + (self countEvent: #removed in: methodItems).
 
-	addedClasses := self countEvent: #added in: classItems.
-	modifiedClasses := self countEvent: #modified in: classItems.
-	removedClasses := self countEvent: #removed in: classItems.
+	addedClasses := addedClasses + (self countEvent: #added in: classItems).
+	modifiedClasses := modifiedClasses + (self countEvent: #modified in: classItems).
+	removedClasses := removedClasses + (self countEvent: #removed in: classItems).
 
 	selectors := (methodItems collect: [ :each | each selector ])
 		             select: [ :each | each notNil ].
-	uniqueHistorySelectors := selectors asSet size.
+	uniqueHistorySelectors := uniqueHistorySelectors + selectors asSet size.
 
 	classNames := OrderedCollection new.
 	methodItems do: [ :each |
@@ -124,7 +124,7 @@ CooHistoryProjectStatistics >> collectHistoryStatisticsFrom: aSession [
 	classItems do: [ :each |
 		each nameOfClass ifNotNil: [ :className |
 			classNames add: className ] ].
-	uniqueHistoryClasses := classNames asSet size
+	uniqueHistoryClasses := uniqueHistoryClasses + classNames asSet size
 ]
 
 { #category : 'collecting' }
