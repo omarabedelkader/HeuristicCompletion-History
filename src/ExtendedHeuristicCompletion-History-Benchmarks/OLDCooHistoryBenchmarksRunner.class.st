@@ -23,7 +23,7 @@ OLDCooHistoryBenchmarksRunner class >> dryRunLoadingWithSession: aSession reposi
 
 	| populator commits messageBenchmark variableBenchmark |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: aString .
+	populator := HistoryCachePopulator repositoryNamed: aString .
 	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 
@@ -86,7 +86,7 @@ OLDCooHistoryBenchmarksRunner class >> newRunWithSession: aSession [
 
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: 'git@github.com:Ducasse/Comix2.git'.
+	populator := HistoryCachePopulator repositoryNamed: 'git@github.com:Ducasse/Comix2.git'.
 	populator session: aSession.
 	commits := populator commitsForHead: 10.
 
@@ -112,7 +112,7 @@ OLDCooHistoryBenchmarksRunner class >> newRunWithSession: aSession repositoryStr
 
 	| populator messageBenchmark variableBenchmark commits |
 	"fill up the history"
-	populator := HistoryCachePopulator repo: aString .
+	populator := HistoryCachePopulator repositoryNamed: aString .
 	populator session: aSession.
 	commits := populator commitsForHead: anInteger.
 

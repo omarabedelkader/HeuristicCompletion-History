@@ -85,17 +85,6 @@ Class {
 }
 
 { #category : 'instance creation' }
-HistoryScrapper class >> repo: aURLString [
-	"Fetch and show commits for the given repository URL.
-	Usage: HistoryScrapper fetchRepo: 'https://github.com/pharo-spec/Spec'"
-	
-	^ self new
-		repositoryURLString: aURLString;
-		initializeRepository;
-		yourself
-]
-
-{ #category : 'instance creation' }
 HistoryScrapper class >> repo: aURLString commits: aNumber [
 	"Fetch and show a specific number of commits for the given repository URL.
 	Usage: 
@@ -105,6 +94,17 @@ HistoryScrapper class >> repo: aURLString commits: aNumber [
 	^ self new
 		repositoryURLString: aURLString;
 		commitCount: aNumber;
+		initializeRepository;
+		yourself
+]
+
+{ #category : 'instance creation' }
+HistoryScrapper class >> repositoryNamed: aURLString [
+	"Fetch and show commits for the given repository URL.
+	Usage: HistoryScrapper fetchRepo: 'https://github.com/pharo-spec/Spec'"
+	
+	^ self new
+		repositoryURLString: aURLString;
 		initializeRepository;
 		yourself
 ]
@@ -151,20 +151,7 @@ HistoryScrapper >> commitCount: aNumber [
 { #category : 'actions' }
 HistoryScrapper >> commitsFromHead: anInteger [
 	"return last, last -1, last -2 .. commits up to last-anInteger"
-	| commits |
-	commits := repository head withCommitWalkDo: [ :walk |
-			  | com |
-			  com := walk
-				         fromHead;
-				         maxNumber: 1000;
-				         commits.
-			  com ].
-	^ commits copyFrom: 1 to: anInteger
-]
-
-{ #category : 'actions' }
-HistoryScrapper >> fetchAncestorCommit: anInteger [
-	"return last, last -1, last -2 .. commits up to last-anInteger"
+	
 	| commits |
 	commits := repository head withCommitWalkDo: [ :walk |
 			  | com |

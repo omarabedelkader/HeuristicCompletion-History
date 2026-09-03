@@ -72,6 +72,14 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 ]
 
 { #category : 'private' }
+CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
+
+	Transcript cr; show: 'Loading and importing '; show: commit printString.	
+	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
+		
+]
+
+{ #category : 'private' }
 CooHistoryExperimentRunner >> loadProjectFrom: aConfiguration [
 
 	Transcript
@@ -85,10 +93,8 @@ CooHistoryExperimentRunner >> loadProjectFrom: aConfiguration [
 CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSession [
 
 	| populator commits benchmark |
-	populator := HistoryCachePopulator repo: aConfiguration repository.
-	populator session: aSession.
+	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
-
 
 	benchmark := CooStaticBenchmarksMessageHistory new.
 	benchmark
@@ -106,7 +112,7 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 	
 	"then now we can reload from old to old -1"
 	commits reverseDo: [ :commit |
-		populator loadFromOldToNewCommit: commit.
+		self loadFromOldToNewCommit: commit.
 		"I would ignore the first one because we loaded the code and then we go in the past.
 		so the system will compute the diff while loading old code and generate
 		bad "

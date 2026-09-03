@@ -1,11 +1,12 @@
 "
-This class builds and updates temporal and frequency caches by scraping Git commits, extracting changed methods, and registering their metadata.
+This class builds and updates temporal and frequency caches by scraping Git commits, extracting changed methods, and registering their metadata. The kye design point is that commit code is not loaded. So the analysis have to extract information and pass it to the session. 
+
+We should revise the logic duplication because the Session in normal mode (announcement reaction) is doing the same. 
 "
 Class {
 	#name : 'HistoryCachePopulator',
-	#superclass : 'Object',
+	#superclass : 'HistoryPopulator',
 	#instVars : [
-		'scrapper',
 		'session'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Fetching-Github',
@@ -30,8 +31,8 @@ HistoryCachePopulator class >> mockRepo [
 { #category : 'examples' }
 HistoryCachePopulator class >> populateFromRepo: aURLString [
 
-	^ (self repo: aURLString)
-		  populateCaches;
+	^ (self repositoryNamed: aURLString)
+		  populateCachesWithoutLoadingCode;
 		  yourself
 ]
 
@@ -40,16 +41,8 @@ HistoryCachePopulator class >> populateFromRepo: aURLString commits: aNumber [
 
 	^ self new
 		scrapper: (HistoryScrapper repo: aURLString commits: aNumber);
-		populateCaches;
+		populateCachesWithoutLoadingCode;
 		yourself
-]
-
-{ #category : 'examples' }
-HistoryCachePopulator class >> repo: aURLString [
-
-	^ self new
-		  scrapper: (HistoryScrapper repo: aURLString);
-		  yourself
 ]
 
 { #category : 'examples' }
@@ -71,13 +64,6 @@ HistoryCachePopulator class >> toplo [
 HistoryCachePopulator >> classNameFromDefinition: aDefinition [
 
 	^ aDefinition className, (aDefinition classIsMeta ifTrue: [ ' class' ] ifFalse: [ '' ])
-	
-]
-
-{ #category : 'forBenchmarks' }
-HistoryCachePopulator >> commitsForHead: aNumber [
-
-	^ self scrapper commitsFromHead: aNumber
 	
 ]
 
@@ -105,11 +91,25 @@ HistoryCachePopulator >> extractClassesFromCommit: aCommit [
 	diff ifNil: [ ^ classInfos ].
 
 	diff tree allChildrenDo: [ :node |
-			node definition isClassDefinition ifTrue: [
-					node value isRemoval ifTrue: [ self processClassRemoval: node value into: classInfos timestamp: aCommit datetime ].
-					node value isAddition ifTrue: [ self processClassAddition: node value into: classInfos timestamp: aCommit datetime ].
-					node value isModification ifTrue: [ self processClassModification: node value into: classInfos timestamp: aCommit datetime ] ] ].
-
+		node definition isClassDefinition ifTrue: [
+			node value isRemoval
+				ifTrue: [ 
+					self 
+						processClassRemoval: node value 
+						into: classInfos 
+						timestamp: aCommit datetime ].
+			node value isAddition 
+				ifTrue: [ 
+					self 
+						processClassAddition: node value 
+						into: classInfos 
+						timestamp: aCommit datetime ].
+			node value isModification 
+				ifTrue: [ 
+					self 
+						processClassModification: node value 
+						into: classInfos 
+						timestamp: aCommit datetime ] ] ].
 	^ classInfos 
 ]
 
@@ -117,24 +117,36 @@ HistoryCachePopulator >> extractClassesFromCommit: aCommit [
 HistoryCachePopulator >> extractMethodsFromCommit: aCommit [
 	"Extract all method selectors and their ASTs from a commit's diff."
 
-	| diff methodInfos |
-	methodInfos := OrderedCollection new. 
+	| diff methodDescriptions |
+	methodDescriptions := OrderedCollection new. 
 	
 	"for the first commit iceberg was barking."
-	aCommit ancestors ifEmpty: [ ^ methodInfos ].
+	aCommit ancestors ifEmpty: [ ^ methodDescriptions ].
 	diff := aCommit diffToParent.
-	diff ifNil: [ ^ methodInfos ].
+	diff ifNil: [ ^ methodDescriptions ].
 
 	diff tree allChildrenDo: [ :node |
 		node definition isMethodDefinition ifTrue: [
 			node value isRemoval 
-				ifTrue: [ self processMethodRemoval: node value into: methodInfos timestamp: aCommit datetime ].
+				ifTrue: [ 
+					self 
+						processMethodRemoval: node value 
+						into: methodDescriptions 
+						timestamp: aCommit datetime ].
 			node value isAddition 
-				ifTrue: [ self processMethodAddition: node value into: methodInfos timestamp: aCommit datetime ].
+				ifTrue: [ 
+					self 
+						processMethodAddition: node value 
+						into: methodDescriptions 
+						timestamp: aCommit datetime ].
 			node value isModification 
-				ifTrue: [ self processMethodModification: node value into: methodInfos timestamp: aCommit datetime ] ] ].
+				ifTrue: [ 
+					self 
+						processMethodModification: node value 
+						into: methodDescriptions 
+						timestamp: aCommit datetime ] ] ].
 
-	^ methodInfos 
+	^ methodDescriptions 
 ]
 
 { #category : 'initialization' }
@@ -144,23 +156,8 @@ HistoryCachePopulator >> initialize [
 	
 ]
 
-{ #category : 'forBenchmarks' }
-HistoryCachePopulator >> loadFromOldToNewCommit: commit [
- 			| infos |
-			Transcript cr; show: 'Loading and importing '; show: commit printString.
-			
-			commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
-			"
-			The session will get notified via announcement related by code load. 
-			
-			infos := self extractMethodsFromCommit: commit.
-			infos do: [ :info | session addMethodItem: info ].
-			infos := self extractClassesFromCommit: commit.
-			infos do: [ :info | session addClassItem: info ]"
-]
-
 { #category : 'main API' }
-HistoryCachePopulator >> populateCaches [
+HistoryCachePopulator >> populateCachesWithoutLoadingCode [
 	"Main method to populate both temporal and frequency caches from Git history."
 	
 	| commits totalMethods |
@@ -170,7 +167,7 @@ HistoryCachePopulator >> populateCaches [
 	commits := commits reversed.
 	totalMethods := 0.
 	
-	Transcript show: 'Populating caches from ', commits size asString, ' commits...'; cr.
+	Transcript show: 'Populating caches from ', commits size asString, ' commits... without loading code'; cr.
 	
 	commits withIndexDo: [ :commit :index |
 		
@@ -180,23 +177,6 @@ HistoryCachePopulator >> populateCaches [
 			session addMethodItem: info ].
 		totalMethods := totalMethods + methodInfos size.
 		]
-]
-
-{ #category : 'forBenchmarks' }
-HistoryCachePopulator >> populateForBenchmarkCommits: aNumber [
-
-	| commits infos |
-	commits := self commitsFromHead: aNumber.
-	commits reverseDo: [ :commit |
-			Transcript
-				cr;
-				show: 'Loading commits: ' , commit printString;
-				cr.
-			commit checkoutAllPackages.
-			infos := self extractMethodsFromCommit: commit.
-			infos do: [ :info | session addMethodItem: info ].
-			infos := self extractClassesFromCommit: commit.
-			infos do: [ :info | session addClassItem: info ] ]
 ]
 
 { #category : 'compute population' }
@@ -306,16 +286,6 @@ HistoryCachePopulator >> processMethodRemoval: aRemoval into: aCollection timest
 		        yourself.
 	deltaMessage ifNotEmpty: [ item deltaMessages: deltaMessage ].
 	aCollection add: item
-]
-
-{ #category : 'accessing' }
-HistoryCachePopulator >> scrapper [
-	^ scrapper
-]
-
-{ #category : 'accessing' }
-HistoryCachePopulator >> scrapper: aHistoryScrapper [
-	scrapper := aHistoryScrapper
 ]
 
 { #category : 'utils' }
