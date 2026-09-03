@@ -41,6 +41,26 @@ CooHistoryExperimentConfiguration class >> microdown [
 		  yourself
 ]
 
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> testRepoForHistory [
+	
+	^ self new
+		  name: 'test-repo-for-history';
+		  repository: 'git@github.com:omarabedelkader/test-repo-for-history.git';
+		  numberOfCommits: 4;
+		  packageNamePrefix: 'MyCounter';
+		  loader: [ 
+			  Metacello new
+				  baseline: 'MyCounter';
+				  repository: 'github://omarabedelkader/test-repo-for-history:main/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'MyCounter';
+		  yourself
+]
+
 { #category : 'private' }
 CooHistoryExperimentConfiguration >> allPackages [
 

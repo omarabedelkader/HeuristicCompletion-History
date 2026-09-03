@@ -244,15 +244,15 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 CooSession >> addMethodItem: anItem [
 
 	methodDescriptions addFirst: anItem.
-	"Instead of poking the handler during each addition we could pass it all the info when 
-	requesting a list of entries."
+	"keeping item is needed for bcnhing because we need to know newly defined and modified entities"
 	
 	programEntityHandler handleNewMethodItem: anItem
 ]
 
 { #category : 'method handling' }
 CooSession >> addModifiedMethodInVocabulary: anAnn [
-
+	"When a nmethod is modified we compute in addition the delta so that we can only bench the difference"
+	
 	| deltaMessage item |
 	deltaMessage := self computeDeltaMessageOf: anAnn.
 	item := CooModifiedMethodHistoryItem new
@@ -304,7 +304,9 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 			 nameOfClass: anAnn method methodClass name;
 			 yourself.
 
-	self addMethodItem: historyItem. "we could also decide that when a class gets a new method the name of the class is getting more important. 
+	self addMethodItem: historyItem. 
+	
+	"we could also decide that when a class gets a new method the name of the class is getting more important. 
 	Focus of attention. So this can be computed latter based on such information. "
 
 ]
@@ -589,6 +591,14 @@ CooSession >> reportString [
 		aStream space ; nextPutAll: (userSelectionHandler class name allButFirst: 3).
 		aStream space ; nextPutAll: 'interaction'; print: completionItems size .
 	aStream space ; nextPutAll: 'navigation'; print: (navigationItems ifNil: [ 0 ] ifNotNil: [ navigationItems size ]) ]
+]
+
+{ #category : 'for benchmark' }
+CooSession >> resetDevelopmentItems [
+	"this method is needed to be able bench only the newly added or modified items."
+	
+	methodDescriptions := OrderedCollection new.  
+	"unclear for now what we should do for class"
 ]
 
 { #category : 'initialization' }

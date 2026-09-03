@@ -21,6 +21,13 @@ CooHistoryExperimentRunner class >> runMicrodown [
 	^ self run: CooHistoryExperimentConfiguration microdown
 ]
 
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runTestRepoForHistory [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration testRepoForHistory
+]
+
 { #category : 'private' }
 CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration session: aSession [
 
@@ -90,6 +97,7 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 
 	commits reverseDo: [ :commit |
 		populator loadFromOldToNewCommit: commit.
+		self halt.
 		benchmark run.].
 
 	^ { commits . benchmark }
