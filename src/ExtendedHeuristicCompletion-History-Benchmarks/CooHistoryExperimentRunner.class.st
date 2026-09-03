@@ -36,7 +36,6 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 	statistics := CooHistoryProjectStatistics new.
 	statistics collectRepositoryStatisticsFrom: aConfiguration.
 
-	
 	commits := self
 		           populateHistoryFor: aConfiguration
 		           session: aSession.
@@ -97,6 +96,8 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
+
+
 	benchmark := CooStaticBenchmarksMessageHistory new.
 	benchmark
 		name: 'Dependency';
@@ -108,18 +109,17 @@ CooHistoryExperimentRunner >> populateHistoryFor: aConfiguration session: aSessi
 	from most recent to old."
 	
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	"note that the handler internal structures are reset but not the kind of handler."
 	aSession resetProgramEntities.
-	self flag: #SD.
-	"here we flush the handler. May be we should reset the current handler because reinitialize it may flush the kind of handler"
 	
-	"then now we can reload from old to old -1"
+	"Then now we can reload from old-1 to recent"
 	commits allButLast reverseDo: [ :commit |
 		self loadFromOldToNewCommit: commit.
-		"I would ignore the first one because we loaded the code and then we go in the past.
-		so the system will compute the diff while loading old code and generate
-		bad "
+		"We ignore the oldest one because we loaded the code and then we go in the past.
+		so the system computes the diff while loading old code and generate noise in the session"
 		benchmark run.
-		"we should flush items to make sure the next loading will only contain new elements"
+		"Flush items but not the handlers to make sure the next loading 
+		will only contain new elements but without clearing the handler previously computer logic"
 		aSession resetDevelopmentItems ].
 
 	^ { commits . benchmark }

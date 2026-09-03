@@ -71,8 +71,7 @@ CooStaticBenchmarksMessageHistory >> run [
 										show: node selector; space.
 									matchedCallsites := matchedCallsites + 1.
 									pos := node selectorInterval ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
-									self benchCallsite: node atPosition: pos ] ] ] ]				
-	.
+									self benchCallsite: node atPosition: pos ] ] ] ].
 	^ self
 ]
 

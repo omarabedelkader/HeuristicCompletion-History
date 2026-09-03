@@ -742,8 +742,7 @@ CooSession >> resetProgramEntities [
 
 	methodDescriptions := OrderedCollection new.
 	classDescriptions := OrderedCollection new.
-	programEntityHandler := CooTemporalHandler new.
-	
+	programEntityHandler reset
 ]
 
 { #category : 'navigation' }

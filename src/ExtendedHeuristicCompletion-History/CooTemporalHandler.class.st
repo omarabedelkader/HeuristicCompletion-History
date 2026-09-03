@@ -74,8 +74,7 @@ CooTemporalHandler >> handleNewMethodItem: anItem [
 CooTemporalHandler >> initialize [
 
 	super initialize.
-	classDescriptions := OrderedCollection new.
-	methodDescriptions := OrderedCollection new.
+	self reset
 ]
 
 { #category : 'accessing' }
@@ -118,6 +117,12 @@ CooTemporalHandler >> removeMethodItem: anItem [
 
 	methodDescriptions := methodDescriptions reject: [ :each |
 		                      each nameOfClass = anItem nameOfClass and: [ each selector = anItem selector ] ]
+]
+
+{ #category : 'initialization' }
+CooTemporalHandler >> reset [
+	classDescriptions := OrderedCollection new.
+	methodDescriptions := OrderedCollection new.
 ]
 
 { #category : 'accessing' }

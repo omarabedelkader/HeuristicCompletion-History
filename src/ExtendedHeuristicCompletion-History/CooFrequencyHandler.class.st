@@ -76,7 +76,14 @@ CooFrequencyHandler >> handleNewMethodItem: anItem [
 { #category : 'initialization' }
 CooFrequencyHandler >> initialize [ 
 	
-	super initialize .
+	super initialize.
+	self reset
+	
+]
+
+{ #category : 'initialization' }
+CooFrequencyHandler >> reset [ 
+	
 	classFrequencyDictionary := Dictionary new.
 	selectorFrequenceDictionary := Dictionary new.
 	classToMethodsMap := Dictionary new.
