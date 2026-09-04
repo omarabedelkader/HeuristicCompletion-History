@@ -30,12 +30,12 @@ CooHistoryExperimentResult >> asSTONDictionary [
 		  #statistics -> statistics asDictionary.
 		  #messages -> (Dictionary newFrom: {
 				   #history -> (self dictionaryForBenchmark: messageHistoryBenchmark).
-				   #completeDirectDependency -> (self dictionaryForBenchmark:
-						    messageDependencyBenchmark) }).
+				   "#completeDirectDependency -> (self dictionaryForBenchmark:
+						    messageDependencyBenchmark)" }).
 		  #variables -> (Dictionary newFrom: {
-				   #history -> (self dictionaryForBenchmark: variableHistoryBenchmark).
+				   "#history -> (self dictionaryForBenchmark: variableHistoryBenchmark).
 				   #completeDirectDependency -> (self dictionaryForBenchmark:
-						    variableDependencyBenchmark) }) }
+						    variableDependencyBenchmark)" }) }
 
 ]
 
@@ -111,6 +111,12 @@ CooHistoryExperimentResult >> messageDependencyBenchmark: anObject [
 ]
 
 { #category : 'accessing' }
+CooHistoryExperimentResult >> messageDependencyValues [
+	messageDependencyBenchmark ifNil: [ ^ #() ].
+	^ self valuesForBenchmark: messageDependencyBenchmark
+]
+
+{ #category : 'accessing' }
 CooHistoryExperimentResult >> messageHistoryBenchmark [
 
 	^ messageHistoryBenchmark
@@ -120,6 +126,12 @@ CooHistoryExperimentResult >> messageHistoryBenchmark [
 CooHistoryExperimentResult >> messageHistoryBenchmark: anObject [
 
 	messageHistoryBenchmark := anObject
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHistoryValues [
+
+	^ self valuesForBenchmark: messageHistoryBenchmark
 ]
 
 { #category : 'accessing' }
@@ -159,6 +171,13 @@ CooHistoryExperimentResult >> statistics: anObject [
 ]
 
 { #category : 'accessing' }
+CooHistoryExperimentResult >> valuesForBenchmark: aBenchmark [
+
+	^ (2 to: 8) collect: [ :prefix |
+		  aBenchmark mmrForPrefixSize: prefix ]
+]
+
+{ #category : 'accessing' }
 CooHistoryExperimentResult >> variableDependencyBenchmark [
 
 	^ variableDependencyBenchmark
@@ -171,6 +190,13 @@ CooHistoryExperimentResult >> variableDependencyBenchmark: anObject [
 ]
 
 { #category : 'accessing' }
+CooHistoryExperimentResult >> variableDependencyValues [
+
+	variableDependencyBenchmark ifNil: [ ^#()].
+	^ self valuesForBenchmark: variableDependencyBenchmark
+]
+
+{ #category : 'accessing' }
 CooHistoryExperimentResult >> variableHistoryBenchmark [
 
 	^ variableHistoryBenchmark
@@ -180,4 +206,10 @@ CooHistoryExperimentResult >> variableHistoryBenchmark [
 CooHistoryExperimentResult >> variableHistoryBenchmark: anObject [
 
 	variableHistoryBenchmark := anObject
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableHistoryValues [
+	variableHistoryBenchmark ifNil: [ ^#() ].
+	^ self valuesForBenchmark: variableHistoryBenchmark
 ]

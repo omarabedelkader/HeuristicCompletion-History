@@ -73,14 +73,16 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 			  cr;
 			  nextPutAll: '\midrule';
 			  cr.
-		  self
+		  
+		historyBenchmark ifNotNil: [
+		self
 			  writeMRRRowNamed: 'History'
 			  benchmark: historyBenchmark
-			  on: stream.
-		  self
+			  on: stream ].
+		 dependencyBenchmark ifNotNil: [ self
 			  writeMRRRowNamed: 'Dependency'
 			  benchmark: dependencyBenchmark
-			  on: stream.
+			  on: stream ].
 		  stream
 			  nextPutAll: '\bottomrule';
 			  cr;

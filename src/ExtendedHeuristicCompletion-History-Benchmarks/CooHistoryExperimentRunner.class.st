@@ -132,9 +132,9 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 	result
 		projectName: aConfiguration name;
 		repository: aConfiguration repository;
-		commitCount: statistics commits size;
+		commitCount: statistics historyCommitCount;
 		statistics: statistics;
-		dependencyConfigurationName: self dependencyConfigurationName;
+		dependencyConfigurationName: 'self dependencyConfigurationName';
 		comparisonDescription:
 			'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
 		messageHistoryBenchmark: commitsAndBench second
