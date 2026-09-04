@@ -29,13 +29,13 @@ CooHistoryLatexExporter >> exportAllFor: anExperimentResult to: aDirectory [
 
 	self
 		write: (self latexStatisticsFor: anExperimentResult)
-		to: directory / (anExperimentResult fileStem , '-statistics.tex').
+		to: directory / (anExperimentResult filename , '-statistics.tex').
 	self
 		write: (self latexMessagesMRRFor: anExperimentResult)
-		to: directory / (anExperimentResult fileStem , '-messages-mrr.tex').
+		to: directory / (anExperimentResult filename , '-messages-mrr.tex').
 	self
 		write: (self latexVariablesMRRFor: anExperimentResult)
-		to: directory / (anExperimentResult fileStem , '-variables-mrr.tex')
+		to: directory / (anExperimentResult filename , '-variables-mrr.tex')
 ]
 
 { #category : 'private' }
@@ -108,7 +108,7 @@ CooHistoryLatexExporter >> latexMessagesMRRFor: anExperimentResult [
 		  benchmarkKind: 'message completion'
 		  historyBenchmark: anExperimentResult messageHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult messageDependencyBenchmark
-		  label: 'tab:' , anExperimentResult fileStem , '-messages-mrr'
+		  label: 'tab:' , anExperimentResult filename , '-messages-mrr'
 ]
 
 { #category : 'latex' }
@@ -200,7 +200,7 @@ CooHistoryLatexExporter >> latexStatisticsFor: anExperimentResult [
 			  nextPutAll: '}';
 			  cr;
 			  nextPutAll: '\label{tab:';
-			  nextPutAll: anExperimentResult fileStem;
+			  nextPutAll: anExperimentResult filename;
 			  nextPutAll: '-statistics}';
 			  cr;
 			  nextPutAll: '\end{table}';
@@ -215,7 +215,7 @@ CooHistoryLatexExporter >> latexVariablesMRRFor: anExperimentResult [
 		  benchmarkKind: 'variable completion'
 		  historyBenchmark: anExperimentResult variableHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult variableDependencyBenchmark
-		  label: 'tab:' , anExperimentResult fileStem , '-variables-mrr'
+		  label: 'tab:' , anExperimentResult filename , '-variables-mrr'
 ]
 
 { #category : 'exporting' }

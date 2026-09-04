@@ -35,14 +35,15 @@ CooHistoryExperimentRunner class >> runTestRepoForHistory [
 { #category : 'private' }
 CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration session: aSession [
 
-	| commits  |
+	| commitsAndBench  |
 	statistics collectRepositoryStatisticsFrom: aConfiguration.
 
-	commits := self
+	commitsAndBench := self
 		loadCommitsAndBench: aConfiguration
 		session: aSession.
 		
-	statistics historyCommitCount: commits first size.
+	statistics historyCommitCount: commitsAndBench first size.
+	^ commitsAndBench
 ]
 
 { #category : 'benchs' }
@@ -115,7 +116,7 @@ CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 { #category : 'running' }
 CooHistoryExperimentRunner >> run: aConfiguration [
 
-	| result |
+	| result commitsAndBench |
 	aConfiguration outputDirectory ensureCreateDirectory.
 	Transcript cr; show: 'Loading project for History experiment: '; show: aConfiguration name.
 	aConfiguration loadProject.
@@ -123,9 +124,23 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 
-	result := self
+	commitsAndBench := self
 		   analyzeHistoryAndBenchmarksFor: aConfiguration
 			session: CooSession current.
+
+	result := CooHistoryExperimentResult new.
+	result
+		projectName: aConfiguration name;
+		repository: aConfiguration repository;
+		commitCount: statistics commits size;
+		statistics: statistics;
+		dependencyConfigurationName: self dependencyConfigurationName;
+		comparisonDescription:
+			'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
+		messageHistoryBenchmark: commitsAndBench second
+		"messageDependencyBenchmark: messageDependency;
+		variableHistoryBenchmark: variableHistory;
+		variableDependencyBenchmark: variableDependency".
 
 	CooHistoryBenchmarkPlotter new
 		exportAllFor: result
@@ -145,7 +160,7 @@ CooHistoryExperimentRunner >> saveSTON: anExperimentResult to: aDirectory [
 
 	| file |
 	file := aDirectory asFileReference
-	        / (anExperimentResult fileStem , '-results.ston').
+	        / (anExperimentResult filename , '-results.ston').
 	file parent ensureCreateDirectory.
 	file writeStreamDo: [ :stream |
 		stream nextPutAll:

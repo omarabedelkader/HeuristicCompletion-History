@@ -399,8 +399,8 @@ CooHistoryBenchmarkPlotter >> exportAllFor: anExperimentResult to: aDirectory [
 	| directory svgPath pngPath |
 	directory := aDirectory asFileReference.
 	directory ensureCreateDirectory.
-	svgPath := directory / (anExperimentResult fileStem , '-comparison.svg').
-	pngPath := directory / (anExperimentResult fileStem , '-comparison.png').
+	svgPath := directory / (anExperimentResult filename , '-comparison.svg').
+	pngPath := directory / (anExperimentResult filename , '-comparison.png').
 
 	self exportSVGFor: anExperimentResult to: svgPath.
 	self exportPNGFor: anExperimentResult to: pngPath.
