@@ -456,6 +456,6 @@ CooHistorySettings class >> useNullHistoryRecorder [
 
 	CooHistoryEventRecorder disableDelivery.
 	CooHistoryEventRecorder deinstall.
-	CooNullHistoryEventRecorder install.
-	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance
+	CooNullHistoryEventRecorderOld install.
+	CooSession current recorder: CooNullHistoryEventRecorderOld uniqueInstance
 ]

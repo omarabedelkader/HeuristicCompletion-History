@@ -237,7 +237,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	userSelectionHandler handleNewSelectionItem: item. 
 	
 	"pass the selected item to the recorder"
-	self recorder enqueueEvent: (self recorder dictionaryForCompletionItem: item).
+	self recorder log: item
 ]
 
 { #category : 'method handling' }
@@ -502,6 +502,7 @@ CooSession >> initialize [
 	self resetProgramEntities.
 	self resetInteractionItems.
 	self resetNavigationItems.
+	recorder := CooNullEventRecorder new
 ]
 
 { #category : 'low-level' }

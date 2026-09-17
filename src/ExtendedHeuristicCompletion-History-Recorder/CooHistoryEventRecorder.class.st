@@ -851,7 +851,7 @@ CooHistoryEventRecorder >> dictionaryForRecorderEvent: anEventSymbol [
 CooHistoryEventRecorder >> disableDelivery [
 
 	deliveryEnabled := false.
-	CooSession current recorder: CooNullHistoryEventRecorder uniqueInstance.
+	CooSession current recorder: CooNullHistoryEventRecorderOld uniqueInstance.
 ]
 
 { #category : 'actions' }

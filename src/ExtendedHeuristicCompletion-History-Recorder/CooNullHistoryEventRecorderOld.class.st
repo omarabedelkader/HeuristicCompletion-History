@@ -6,46 +6,46 @@ I do not record items nor send them to the remote.
 I can be instantiated either when the image starts and the user selects NO on the popup, or when the user disables this extension from the settings menu, or manually via CooSession >> disableDelivery.
 "
 Class {
-	#name : 'CooNullHistoryEventRecorder',
+	#name : 'CooNullHistoryEventRecorderOld',
 	#superclass : 'CooHistoryEventRecorder',
 	#category : 'ExtendedHeuristicCompletion-History-Recorder',
 	#package : 'ExtendedHeuristicCompletion-History-Recorder'
 }
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> deliverNow [ 
+CooNullHistoryEventRecorderOld >> deliverNow [ 
 	^ self
 ]
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> deliverNowInBackground [ 
+CooNullHistoryEventRecorderOld >> deliverNowInBackground [ 
 	^ self
 ]
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> deliveryEnabled [ 
+CooNullHistoryEventRecorderOld >> deliveryEnabled [ 
 
 	^ false
 ]
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> disableDelivery [
+CooNullHistoryEventRecorderOld >> disableDelivery [
 	CooSession current recorder: self class uniqueInstance
 ]
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> enableDelivery [
+CooNullHistoryEventRecorderOld >> enableDelivery [
 	CooSession current recorder: CooHistoryEventRecorder uniqueInstance 
 ]
 
 { #category : 'initialization' }
-CooNullHistoryEventRecorder >> initialize [ 
+CooNullHistoryEventRecorderOld >> initialize [ 
 	super initialize.
 	deliveryEnabled := false.
 ]
 
 { #category : 'actions' }
-CooNullHistoryEventRecorder >> install [
+CooNullHistoryEventRecorderOld >> install [
 
 	self deinstall.
 
