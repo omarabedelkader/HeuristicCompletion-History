@@ -404,61 +404,6 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 	
 ]
 
-{ #category : 'emit' }
-CooSession >> dictionaryForClassItem: item announcement: anAnnouncement [ 
-
-	| dictionary |
-	self halt: 'This should be delegated to the Announcement class! '.
-	dictionary := Dictionary new.
-	dictionary at: #kind put: #class.
-	dictionary at: #event put: item event.
-	dictionary at: #className put: item nameOfClass.
-	dictionary at: #timestamp put: item timestamp asString.
-	dictionary at: #live put: true.
-	dictionary at: #announcementClass put: anAnnouncement class name.
-	^ dictionary
-]
-
-{ #category : 'emit' }
-CooSession >> dictionaryForMethodItem: item announcement: anAnnouncement [
-	"we should find a way to avoid to pass the announcement."
-	
-	| dictionary |
-	self halt: 'This should be delegated to the Announcement class! '.
-	dictionary := Dictionary new.
-	dictionary at: #kind put: #method.
-	dictionary at: #event put: item event.
-	dictionary at: #className put: item nameOfClass.
-	dictionary at: #selector put: item selector asString.
-	dictionary at: #timestamp put: item timestamp asString.
-	dictionary at: #live put: true.
-	dictionary at: #deltaMessages put: (item deltaMessages collect: [ :each | each asString ]) asArray.
-	dictionary at: #announcementClass put: anAnnouncement class name.
-	^ dictionary
-]
-
-{ #category : 'emit' }
-CooSession >> emitClass: historyItem announcement: ann [
-	self halt: 'We should only write
-		self recorder enqueueEvent: history asEvent.
-		
-		Now this is strange that enqueueEvent: expect a dictionary and not something else
-		why not the item (of course it means that you need the class for the analysis. duh but why not?)
-	'.
-	self recorder enqueueEvent: (self dictionaryForClassItem: historyItem announcement: ann)
-]
-
-{ #category : 'emit' }
-CooSession >> emitMethod: historyItem announcement: ann [
-	self halt: 'We should only write
-		self recorder enqueueEvent: history asEvent.
-		
-		Now this is strange that enqueueEvent: expect a dictionary and not something else
-		why not the item (of course it means that you need the class for the analysis. duh but why not?)
-	'.
-	self recorder enqueueEvent: (self dictionaryForMethodItem: historyItem announcement: ann)
-]
-
 { #category : 'for benchmark' }
 CooSession >> existingMethodDescriptions [
 

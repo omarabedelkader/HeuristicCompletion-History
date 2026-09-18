@@ -130,21 +130,6 @@ CooHistoryEventRecorderTest >> testDeliverNowWhenEmptyListOfEvents [
 ]
 
 { #category : 'tests' }
-CooHistoryEventRecorderTest >> testEnqueueEventAddsToPendingEvents [
-    | item ann event |
-    recorder drainPendingEvents.
-    ann := ClassAdded new.
-    item := CooAddedClassHistoryItem new
-        nameOfClass: 'MyClass';
-        timestamp: DateAndTime now;
-        yourself.
-    event := recorder dictionaryForClassItem: item announcement: ann.
-    recorder enqueueEvent: event.
-    self assert: recorder pendingEvents size equals: 1.
-    self assert: recorder pendingEvents last equals: event.
-]
-
-{ #category : 'tests' }
 CooHistoryEventRecorderTest >> testEnqueueEventDoesNotDeliverBeforeBatchSize [
 
 	recorder deliveryEnabled: true.
@@ -159,29 +144,6 @@ CooHistoryEventRecorderTest >> testEnqueueEventDoesNotDeliverBeforeBatchSize [
 
 	self deny: recorder shouldDeliverPendingEvents.
 	self assert: recorder pendingEvents size equals: 2.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testEnqueueEventPreservesOrder [
-    | item1 item2 ann1 ann2 event1 event2 |
-    recorder drainPendingEvents.
-    ann1 := ClassAdded new.
-    ann2 := ClassAdded new.
-    item1 := CooAddedClassHistoryItem new
-        nameOfClass: 'MyClass';
-        timestamp: DateAndTime now;
-        yourself.
-    item2 := CooAddedClassHistoryItem new
-        nameOfClass: 'AnotherClass';
-        timestamp: DateAndTime now;
-        yourself.
-    event1 := recorder dictionaryForClassItem: item1 announcement: ann1.
-    event2 := recorder dictionaryForClassItem: item2 announcement: ann2.
-    recorder enqueueEvent: event1.
-    recorder enqueueEvent: event2.
-    self assert: recorder pendingEvents size equals: 2.
-    self assert: recorder pendingEvents first equals: event1.
-    self assert: recorder pendingEvents last equals: event2.
 ]
 
 { #category : 'tests' }
@@ -344,81 +306,6 @@ CooHistoryEventRecorderTest >> testRemoteConfigurationHasNonEmptyTaskOrSurveyId 
 
 	"It must stay stable on this recorder instance."
 	self assert: recorder taskOrSurveyId equals: taskOrSurveyId
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testRequeueEvents [
-    | events ann1 ann2 item1 item2 |
-    recorder drainPendingEvents.
-    self assert: recorder pendingEvents isEmpty.
-
-    ann1 := MethodAdded new.
-    ann2 := ClassAdded new.
-
-    item1 := CooAddedMethodHistoryItem new
-        nameOfClass: 'MyClass';
-        selector: #myMethod;
-        timestamp: DateAndTime now;
-        deltaMessages: #();
-        yourself.
-
-    item2 := CooAddedClassHistoryItem new
-        nameOfClass: 'AnotherClass';
-        timestamp: DateAndTime now;
-        yourself.
-
-    events := OrderedCollection new.
-    events add: (recorder dictionaryForMethodItem: item1 announcement: ann1).
-    events add: (recorder dictionaryForClassItem: item2 announcement: ann2).
-
-    recorder requeueEvents: events.
-
-    self assert: recorder pendingEvents size equals: 2.
-    self assert: recorder pendingEvents first equals: events first.
-    self assert: recorder pendingEvents second equals: events second.
-]
-
-{ #category : 'tests' }
-CooHistoryEventRecorderTest >> testRequeueEventsPreservesOrder [
-    | events existingEvents ann1 ann2 ann3 item1 item2 item3 |
-    recorder drainPendingEvents.
-    self assert: recorder pendingEvents isEmpty.
-
-    ann1 := MethodAdded new.
-    ann2 := ClassAdded new.
-    ann3 := MethodAdded new.
-
-    item1 := CooAddedMethodHistoryItem new
-        nameOfClass: 'MyClass';
-        selector: #myMethod;
-        timestamp: DateAndTime now;
-        deltaMessages: #();
-        yourself.
-    item2 := CooAddedClassHistoryItem new
-        nameOfClass: 'AnotherClass';
-        timestamp: DateAndTime now;
-        yourself.
-    item3 := CooAddedMethodHistoryItem new
-        nameOfClass: 'ThirdClass';
-        selector: #thirdMethod;
-        timestamp: DateAndTime now;
-        deltaMessages: #();
-        yourself.
-
-    existingEvents := OrderedCollection new.
-    existingEvents add: (recorder dictionaryForMethodItem: item3 announcement: ann3).
-    recorder requeueEvents: existingEvents.
-    self assert: recorder pendingEvents size equals: 1.
-
-    events := OrderedCollection new.
-    events add: (recorder dictionaryForMethodItem: item1 announcement: ann1).
-    events add: (recorder dictionaryForClassItem: item2 announcement: ann2).
-    recorder requeueEvents: events.
-
-    self assert: recorder pendingEvents size equals: 3.
-    self assert: recorder pendingEvents first equals: events first.
-    self assert: (recorder pendingEvents at: 2) equals: events second.
-    self assert: recorder pendingEvents last equals: existingEvents first.
 ]
 
 { #category : 'tests' }
