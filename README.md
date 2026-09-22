@@ -19,15 +19,3 @@ Metacello new
   repository: 'github://omarabedelkader/HeuristicCompletion-History:main/src';
   load.
 ```
-
-After the participant has consented, create and authorize a recorder:
-
-
-```smalltalk
-CooHistoryEventRecorder reset.
-CooHistoryEventRecorder configureForLocalPXServer.
-CooSession install.
-CooHistoryEventRecorder install.
-CooHistoryEventRecorder enableDelivery.
-```
-
