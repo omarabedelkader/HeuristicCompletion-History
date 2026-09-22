@@ -94,34 +94,28 @@ CooHistoryExperimentRunner >> initialize [
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [ 
+CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
 	| populator commits historyBenchmark dependencyBenchmark |
-	populator := HistoryPopulatorForBench
-		repositoryNamed: aConfiguration repository.
+	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
 	historyBenchmark := CooStaticBenchmarksMessageHistory new
-		name: 'History';
-		session: aSession;
-		builder: (self historyMessageBuilderWithSession: aSession);
-		yourself.
+		                    name: 'History';
+		                    session: aSession;
+		                    builder: (self historyMessageBuilderWithSession: aSession);
+		                    yourself.
 
 	dependencyBenchmark := CooStaticBenchmarksMessageHistory new
-		name: 'Dependency';
-		session: aSession;
-		builder: self completeDirectDependencyMessageBuilder;
-		yourself.
-
-	"Load the oldest commit as the initial state.
+		                       name: 'Dependency';
+		                       session: aSession;
+		                       builder: self completeDirectDependencyMessageBuilder;
+		                       yourself. "Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
 	from which to obtain meaningful development changes."
-	commits last
-		checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 
-	aSession resetProgramEntities.
-
-	"Replay commits from old to new.
+	aSession resetProgramEntities. "Replay commits from old to new.
 	For EACH commit:
 	  1. install it
 	  2. extract its changes
@@ -130,22 +124,34 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	  5. collect statistics
 	  6. clear development items"
 	commits allButLast reverseDo: [ :commit |
+			self loadFromOldToNewCommit: commit.
+				
+				Transcript
 
-		self loadFromOldToNewCommit: commit.
+    cr;
 
-		historyBenchmark run.
-		dependencyBenchmark run.
+    show: '=== HISTORY CACHE ===';
 
-		statistics collectHistoryStatisticsFrom: aSession.
+    cr.
 
-		aSession resetDevelopmentItems
-	].
+aSession programEntityHandler selectorEntries do: [ :entry |
+
+    Transcript
+
+        show: entry contents;
+
+        cr ].
+			historyBenchmark run.
+			dependencyBenchmark run.
+
+			statistics collectHistoryStatisticsFrom: aSession.
+
+			aSession resetDevelopmentItems ].
 
 	^ {
-		commits.
-		historyBenchmark.
-		dependencyBenchmark
-	}
+		  commits.
+		  historyBenchmark.
+		  dependencyBenchmark }
 ]
 
 { #category : 'private' }

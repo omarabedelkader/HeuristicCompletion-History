@@ -676,6 +676,12 @@ CooSession >> resetDevelopmentItems [
 	"unclear for now what we should do for class"
 ]
 
+{ #category : 'for benchmark' }
+CooSession >> resetHistoryVocabulary [
+
+    programEntityHandler reset
+]
+
 { #category : 'initialization' }
 CooSession >> resetInteractionItems [
 	
