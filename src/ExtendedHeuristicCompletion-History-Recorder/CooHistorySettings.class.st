@@ -43,16 +43,7 @@ CooHistorySettings class >> enableRemoteHistoryRecording [
 	historyRecordingEnabled := true.
 	remoteDeliveryEnabled := true.
 
-	"Configure all PX routing metadata before installing the collector:
-	the PX server rejects uploads whose category, experienceId,
-	participantUUID or taskOrSurveyId is missing or empty."
-	CooHistoryEventRecorder configureForLocalPXServer.
 	
-	
-	CooSession install.
-	CooHistoryEventRecorder install.
-	CooHistoryEventRecorder enableDelivery.
-	CooHistoryEventRecorder recordRemoteDeliveryEnabled
 ]
 
 { #category : 'accessing' }
@@ -449,13 +440,5 @@ CooHistorySettings class >> useNullHistoryRecorder [
 	historyRecordingEnabled := false.
 	remoteDeliveryEnabled := false.
 
-	(Smalltalk globals at: #ERPrivacySettings ifAbsent: [ nil ])
-		ifNotNil: [ :privacyClass |
-			(privacyClass respondsTo: #sendDiagnosticsAndUsageData:)
-				ifTrue: [ privacyClass sendDiagnosticsAndUsageData: false ] ].
-
-	CooHistoryEventRecorder disableDelivery.
-	CooHistoryEventRecorder deinstall.
-	CooNullHistoryEventRecorderOld install.
-	CooSession current recorder: CooNullHistoryEventRecorderOld uniqueInstance
+	CooSession current recorder: CooNullEventRecorder new
 ]
