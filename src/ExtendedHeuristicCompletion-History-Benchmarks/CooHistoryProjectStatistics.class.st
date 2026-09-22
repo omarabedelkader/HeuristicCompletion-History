@@ -103,7 +103,7 @@ CooHistoryProjectStatistics >> collectHistoryStatisticsFrom: aSession [
 	classItems := aSession classDescriptions.
 
 	historyMethodCount := historyMethodCount + methodItems size.
-	historyClassCount := historyMethodCount + classItems size.
+	historyClassCount := historyClassCount + classItems size.
 
 	addedMethods := addedMethods + (self countEvent: #added in: methodItems).
 	modifiedMethods := modifiedMethods + (self countEvent: #modified in: methodItems).

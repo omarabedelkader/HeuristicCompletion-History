@@ -65,6 +65,27 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 	^ builder
 ]
 
+{ #category : 'private' }
+CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+		add: CoSelfMessageHeuristic new;
+		add: CoSuperMessageHeuristic new;
+		add: CoTypedReceiverMessageHeuristic new;
+		add: CoInitializeInferencedMessageHeuristic new;
+		add: CoLiteralMessageHeuristic new;
+		add: CoGlobalVariableMessageHeuristic new;
+		add: CoVariableWithTypeNameMessageHeuristic new;
+		add: (CooSessionMessagesHeuristic new
+			session: aSession;
+			yourself);
+		add: CoUnknownMessageHeuristic new;
+		build).
+	^ builder
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> initialize [
 
@@ -73,36 +94,58 @@ CooHistoryExperimentRunner >> initialize [
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
+CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [ 
 
-	| populator commits benchmark |
-	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
+	| populator commits historyBenchmark dependencyBenchmark |
+	populator := HistoryPopulatorForBench
+		repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
-	benchmark := CooStaticBenchmarksMessageHistory new.
-	benchmark
+	historyBenchmark := CooStaticBenchmarksMessageHistory new
+		name: 'History';
+		session: aSession;
+		builder: (self historyMessageBuilderWithSession: aSession);
+		yourself.
+
+	dependencyBenchmark := CooStaticBenchmarksMessageHistory new
 		name: 'Dependency';
 		session: aSession;
-		builder: self completeDirectDependencyMessageBuilder.
+		builder: self completeDirectDependencyMessageBuilder;
+		yourself.
 
-	"We load the last of all commits without extraction information to avoid to have diff from most recent to old."
-	
-	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
-	"note that the handler internal structures are reset but not the kind of handler."
+	"Load the oldest commit as the initial state.
+	We do not benchmark it because there is no previous commit
+	from which to obtain meaningful development changes."
+	commits last
+		checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+
 	aSession resetProgramEntities.
-	
-	"Then now we can reload from old-1 to recent"
-	commits allButLast reverseDo: [ :commit |
-		self loadFromOldToNewCommit: commit.
-		"We ignore the oldest one because we loaded the code and then we go in the past.
-		so the system computes the diff while loading old code and generate noise in the session"
-		benchmark run.
-		statistics collectHistoryStatisticsFrom: aSession. 
-		"Flush items but not the handlers to make sure the next loading 
-		will only contain new elements but without clearing the handler previously computer logic"
-		aSession resetDevelopmentItems ].
 
-	^ { commits . benchmark }
+	"Replay commits from old to new.
+	For EACH commit:
+	  1. install it
+	  2. extract its changes
+	  3. benchmark History
+	  4. benchmark Dependency
+	  5. collect statistics
+	  6. clear development items"
+	commits allButLast reverseDo: [ :commit |
+
+		self loadFromOldToNewCommit: commit.
+
+		historyBenchmark run.
+		dependencyBenchmark run.
+
+		statistics collectHistoryStatisticsFrom: aSession.
+
+		aSession resetDevelopmentItems
+	].
+
+	^ {
+		commits.
+		historyBenchmark.
+		dependencyBenchmark
+	}
 ]
 
 { #category : 'private' }
@@ -137,7 +180,8 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 		dependencyConfigurationName: 'self dependencyConfigurationName';
 		comparisonDescription:
 			'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
-		messageHistoryBenchmark: commitsAndBench second
+		messageHistoryBenchmark: commitsAndBench second;
+		messageDependencyBenchmark: commitsAndBench third
 		"messageDependencyBenchmark: messageDependency;
 		variableHistoryBenchmark: variableHistory;
 		variableDependencyBenchmark: variableDependency".
