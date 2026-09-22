@@ -266,7 +266,7 @@ CooHistoryEventRecorder class >> configureForLocalPXServer [
 	<script>
 	"Configure the recorder to deliver events to a PXServer started locally
 	with PXServer start in the pharo-data-collector image. The canonical
-	ingest URL of that server is http://localhost:8008/events; the server
+	ingest URL of that server is http://localhost:8080/events; the server
 	validates that metadata carries exactly category, experienceId,
 	participantUUID and taskOrSurveyId as non-empty strings, and persists
 	each event under var/data/<category>/<experienceId>/<participantUUID>/
@@ -277,7 +277,7 @@ CooHistoryEventRecorder class >> configureForLocalPXServer [
 	that need explicit study semantics should set them with
 	CooHistoryEventRecorder participantUUID: and taskOrSurveyId:."
 
-	self serverUrl: 'http://localhost:8008/events'.
+	self serverUrl: 'http://localhost:8080/events'.
 	self category: #complishon.
 	self experienceId: 'complishon'.
 	self participantUUID ifNil: [
@@ -335,7 +335,7 @@ CooHistoryEventRecorder class >> defaultServerUrl [
 	Change this with:
 		CooHistoryEventRecorder configureForLocalPXServer
 	or:
-		CooHistoryEventRecorder serverUrl: 'http://localhost:8008/events'
+		CooHistoryEventRecorder serverUrl: 'http://localhost:8080/events'
 	or:
 		CooHistoryEventRecorder serverUrl: 'https://rmod-xp.lille.inria.fr/complishon'"
 

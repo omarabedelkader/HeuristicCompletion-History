@@ -375,6 +375,12 @@ CooSession >> completionClassSpies [
 	^ {userSelectionHandler sortedUserUppercasedEntries first . completionItems first}
 ]
 
+{ #category : 'interaction items' }
+CooSession >> completionItems [
+
+	^ completionItems
+]
+
 { #category : 'helpers' }
 CooSession >> computeDeltaMessageBetween: aNewMethodAst andOld: anOldMethodAst [
 	"Pay attention we do not use difference: because difference is set based. 
