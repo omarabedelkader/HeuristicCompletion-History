@@ -231,11 +231,10 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 
 
 	completionItems addFirst: item.
+	" we do not need to keep this list locally since we send the item to the recoreder. "	
 	
-	"Instead of poking the handler during each addition we could pass it all the info when 
-	requesting a list of entries."
 	userSelectionHandler handleNewSelectionItem: item. 
-	
+	Transcript show: 'Completion item added: ', item printString;cr.
 	"pass the selected item to the recorder"
 	self recorder log: item
 ]
