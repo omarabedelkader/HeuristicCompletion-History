@@ -213,7 +213,9 @@ CooSession >> addClassItem: anItem [
 	
 	"Instead of poking the handler during each addition we could pass it all the info when 
 	requesting a list of entries."
-	programEntityHandler handleNewClassItem: anItem
+	programEntityHandler handleNewClassItem: anItem.
+	self recorder log: anItem
+	
 ]
 
 { #category : 'interaction items' }
