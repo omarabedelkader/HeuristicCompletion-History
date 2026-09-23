@@ -120,7 +120,7 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 		                       yourself. "Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
 	from which to obtain meaningful development changes."
-	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	commits last checkout.
 
 	aSession resetProgramEntities. "Replay commits from old to new.
 	For EACH commit:
@@ -164,9 +164,12 @@ aSession programEntityHandler selectorEntries do: [ :entry |
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 
-	Transcript cr;cr; show: 'Loading and importing '; show: commit printString.	
-	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
-		
+	Transcript
+		cr;
+		cr;
+		show: 'Loading and importing ';
+		show: commit printString.
+	commit checkout
 ]
 
 { #category : 'running' }
