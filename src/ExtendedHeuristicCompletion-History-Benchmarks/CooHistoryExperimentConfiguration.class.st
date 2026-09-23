@@ -42,6 +42,26 @@ CooHistoryExperimentConfiguration class >> microdown [
 ]
 
 { #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> roassal [
+
+    ^ self new
+        name: 'Roassal';
+        repository: 'git@github.com:pharo-graphics/Roassal.git';
+        numberOfCommits: 200;
+        packageNamePrefix: 'Roassal';
+        loader: [
+            Metacello new
+                baseline: 'Roassal';
+                repository: 'github://pharo-graphics/Roassal:Pharo13';
+                load: 'Full' ];
+        outputDirectory:
+            FileLocator workingDirectory
+                / 'History-Bench-Results'
+                / 'Roassal';
+        yourself
+]
+
+{ #category : 'instance creation' }
 CooHistoryExperimentConfiguration class >> testRepoForHistory [
 	
 	^ self new

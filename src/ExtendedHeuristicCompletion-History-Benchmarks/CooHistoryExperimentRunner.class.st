@@ -26,6 +26,13 @@ CooHistoryExperimentRunner class >> runMicrodown [
 ]
 
 { #category : 'running' }
+CooHistoryExperimentRunner class >> runRoassal [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration roassal
+]
+
+{ #category : 'running' }
 CooHistoryExperimentRunner class >> runTestRepoForHistory [
 
 	<script>
