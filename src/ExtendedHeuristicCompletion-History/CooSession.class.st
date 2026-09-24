@@ -194,13 +194,6 @@ Pharo
 ]
 
 { #category : 'instance creation' }
-CooSession class >> withCache: aCache [
-	
-	self deprecated: 'use entityHandler' transformWith: '`@rec withCache: `@a' ->  '`@rec withEntityHandler: `@a'. 
-	^ self withEntityHandler: aCache
-]
-
-{ #category : 'instance creation' }
 CooSession class >> withEntityHandler: aProgramEntityHandler [
 
 	^ self current programEntityHandler: aProgramEntityHandler

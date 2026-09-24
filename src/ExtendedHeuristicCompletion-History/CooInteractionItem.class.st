@@ -82,7 +82,12 @@ CooInteractionItem >> prepareForSerialization [
 	dic at: #fetchers put: self fetchers.
 	"dic at: #sourceCode put: self sourceCode." 
 	dic at: #selectedItemDescription put: self selectedItem description description asString.
-	dic at: #entries put: (self choices collect: [ :e | {e contents . e node sourceCode} ]).
+	dic at: #entries put: 
+		(self choices collect: 
+			[ :e | 
+				{e contents . 
+				e node ifNotNil: [:n | n sourceCode ifNil: [''] ]
+				} ]).
 	^ dic
 ]
 

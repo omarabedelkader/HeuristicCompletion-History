@@ -72,7 +72,43 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 	^ builder
 ]
 
-{ #category : 'private' }
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> completeDirectDependencyVariableBuilder [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass: CoDependencyGlobalVariableFetcher);
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> completeSemanticsVariableBuilder [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariablesHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
 CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 
 	| builder |
