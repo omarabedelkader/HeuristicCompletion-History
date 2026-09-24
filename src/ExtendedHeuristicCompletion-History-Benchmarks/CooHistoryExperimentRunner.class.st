@@ -77,15 +77,12 @@ CooHistoryExperimentRunner >> completeDirectDependencyVariableBuilder [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
-	builder messagesHeuristic: (builder newHeuristicBuilder
-			 add: CoSelfMessageHeuristic new;
-			 add: CoSuperMessageHeuristic new;
-			 add: CoTypedReceiverMessageHeuristic new;
-			 add: CoInitializeInferencedMessageHeuristic new;
-			 add: CoLiteralMessageHeuristic new;
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoLocalScopeVariablesHeuristic new;
+			 add: CoWorkspaceVariablesHeuristic new;
+			 add: CoInstanceAccessibleVariablesHeuristic new;
 			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass: CoDependencyGlobalVariableFetcher);
-			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: CoUnknownMessageHeuristic new;
+			 add: CoGlobalVariablesHeuristic new;
 			 build).
 	^ builder
 ]
@@ -113,15 +110,11 @@ CooHistoryExperimentRunner >> completeSemanticsVariableBuilder [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
-	builder messagesHeuristic: (builder newHeuristicBuilder
-			 add: CoSelfMessageHeuristic new;
-			 add: CoSuperMessageHeuristic new;
-			 add: CoTypedReceiverMessageHeuristic new;
-			 add: CoInitializeInferencedMessageHeuristic new;
-			 add: CoLiteralMessageHeuristic new;
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoLocalScopeVariablesHeuristic new;
+			 add: CoWorkspaceVariablesHeuristic new;
+			 add: CoInstanceAccessibleVariablesHeuristic new;
 			 add: CoGlobalVariablesHeuristic new;
-			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: CoUnknownMessageHeuristic new;
 			 build).
 	^ builder
 ]
@@ -147,6 +140,23 @@ CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 	^ builder
 ]
 
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> historyVariableBuilderWithSession: aSession [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+		add: CoLocalScopeVariablesHeuristic new;
+		add: CoWorkspaceVariablesHeuristic new;
+		add: CoInstanceAccessibleVariablesHeuristic new;
+		add: (CooSessionVariableHeuristic new
+			session: aSession;
+			yourself);
+		add: CoGlobalVariablesHeuristic new;
+		build).
+	^ builder
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> initialize [
 
@@ -157,28 +167,48 @@ CooHistoryExperimentRunner >> initialize [
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
-	| populator commits historyBenchmark dependencyBenchmark semanticBenchmark |
+	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
-	historyBenchmark := CooStaticBenchmarksMessageHistory new
+	messageHistoryBenchmark := CooStaticBenchmarksMessageHistory new
 		                    name: 'History';
 		                    session: aSession;
 		                    builder: (self historyMessageBuilderWithSession: aSession);
 		                    yourself.
 
-	dependencyBenchmark := CooStaticBenchmarksMessageHistory new
+	messageDependencyBenchmark := CooStaticBenchmarksMessageHistory new
 		                       name: 'Dependency';
 		                       session: aSession;
 		                       builder: self completeDirectDependencyMessageBuilder;
 		                       yourself.
 
 
-	semanticBenchmark := CooStaticBenchmarksMessageHistory new
+	messageSemanticBenchmark := CooStaticBenchmarksMessageHistory new
 		                     name: 'Semantic';
 		                     session: aSession;
 		                     builder: self completeSemanticMessageBuilder;
-		                     yourself. 
+		                     yourself.
+
+	variableHistoryBenchmark := CooStaticBenchmarksVariableHistory new
+		                            name: 'History';
+		                            session: aSession;
+		                            builder:
+			                            (self historyVariableBuilderWithSession: aSession);
+		                            yourself.
+
+	variableDependencyBenchmark := CooStaticBenchmarksVariableHistory new
+		                               name: 'Dependency';
+		                               session: aSession;
+		                               builder:
+			                               self completeDirectDependencyVariableBuilder;
+		                               yourself.
+
+	variableSemanticBenchmark := CooStaticBenchmarksVariableHistory new
+		                             name: 'Semantic';
+		                             session: aSession;
+		                             builder: self completeSemanticsVariableBuilder;
+		                             yourself.
 		
 		
  	"Load the oldest commit as the initial state.
@@ -205,17 +235,23 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 							cr;
 							show: 'Error loading ' , commit printString ].
 			loadSuccess ifTrue: [ "aSession resetDevelopmentItems"
-					semanticBenchmark run.
-					historyBenchmark run.
-					dependencyBenchmark run.
+					messageSemanticBenchmark run.
+					messageHistoryBenchmark run.
+					messageDependencyBenchmark run.
+					variableSemanticBenchmark run.
+					variableHistoryBenchmark run.
+					variableDependencyBenchmark run.
 					
 					statistics collectHistoryStatisticsFrom: aSession ] ].
 
 	^ {
 		  commits .
-			semanticBenchmark.
-		  	historyBenchmark.
-		  	dependencyBenchmark }
+		  messageSemanticBenchmark.
+		  messageHistoryBenchmark.
+		  messageDependencyBenchmark.
+		  variableSemanticBenchmark.
+		  variableHistoryBenchmark.
+		  variableDependencyBenchmark }
 ]
 
 { #category : 'private' }
@@ -249,12 +285,14 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 		commitCount: statistics historyCommitCount;
 		statistics: statistics;
 		dependencyConfigurationName: 'self dependencyConfigurationName';
-		comparisonDescription: 'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
-		messageHistoryBenchmark: commitsAndBench second;
-		messageDependencyBenchmark: commitsAndBench third;
-		messageDependencyBenchmark: commitsAndBench fourth. "messageDependencyBenchmark: messageDependency;
-		variableHistoryBenchmark: variableHistory;
-		variableDependencyBenchmark: variableDependency"
+		comparisonDescription:
+			'Complete semantics vs Complete semantics + History vs Complete semantics + Direct Package Dependencies';
+		messageSemanticBenchmark: commitsAndBench second;
+		messageHistoryBenchmark: commitsAndBench third;
+		messageDependencyBenchmark: commitsAndBench fourth;
+		variableSemanticBenchmark: commitsAndBench fifth;
+		variableHistoryBenchmark: commitsAndBench sixth;
+		variableDependencyBenchmark: commitsAndBench seventh.
 
 	CooHistoryBenchmarkPlotter new exportAllFor: result to: aConfiguration outputDirectory.
 	CooHistoryLatexExporter new exportAllFor: result to: aConfiguration outputDirectory.

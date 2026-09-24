@@ -258,6 +258,7 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 CooHistoryBenchmarkPlotter >> appendSeries: values color: color marker: marker on: aStream left: left top: top width: width height: height [
 
 	| points |
+	(values isNil or: [ values isEmpty ]) ifTrue: [ ^ self ].
 	points := OrderedCollection new.
 	self prefixes withIndexDo: [ :prefix :index |
 		| value x y |
@@ -536,6 +537,7 @@ CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyVa
 CooHistoryBenchmarkPlotter >> drawPNGSeries: values on: canvas left: left top: top width: width height: height color: color marker: marker [
 
 	| previousPoint |
+	(values isNil or: [ values isEmpty ]) ifTrue: [ ^ self ].
 	previousPoint := nil.
 	self prefixes withIndexDo: [ :prefix :index |
 		| value x y point |
