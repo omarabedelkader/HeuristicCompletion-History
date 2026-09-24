@@ -316,18 +316,17 @@ CooSession >> addedMethodDescriptions [
 	"this is unclear how to handle removed method when we load commits"
 	
 	| tmps removed existing |
-	tmps := methodDescriptions copy.
-	tmps := tmps select: [ :each | each event = #added  ].
+	tmps := methodDescriptions reversed.
 	existing := Set new.
-	removed := Set new.
 	
 	tmps do: [ :each |
-			"we make sure that if a method was removed we do not handle it.
-			Now this unclear if we get removed method when loading back code so the following
-			test looks useless."
-			each event = #removed ifTrue: [ removed add: each ].
-			(removed anySatisfy: [ :r | r selector = each selector and: [ r nameOfClass = each nameOfClass ] ]) 
-				ifFalse: [ existing add: each ] ].
+			each event = #removed 
+				ifTrue: [ (existing 
+								anySatisfy: [ :r | r selector = each selector 
+								and: [ r nameOfClass = each nameOfClass ] ]) ifTrue: [ existing remove: each ]]
+				ifFalse: [ (each event = #added | each event = #modified)
+									ifTrue: [ existing add: each ] ]
+			].
 	^ existing
 ]
 
