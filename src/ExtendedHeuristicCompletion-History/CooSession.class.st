@@ -680,6 +680,7 @@ CooSession >> resetDevelopmentItems [
 	
 	methodDescriptions := OrderedCollection new.  
 	"unclear for now what we should do for class"
+	classDescriptions := OrderedCollection new.
 ]
 
 { #category : 'initialization' }

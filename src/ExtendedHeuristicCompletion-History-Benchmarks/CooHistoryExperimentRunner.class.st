@@ -150,7 +150,7 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 			dependencyBenchmark run.
 			statistics collectHistoryStatisticsFrom: aSession.
 			].	
-		aSession resetDevelopmentItems 	
+		"aSession resetDevelopmentItems" 	
 	].
 
 	^ {
