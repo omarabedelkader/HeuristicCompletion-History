@@ -103,7 +103,7 @@ CooHistoryExperimentRunner >> completeDirectDependencyVariableBuilder [
 ]
 
 { #category : 'benchs' }
-CooHistoryExperimentRunner >> completeSemanticMessageBuilder [
+CooHistoryExperimentRunner >> completeSemanticsMessageBuilder [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
@@ -225,6 +225,24 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 		                             builder: self completeSemanticsVariableBuilder;
 		                             yourself.
 		
+	semanticsVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: self completeSemanticsVariableBuilder;
+		                     yourself. 
+		
+	dependencyVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: self completeSemanticsVariableBuilder ;
+		                     yourself. 
+	
+	historyVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: (self historyVariableBuilderWithSession: aSession) ;
+		                     yourself. 
+	
 		
  	"Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
@@ -255,7 +273,12 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 					variableHistoryBenchmark run.
 					variableDependencyBenchmark run.
 					
-					statistics collectHistoryStatisticsFrom: aSession ] ].
+					statistics collectHistoryStatisticsFrom: aSession.
+					"Pay attention do not remove the following line
+					it flushes the entities loading for a single commit. 
+					It does not touch the handlers that may naturally accumulate data 
+					across multiple commits."
+					aSession resetDevelopmentItems ] ].
 
 	^ {
 		  commits .

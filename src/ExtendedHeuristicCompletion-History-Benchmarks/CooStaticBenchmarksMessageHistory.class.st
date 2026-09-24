@@ -42,7 +42,7 @@ CooStaticBenchmarksMessageHistory >> run [
 	scannedMethods := 0.
 	matchedCallsites := 0.
 	
-	Transcript cr; show: '# Running Message Benchmark'.
+	Transcript cr; show: '# Running Message Benchmark ', self class name.
 	
 	self session modifiedMethodsAndDescriptions do: [ :methodAndDescription |
 			| method description |
@@ -64,6 +64,7 @@ CooStaticBenchmarksMessageHistory >> run [
 										ifNil: [ node start ] ifNotNil: [ :interval | interval first ].
 									self benchCallsite: node atPosition: pos ] ] ] ].
 					
+	"Here we do not need the descriptions because we should scan all the nodes"	
 	self session addedMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |

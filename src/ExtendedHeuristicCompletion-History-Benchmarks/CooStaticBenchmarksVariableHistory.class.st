@@ -21,14 +21,6 @@ Class {
 	#tag : 'Core'
 }
 
-{ #category : 'benchmarks' }
-CooStaticBenchmarksVariableHistory >> cachedClassNames [
-
-	| entries |
-	entries := self session programEntityHandler classEntries ifNil: [ #(  ) ].
-	^ (entries collect: [ :each | each contents ]) asSet
-]
-
 { #category : 'accessing' }
 CooStaticBenchmarksVariableHistory >> matchedCallsites [
 
@@ -36,49 +28,31 @@ CooStaticBenchmarksVariableHistory >> matchedCallsites [
 ]
 
 { #category : 'running' }
-CooStaticBenchmarksVariableHistory >> methodsInScopeDo: aBlock [
-
-	(scope respondsTo: #methodsDo:)
-		ifTrue: [ ^ scope methodsDo: aBlock ].
-	(scope respondsTo: #definedClasses)
-		ifTrue: [ ^ scope definedClasses do: [ :class |
-			class methodsDo: aBlock ] ].
-	(scope respondsTo: #do:)
-		ifTrue: [ ^ scope do: [ :each |
-			(each respondsTo: #methodsDo:)
-				ifTrue: [ each methodsDo: aBlock ]
-				ifFalse: [ (each respondsTo: #definedClasses)
-					ifTrue: [ each definedClasses do: [ :class | class methodsDo: aBlock ] ] ] ] ].
-	self error:
-		'Scope does not support method enumeration. Pass a package, class, or collection of them.'
-]
-
-{ #category : 'running' }
 CooStaticBenchmarksVariableHistory >> run [
 
-	| cachedClassNames |
-	cachedClassNames := self cachedClassNames.
 	scannedMethods := 0.
 	matchedCallsites := 0.
 
-	Transcript
-		cr;
-		show: '# Running Variable Benchmark';
-		cr.
-	self session existingMethods do: [ :method |
+	Transcript 
+		cr; cr;
+		show: '# Running Variable Benchmark '; 
+		show: self session addedAndModifiedMethods size printString; cr.
+		
+		self session addedAndModifiedMethods do: [ :method |
+		
 			scannedMethods := scannedMethods + 1.
 			method parseTree ifNotNil: [ :parseTree |
-					parseTree nodesDo: [ :node |
-							(node isVariable and: [ node name first isUppercase and: [ cachedClassNames includes: node name ] ]) ifTrue: [
+				parseTree nodesDo: [ :node |
+							(node isVariable and: [ node name first isUppercase ]) 
+								ifTrue: [
+									node name = 'Dictionary' ifTrue: [ self halt. ].
 									Transcript
 										cr;
-										show: '## Benched class: ';
-										show: node name;
+										show: '## Benched class: ';	 show: node name;
 										cr.
 
 									matchedCallsites := matchedCallsites + 1.
-									self benchCallsite: node atPosition: node start ] ] ] ]
-	.
+									self benchCallsite: node atPosition: node start ] ] ] ].
 	^ self
 ]
 
