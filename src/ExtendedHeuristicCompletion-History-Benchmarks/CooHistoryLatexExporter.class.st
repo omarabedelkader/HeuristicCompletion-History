@@ -1,5 +1,13 @@
 "
-I export LaTeX tables from a CooHistoryExperimentResult.
+I export LaTeX report tables from a CooHistoryExperimentResult.
+
+#exportAllFor:to: writes three files per project:
+	<project>-statistics.tex       project and replayed-history statistics
+	<project>-messages-mrr.tex     message-completion MRR by prefix length
+	<project>-variables-mrr.tex    variable-completion MRR by prefix length
+
+Each MRR table reports, for every strategy, the overall MRR together with the
+MRR observed for prefix lengths 2 to 8.
 "
 Class {
 	#name : 'CooHistoryLatexExporter',
@@ -57,7 +65,7 @@ CooHistoryLatexExporter >> latexEscape: aString [
 ]
 
 { #category : 'latex' }
-CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchmarkKind historyBenchmark: historyBenchmark dependencyBenchmark: dependencyBenchmark label: label [
+CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchmarkKind semanticBenchmark: semanticBenchmark historyBenchmark: historyBenchmark dependencyBenchmark: dependencyBenchmark label: label [
 
 	^ String streamContents: [ :stream |
 		  stream
@@ -74,15 +82,21 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 			  nextPutAll: '\midrule';
 			  cr.
 		  
-		historyBenchmark ifNotNil: [
-		self
-			  writeMRRRowNamed: 'History'
-			  benchmark: historyBenchmark
-			  on: stream ].
-		 dependencyBenchmark ifNotNil: [ self
-			  writeMRRRowNamed: 'Dependency'
-			  benchmark: dependencyBenchmark
-			  on: stream ].
+		  semanticBenchmark ifNotNil: [
+			  self
+				  writeMRRRowNamed: 'Semantic'
+				  benchmark: semanticBenchmark
+				  on: stream ].
+		  historyBenchmark ifNotNil: [
+			  self
+				  writeMRRRowNamed: 'History'
+				  benchmark: historyBenchmark
+				  on: stream ].
+		  dependencyBenchmark ifNotNil: [
+			  self
+				  writeMRRRowNamed: 'Dependency'
+				  benchmark: dependencyBenchmark
+				  on: stream ].
 		  stream
 			  nextPutAll: '\bottomrule';
 			  cr;
@@ -91,7 +105,8 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 			  nextPutAll: '\caption{';
 			  nextPutAll:
 				  (self latexEscape: projectName , ' ' , benchmarkKind
-					   , ' MRR. Dependency denotes Complete + Direct Package Dependencies.');
+					   ,
+						   ' MRR. Semantic denotes complete semantics, History adds session history, and Dependency adds direct package dependencies.');
 			  nextPutAll: '}';
 			  cr;
 			  nextPutAll: '\label{';
@@ -108,6 +123,7 @@ CooHistoryLatexExporter >> latexMessagesMRRFor: anExperimentResult [
 	^ self
 		  latexMRRForProject: anExperimentResult projectName
 		  benchmarkKind: 'message completion'
+		  semanticBenchmark: anExperimentResult messageSemanticBenchmark
 		  historyBenchmark: anExperimentResult messageHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult messageDependencyBenchmark
 		  label: 'tab:' , anExperimentResult filename , '-messages-mrr'
@@ -215,6 +231,7 @@ CooHistoryLatexExporter >> latexVariablesMRRFor: anExperimentResult [
 	^ self
 		  latexMRRForProject: anExperimentResult projectName
 		  benchmarkKind: 'variable completion'
+		  semanticBenchmark: anExperimentResult variableSemanticBenchmark
 		  historyBenchmark: anExperimentResult variableHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult variableDependencyBenchmark
 		  label: 'tab:' , anExperimentResult filename , '-variables-mrr'

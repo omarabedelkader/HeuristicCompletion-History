@@ -1,5 +1,15 @@
 "
-i collect data from the runner
+I capture the outcome of one project-level History experiment.
+
+I hold the six benchmarks produced by CooHistoryExperimentRunner — message and
+variable completion, each under the Semantic, History and Dependency
+configurations — together with the project metadata and the statistics
+collected while replaying the history.
+
+I am the source of truth consumed by:
+- CooHistoryBenchmarkPlotter (figures),
+- CooHistoryLatexExporter (LaTeX tables),
+- #saveSTON in the runner (machine-readable summary).
 "
 Class {
 	#name : 'CooHistoryExperimentResult',
@@ -13,9 +23,9 @@ Class {
 		'variableHistoryBenchmark',
 		'variableDependencyBenchmark',
 		'commitCount',
-		'dependencyConfigurationName',
 		'comparisonDescription',
-		'messageSemanticBenchmark'
+		'messageSemanticBenchmark',
+		'variableSemanticBenchmark'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
@@ -29,17 +39,18 @@ CooHistoryExperimentResult >> asSTONDictionary [
 		  #project -> projectName.
 		  #repository -> repository.
 		  #commitsAnalyzed -> commitCount.
-		  #dependencyConfiguration -> dependencyConfigurationName.
 		  #comparison -> comparisonDescription.
 		  #statistics -> statistics asDictionary.
 		  #messages -> (Dictionary newFrom: {
+				   #semantic -> (self dictionaryForBenchmark: messageSemanticBenchmark).
 				   #history -> (self dictionaryForBenchmark: messageHistoryBenchmark).
-				   "#completeDirectDependency -> (self dictionaryForBenchmark:
-						    messageDependencyBenchmark)" }).
-		  #variables -> (Dictionary newFrom: {
-				   "#history -> (self dictionaryForBenchmark: variableHistoryBenchmark).
 				   #completeDirectDependency -> (self dictionaryForBenchmark:
-						    variableDependencyBenchmark)" }) }
+						    messageDependencyBenchmark) }).
+		  #variables -> (Dictionary newFrom: {
+				   #semantic -> (self dictionaryForBenchmark: variableSemanticBenchmark).
+				   #history -> (self dictionaryForBenchmark: variableHistoryBenchmark).
+				   #completeDirectDependency -> (self dictionaryForBenchmark:
+						    variableDependencyBenchmark) }) }
 
 ]
 
@@ -67,21 +78,10 @@ CooHistoryExperimentResult >> comparisonDescription: anObject [
 	comparisonDescription := anObject
 ]
 
-{ #category : 'accessing' }
-CooHistoryExperimentResult >> dependencyConfigurationName [
-
-	^ dependencyConfigurationName
-]
-
-{ #category : 'accessing' }
-CooHistoryExperimentResult >> dependencyConfigurationName: anObject [
-
-	dependencyConfigurationName := anObject
-]
-
 { #category : 'converting' }
 CooHistoryExperimentResult >> dictionaryForBenchmark: aBenchmark [
 
+	aBenchmark ifNil: [ ^ nil ].
 	^ Dictionary newFrom: {
 		  #name -> aBenchmark name.
 		  #mrr -> aBenchmark mmr.
@@ -116,6 +116,7 @@ CooHistoryExperimentResult >> messageDependencyBenchmark: anObject [
 
 { #category : 'accessing' }
 CooHistoryExperimentResult >> messageDependencyValues [
+
 	messageDependencyBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: messageDependencyBenchmark
 ]
@@ -197,6 +198,7 @@ CooHistoryExperimentResult >> statistics: anObject [
 { #category : 'accessing' }
 CooHistoryExperimentResult >> valuesForBenchmark: aBenchmark [
 
+	aBenchmark ifNil: [ ^ #() ].
 	^ (2 to: 8) collect: [ :prefix |
 		  aBenchmark mmrForPrefixSize: prefix ]
 ]
@@ -216,7 +218,7 @@ CooHistoryExperimentResult >> variableDependencyBenchmark: anObject [
 { #category : 'accessing' }
 CooHistoryExperimentResult >> variableDependencyValues [
 
-	variableDependencyBenchmark ifNil: [ ^#()].
+	variableDependencyBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: variableDependencyBenchmark
 ]
 
@@ -234,6 +236,26 @@ CooHistoryExperimentResult >> variableHistoryBenchmark: anObject [
 
 { #category : 'accessing' }
 CooHistoryExperimentResult >> variableHistoryValues [
-	variableHistoryBenchmark ifNil: [ ^#() ].
+
+	variableHistoryBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: variableHistoryBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableSemanticBenchmark [
+
+	^ variableSemanticBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableSemanticBenchmark: aBenchmark [
+
+	variableSemanticBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableSemanticValues [
+
+	variableSemanticBenchmark ifNil: [ ^ #() ].
+	^ self valuesForBenchmark: variableSemanticBenchmark
 ]

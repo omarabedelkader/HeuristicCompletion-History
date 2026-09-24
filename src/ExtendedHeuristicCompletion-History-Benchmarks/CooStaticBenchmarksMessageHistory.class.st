@@ -1,8 +1,11 @@
 "
-A benchmarks message completions for selectors
-that are present in the current session cache. This narrows the benchmark scope
-so it only evaluates completions for selectors that have been modified and
-stored in the cache.
+I benchmark message completions while replaying a repository history.
+
+I evaluate only the dev-relevant callsites exposed by the session (CooSession):
+	- methods modified by the current commit contribute their changed call sites,
+	- methods added by the current commit contribute all their message sends.
+Selectors are filtered against the session history (see
+#shouldBenchmarkMessageSelector:).
 "
 Class {
 	#name : 'CooStaticBenchmarksMessageHistory',

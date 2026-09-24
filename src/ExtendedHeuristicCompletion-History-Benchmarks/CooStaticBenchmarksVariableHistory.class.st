@@ -1,7 +1,11 @@
 "
-A benchmarks variable (class name) completions
-for class names that are present in the current session cache. This restricts
-the benchmark to cached class entries only.
+I benchmark variable (capitalized class name) completions while replaying a
+repository history.
+
+I scan the current session methods and bench the uppercase variable nodes whose
+name is present in the session cache (the classes already seen by the
+programEntityHandler). This restricts the benchmark to the studied globals,
+mirroring the message benchmark which only targets modified and added methods.
 "
 Class {
 	#name : 'CooStaticBenchmarksVariableHistory',
