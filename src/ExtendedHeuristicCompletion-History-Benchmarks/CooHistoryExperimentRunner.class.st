@@ -72,6 +72,24 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 	^ builder
 ]
 
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> completeSemanticMessageBuilder [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
 { #category : 'private' }
 CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 

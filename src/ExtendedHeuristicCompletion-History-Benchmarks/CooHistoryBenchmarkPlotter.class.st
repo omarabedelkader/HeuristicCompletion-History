@@ -377,22 +377,6 @@ CooHistoryBenchmarkPlotter >> drawPNGSeries: values on: canvas left: left top: t
 		previousPoint := point ]
 ]
 
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> drawString: aString on: canvas at: aPoint color: color [
-
-	[ canvas
-		drawString: aString
-		at: aPoint
-		font: StandardFonts defaultFont
-		color: color ]
-		on: MessageNotUnderstood
-		do: [ :exception |
-			canvas
-				drawString: aString
-				at: aPoint
-				color: color ]
-]
-
 { #category : 'exporting' }
 CooHistoryBenchmarkPlotter >> exportAllFor: anExperimentResult to: aDirectory [
 
@@ -471,67 +455,6 @@ CooHistoryBenchmarkPlotter >> normalizedMrr: aNumber [
 CooHistoryBenchmarkPlotter >> prefixes [
 
 	^ 2 to: 8
-]
-
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> renderPNGFor: anExperimentResult to: aFileReference [
-
-	| form canvas writer |
-	form := Form extent: self canvasExtent depth: 32.
-	canvas := form getCanvas.
-	canvas
-		fillRectangle: form boundingBox
-		color: Color white.
-
-	self
-		drawString: anExperimentResult projectName asUppercase
-		on: canvas
-		at: 520 @ 32
-		color: Color black.
-	self
-		drawPNGPanelNamed: 'Messages'
-		historyValues: anExperimentResult messageHistoryValues
-		dependencyValues: anExperimentResult messageDependencyValues
-		on: canvas
-		left: 80
-		top: 100
-		width: 460
-		height: 360.
-	self
-		drawPNGPanelNamed: 'Variables'
-		historyValues: anExperimentResult variableHistoryValues
-		dependencyValues: anExperimentResult variableDependencyValues
-		on: canvas
-		left: 660
-		top: 100
-		width: 460
-		height: 360.
-
-	self
-		fillOvalOn: canvas
-		center: 470 @ 555
-		radius: 5
-		color: (Color r: 0.12 g: 0.47 b: 0.71).
-	self
-		drawString: 'History'
-		on: canvas
-		at: 485 @ 548
-		color: Color black.
-	self
-		strokeTriangleOn: canvas
-		center: 585 @ 555
-		color: (Color r: 0.84 g: 0.15 b: 0.16).
-	self
-		drawString: 'Dependency'
-		on: canvas
-		at: 600 @ 548
-		color: Color black.
-
-	writer := Smalltalk globals at: #PNGReadWriter.
-	writer
-		putForm: form
-		onFileNamed: aFileReference fullName.
-	^ aFileReference
 ]
 
 { #category : 'png' }
