@@ -137,15 +137,20 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	  5. collect statistics
 	  6. clear development items"
 	commits allButLast reverseDo: [ :commit |
-
+		| loadSuccess |
+		loadSuccess := true. 
+		[ 
 		self loadFromOldToNewCommit: commit.
-
-		historyBenchmark run.
-		dependencyBenchmark run.
-
-		statistics collectHistoryStatisticsFrom: aSession.
-
-		aSession resetDevelopmentItems
+		] 
+			on: Error 
+			do: [ loadSuccess := false. 
+				Transcript cr; show: 'Error loading ', commit printString ].
+		loadSuccess ifTrue: [ 	
+			historyBenchmark run.
+			dependencyBenchmark run.
+			statistics collectHistoryStatisticsFrom: aSession.
+			].	
+		aSession resetDevelopmentItems 	
 	].
 
 	^ {

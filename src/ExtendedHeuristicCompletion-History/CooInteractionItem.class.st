@@ -71,13 +71,18 @@ CooInteractionItem >> initialize [
 	fetchers := #()
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'serialization' }
 CooInteractionItem >> prepareForSerialization [
 
 	| dic |
 	dic := Dictionary new.
-	dic at: #className put: self nameOfClass.
-	
+	dic at: #className put: self class name.
+	dic at: #token put: self token.
+	dic at: #index put: self index. 
+	dic at: #fetchers put: self fetchers.
+	"dic at: #sourceCode put: self sourceCode." 
+	dic at: #selectedItemDescription put: self selectedItem description description asString.
+	dic at: #entries put: (self choices collect: [ :e | {e contents . e node sourceCode} ]).
 	^ dic
 ]
 
