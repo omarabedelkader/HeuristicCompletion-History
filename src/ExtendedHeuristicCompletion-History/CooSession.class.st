@@ -214,7 +214,9 @@ CooSession >> addClassItem: anItem [
 	"Instead of poking the handler during each addition we could pass it all the info when 
 	requesting a list of entries."
 	programEntityHandler handleNewClassItem: anItem.
-	self recorder log: anItem
+	"
+	Do not record structural event for now
+	self recorder log: anItem prepareForSerialization" 
 	
 ]
 
@@ -238,7 +240,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	userSelectionHandler handleNewSelectionItem: item. 
 	Transcript show: 'Completion item added: ', item printString;cr.
 	"pass the selected item to the recorder"
-	self recorder log: item
+	self recorder log: item prepareForSerialization
 ]
 
 { #category : 'method handling' }
@@ -248,7 +250,10 @@ CooSession >> addMethodItem: anItem [
 	methodDescriptions addFirst: anItem.
 	"keeping item is needed for bcnhing because we need to know newly defined and modified entities"
 	
-	programEntityHandler handleNewMethodItem: anItem
+	programEntityHandler handleNewMethodItem: anItem.
+	"do not record structural event for now
+		self recorder log: anItem prepareForSerialization"
+	
 ]
 
 { #category : 'method handling' }

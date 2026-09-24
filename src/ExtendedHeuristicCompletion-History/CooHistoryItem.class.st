@@ -52,6 +52,12 @@ CooHistoryItem >> nameOfClass: aClassName [
 	className := aClassName
 ]
 
+{ #category : 'serialization' }
+CooHistoryItem >> prepareForSerialization [
+	"for now"
+	^ self
+]
+
 { #category : 'printing' }
 CooHistoryItem >> printOn: aStream [
 
