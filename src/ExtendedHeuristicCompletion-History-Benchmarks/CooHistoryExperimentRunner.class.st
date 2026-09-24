@@ -205,15 +205,17 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 							cr;
 							show: 'Error loading ' , commit printString ].
 			loadSuccess ifTrue: [ "aSession resetDevelopmentItems"
+					semanticBenchmark run.
 					historyBenchmark run.
 					dependencyBenchmark run.
+					
 					statistics collectHistoryStatisticsFrom: aSession ] ].
 
 	^ {
-		  commits.
-		  historyBenchmark.
-		semanticBenchmark run.
-		  dependencyBenchmark }
+		  commits .
+			semanticBenchmark.
+		  	historyBenchmark.
+		  	dependencyBenchmark }
 ]
 
 { #category : 'private' }
