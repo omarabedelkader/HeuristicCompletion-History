@@ -23,7 +23,7 @@ CooHistoryExperimentConfiguration class >> microdown [
 	^ self new
 		  name: 'Microdown';
 		  repository: 'git@github.com:pillar-markup/Microdown.git';
-		  numberOfCommits: 50;
+		  numberOfCommits: 70;
 		  packageNamePrefix: 'Microdown';
 		  loader: [
 			  Smalltalk globals
@@ -39,6 +39,26 @@ CooHistoryExperimentConfiguration class >> microdown [
 		  outputDirectory:
 			  FileLocator workingDirectory / 'History-Bench-Results' / 'Microdown';
 		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> roassal [
+
+    ^ self new
+        name: 'Roassal';
+        repository: 'git@github.com:pharo-graphics/Roassal.git';
+        numberOfCommits: 200;
+        packageNamePrefix: 'Roassal';
+        loader: [
+            Metacello new
+                baseline: 'Roassal';
+                repository: 'github://pharo-graphics/Roassal:Pharo13';
+                load: 'Full' ];
+        outputDirectory:
+            FileLocator workingDirectory
+                / 'History-Bench-Results'
+                / 'Roassal';
+        yourself
 ]
 
 { #category : 'instance creation' }
