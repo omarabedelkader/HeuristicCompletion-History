@@ -1,3 +1,6 @@
+"
+i collect data from the runner
+"
 Class {
 	#name : 'CooHistoryExperimentResult',
 	#superclass : 'Object',
@@ -11,7 +14,8 @@ Class {
 		'variableDependencyBenchmark',
 		'commitCount',
 		'dependencyConfigurationName',
-		'comparisonDescription'
+		'comparisonDescription',
+		'messageSemanticBenchmark'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
@@ -132,6 +136,26 @@ CooHistoryExperimentResult >> messageHistoryBenchmark: anObject [
 CooHistoryExperimentResult >> messageHistoryValues [
 
 	^ self valuesForBenchmark: messageHistoryBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageSemanticBenchmark [
+
+    ^ messageSemanticBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageSemanticBenchmark: aBenchmark [
+
+    messageSemanticBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageSemanticValues [
+
+    messageSemanticBenchmark ifNil: [ ^ #() ].
+
+    ^ self valuesForBenchmark: messageSemanticBenchmark
 ]
 
 { #category : 'accessing' }

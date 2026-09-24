@@ -13,8 +13,9 @@ Class {
 		'packageNamePrefix',
 		'packageNames'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Benchmarks',
-	#package : 'ExtendedHeuristicCompletion-History-Benchmarks'
+	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
+	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
+	#tag : 'Core'
 }
 
 { #category : 'instance creation' }
@@ -23,7 +24,7 @@ CooHistoryExperimentConfiguration class >> microdown [
 	^ self new
 		  name: 'Microdown';
 		  repository: 'git@github.com:pillar-markup/Microdown.git';
-		  numberOfCommits: 10;
+		  numberOfCommits: 70;
 		  packageNamePrefix: 'Microdown';
 		  loader: [
 			  Smalltalk globals
