@@ -1,13 +1,19 @@
 "
-I export project comparison plots from a CooHistoryExperimentResult.
+I export the message- and variable-completion benchmark figures from a
+CooHistoryExperimentResult.
+
+For each completion kind I render its own figure (SVG and PNG) plotting three
+MRR-vs-prefix-length series on a common axis:
+	- Semantic:    the plain completion semantics (baseline).
+	- History:     semantics plus the session-history heuristics.
+	- Dependency:  semantics plus the direct package dependency heuristics.
+
+Figures are written by #exportAllFor:to:, which produces
+<project>-messages.svg, <project>-variables.svg and the matching PNG files.
 "
 Class {
 	#name : 'CooHistoryBenchmarkPlotter',
 	#superclass : 'Object',
-	#instVars : [
-		'anExperimentResult',
-		'messageSemanticValues'
-	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Tools',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#tag : 'Tools'
@@ -68,7 +74,7 @@ CooHistoryBenchmarkPlotter >> appendGridOn: aStream left: left top: top width: w
 			cr ]
 ]
 
-{ #category : 'png' }
+{ #category : 'svg' }
 CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 
 	"History"
@@ -123,65 +129,6 @@ CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 ]
 
 { #category : 'svg' }
-CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyValues dependencyValues: dependencyValues on: aStream left: left top: top width: width height: height [
-
-	aStream
-		nextPutAll: '<text x="';
-		nextPutAll: (self svgNumber: left + (width / 2));
-		nextPutAll: '" y="';
-		nextPutAll: (self svgNumber: top - 26);
-		nextPutAll: '" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111">';
-		nextPutAll: (self xmlEscape: aTitle);
-		nextPutAll: '</text>';
-		cr.
-
-	self
-		appendGridOn: aStream
-		left: left
-		top: top
-		width: width
-		height: height.
-	self
-		appendAxesOn: aStream
-		left: left
-		top: top
-		width: width
-		height: height.
-	self
-		appendXTicksOn: aStream
-		left: left
-		top: top
-		width: width
-		height: height.
-	self
-		appendSeries: historyValues
-		color: '#1f77b4'
-		marker: #circle
-		on: aStream
-		left: left
-		top: top
-		width: width
-		height: height.
-	self
-		appendSeries: dependencyValues
-		color: '#d62728'
-		marker: #triangle
-		on: aStream
-		left: left
-		top: top
-		width: width
-		height: height.
-
-	aStream
-		nextPutAll: '<text x="';
-		nextPutAll: (self svgNumber: left + (width / 2));
-		nextPutAll: '" y="';
-		nextPutAll: (self svgNumber: top + height + 54);
-		nextPutAll: '" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#333">Prefix Length</text>';
-		cr
-]
-
-{ #category : 'png' }
 CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: aStream left: left top: top width: width height: height [
 
 	aStream
@@ -200,21 +147,18 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 		top: top
 		width: width
 		height: height.
-
 	self
 		appendAxesOn: aStream
 		left: left
 		top: top
 		width: width
 		height: height.
-
 	self
 		appendXTicksOn: aStream
 		left: left
 		top: top
 		width: width
 		height: height.
-
 	self
 		appendSeries: historyValues
 		color: '#1f77b4'
@@ -224,7 +168,6 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 		top: top
 		width: width
 		height: height.
-
 	self
 		appendSeries: semanticValues
 		color: '#2ca02c'
@@ -234,7 +177,6 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 		top: top
 		width: width
 		height: height.
-
 	self
 		appendSeries: dependencyValues
 		color: '#d62728'
@@ -374,7 +316,7 @@ CooHistoryBenchmarkPlotter >> drawLineOn: canvas from: startPoint to: endPoint w
 ]
 
 { #category : 'png' }
-CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues dependencyValues: dependencyValues on: canvas left: left top: top width: width height: height [
+CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: canvas left: left top: top width: width height: height [
 
 	| axisColor gridColor textColor |
 	axisColor := Color r: 0.2 g: 0.2 b: 0.2.
@@ -382,80 +324,9 @@ CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyVa
 	textColor := Color r: 0.1 g: 0.1 b: 0.1.
 
 	self
-		drawString: aTitle
+		drawCenteredString: aTitle
 		on: canvas
-		at: (left + (width / 2) - 45) rounded @ (top - 42) rounded
-		color: textColor.
-
-	#( 0 0.2 0.4 0.6 0.8 1.0 ) do: [ :tick |
-		| y |
-		y := (self yForMrr: tick top: top height: height) rounded.
-		self
-			drawLineOn: canvas
-			from: left rounded @ y
-			to: (left + width) rounded @ y
-			width: 1
-			color: gridColor.
-		self
-			drawString: (tick asFloat printShowingDecimalPlaces: 1)
-			on: canvas
-			at: (left - 36) rounded @ (y - 7)
-			color: textColor ].
-
-	self
-		drawLineOn: canvas
-		from: left rounded @ top rounded
-		to: left rounded @ (top + height) rounded
-		width: 2
-		color: axisColor.
-	self
-		drawLineOn: canvas
-		from: left rounded @ (top + height) rounded
-		to: (left + width) rounded @ (top + height) rounded
-		width: 2
-		color: axisColor.
-
-	self prefixes do: [ :prefix |
-		| x |
-		x := (self xForPrefix: prefix left: left width: width) rounded.
-		self
-			drawString: prefix asString
-			on: canvas
-			at: (x - 4) @ (top + height + 12) rounded
-			color: textColor ].
-
-	self
-		drawPNGSeries: historyValues
-		on: canvas
-		left: left
-		top: top
-		width: width
-		height: height
-		color: (Color r: 0.12 g: 0.47 b: 0.71)
-		marker: #circle.
-	self
-		drawPNGSeries: dependencyValues
-		on: canvas
-		left: left
-		top: top
-		width: width
-		height: height
-		color: (Color r: 0.84 g: 0.15 b: 0.16)
-		marker: #triangle
-]
-
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: canvas left: left top: top width: width height: height [ 
-
-	| axisColor gridColor textColor |
-	axisColor := Color r: 0.2 g: 0.2 b: 0.2.
-	gridColor := Color r: 0.9 g: 0.91 b: 0.92.
-	textColor := Color r: 0.1 g: 0.1 b: 0.1.
-
-	self
-		drawString: aTitle
-		on: canvas
-		at: (left + (width / 2) - 45) rounded @ (top - 42) rounded
+		at: (left + (width / 2)) rounded @ (top - 42) rounded
 		color: textColor.
 
 	#( 0 0.2 0.4 0.6 0.8 1.0 ) do: [ :tick |
@@ -568,43 +439,152 @@ CooHistoryBenchmarkPlotter >> drawPNGSeries: values on: canvas left: left top: t
 		previousPoint := point ]
 ]
 
+{ #category : 'png' }
+CooHistoryBenchmarkPlotter >> drawString: aString on: canvas at: aPoint color: aColor [
+
+	[ canvas
+		drawString: aString
+		at: aPoint
+		font: TextStyle defaultFont
+		color: aColor ]
+		on: MessageNotUnderstood
+		do: [ :exception |
+			canvas
+				drawString: aString
+				at: aPoint
+				color: aColor ]
+]
+
+{ #category : 'png' }
+CooHistoryBenchmarkPlotter >> drawCenteredString: aString on: canvas at: aPoint color: aColor [
+
+	| font width point |
+	font := TextStyle defaultFont.
+	width := font widthOfString: aString.
+	point := (aPoint x - (width / 2)) rounded @ aPoint y.
+	self
+		drawString: aString
+		on: canvas
+		at: point
+		color: aColor
+]
+
 { #category : 'exporting' }
 CooHistoryBenchmarkPlotter >> exportAllFor: anExperimentResult to: aDirectory [
 
-	| directory svgPath pngPath |
+	| directory svgMessagesPath svgVariablesPath pngMessagesPath pngVariablesPath |
 	directory := aDirectory asFileReference.
 	directory ensureCreateDirectory.
-	svgPath := directory / (anExperimentResult filename , '-comparison.svg').
-	pngPath := directory / (anExperimentResult filename , '-comparison.png').
 
-	self exportSVGFor: anExperimentResult to: svgPath.
-	self exportPNGFor: anExperimentResult to: pngPath.
+	svgMessagesPath := directory
+		/ (anExperimentResult filename , '-messages.svg').
+	svgVariablesPath := directory
+		/ (anExperimentResult filename , '-variables.svg').
+	pngMessagesPath := directory
+		/ (anExperimentResult filename , '-messages.png').
+	pngVariablesPath := directory
+		/ (anExperimentResult filename , '-variables.png').
 
-	^ { svgPath. pngPath }
+	self
+		writeSVG: (self svgForMessages: anExperimentResult)
+		to: svgMessagesPath.
+	self
+		writeSVG: (self svgForVariables: anExperimentResult)
+		to: svgVariablesPath.
+	self
+		writePNG: (self pngForMessages: anExperimentResult)
+		to: pngMessagesPath.
+	self
+		writePNG: (self pngForVariables: anExperimentResult)
+		to: pngVariablesPath.
+
+	^ {
+		  svgMessagesPath.
+		  svgVariablesPath.
+		  pngMessagesPath.
+		  pngVariablesPath }
 ]
 
 { #category : 'exporting' }
-CooHistoryBenchmarkPlotter >> exportPNGFor: anExperimentResult to: aFileReference [
+CooHistoryBenchmarkPlotter >> writeSVG: anSVGString to: aFileReference [
 
+	self
+		write: anSVGString
+		to: aFileReference asFileReference
+]
+
+{ #category : 'exporting' }
+CooHistoryBenchmarkPlotter >> writePNG: aForm to: aFileReference [
+
+	| reference stream |
 	(Smalltalk globals includesKey: #PNGReadWriter)
 		ifFalse: [ ^ nil ].
 
-	^ [ self renderPNGFor: anExperimentResult to: aFileReference asFileReference ]
-		  on: Error
-		  do: [ :exception |
-			  Transcript
-				  cr;
-				  show: 'Could not export PNG plot: ';
-				  show: exception messageText.
-			  nil ]
+	reference := aFileReference asFileReference.
+	reference parent ensureCreateDirectory.
+	^ [ stream := reference binaryWriteStream.
+		[ PNGReadWriter putForm: aForm on: stream ]
+			ensure: [ stream close ] ]
+		on: Error
+		do: [ :exception |
+			Transcript
+				cr;
+				show: 'Could not export PNG plot: ';
+				show: exception messageText.
+			nil ]
+]
+
+{ #category : 'private' }
+CooHistoryBenchmarkPlotter >> pngFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues [
+
+	| form canvas |
+	form := Form extent: self canvasExtent depth: 32.
+	canvas := form getCanvas.
+
+	canvas
+		fillRectangle: (0 @ 0 corner: self canvasExtent)
+		color: Color white.
+
+	self
+		drawCenteredString: anExperimentResult projectName asUppercase
+		on: canvas
+		at: (600 @ 24)
+		color: (Color r: 0.1 g: 0.1 b: 0.1).
+
+	self
+		drawPNGPanelNamed: aTitle
+		historyValues: historyValues
+		semanticValues: semanticValues
+		dependencyValues: dependencyValues
+		on: canvas
+		left: 150
+		top: 150
+		width: 900
+		height: 360.
+
+	^ form
 ]
 
 { #category : 'exporting' }
-CooHistoryBenchmarkPlotter >> exportSVGFor: anExperimentResult to: aFileReference [
+CooHistoryBenchmarkPlotter >> pngForMessages: anExperimentResult [
 
-	self
-		write: (self svgFor: anExperimentResult)
-		to: aFileReference asFileReference
+	^ self
+		pngFor: anExperimentResult
+		panelTitle: 'Message Completion'
+		historyValues: anExperimentResult messageHistoryValues
+		semanticValues: anExperimentResult messageSemanticValues
+		dependencyValues: anExperimentResult messageDependencyValues
+]
+
+{ #category : 'exporting' }
+CooHistoryBenchmarkPlotter >> pngForVariables: anExperimentResult [
+
+	^ self
+		pngFor: anExperimentResult
+		panelTitle: 'Variable Completion'
+		historyValues: anExperimentResult variableHistoryValues
+		semanticValues: anExperimentResult variableSemanticValues
+		dependencyValues: anExperimentResult variableDependencyValues
 ]
 
 { #category : 'png' }
@@ -675,8 +655,30 @@ CooHistoryBenchmarkPlotter >> strokeTriangleOn: canvas center: centerPoint color
 		color: color
 ]
 
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult [
+{ #category : 'svg' }
+CooHistoryBenchmarkPlotter >> svgForMessages: anExperimentResult [
+
+	^ self
+		svgFor: anExperimentResult
+		panelTitle: 'Message Completion'
+		historyValues: anExperimentResult messageHistoryValues
+		semanticValues: anExperimentResult messageSemanticValues
+		dependencyValues: anExperimentResult messageDependencyValues
+]
+
+{ #category : 'svg' }
+CooHistoryBenchmarkPlotter >> svgForVariables: anExperimentResult [
+
+	^ self
+		svgFor: anExperimentResult
+		panelTitle: 'Variable Completion'
+		historyValues: anExperimentResult variableHistoryValues
+		semanticValues: anExperimentResult variableSemanticValues
+		dependencyValues: anExperimentResult variableDependencyValues
+]
+
+{ #category : 'svg' }
+CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues [
 
 	^ String streamContents: [ :stream |
 		stream
@@ -701,31 +703,20 @@ CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult [
 			cr.
 
 		self
-			appendPanelNamed: 'Messages'
-			historyValues: anExperimentResult messageHistoryValues
-			semanticValues: anExperimentResult messageSemanticValues
-			dependencyValues: anExperimentResult messageDependencyValues
+			appendPanelNamed: aTitle
+			historyValues: historyValues
+			semanticValues: semanticValues
+			dependencyValues: dependencyValues
 			on: stream
-			left: 80
-			top: 100
-			width: 460
-			height: 360.
-
-		self
-			appendPanelNamed: 'Variables'
-			historyValues: anExperimentResult variableHistoryValues
-			semanticValues: #()
-			dependencyValues: anExperimentResult variableDependencyValues
-			on: stream
-			left: 660
-			top: 100
-			width: 460
+			left: 150
+			top: 150
+			width: 900
 			height: 360.
 
 		self
 			appendLegendOn: stream
-			x: 400
-			y: 555.
+			x: 420
+			y: 585.
 
 		stream
 			nextPutAll: '</svg>';

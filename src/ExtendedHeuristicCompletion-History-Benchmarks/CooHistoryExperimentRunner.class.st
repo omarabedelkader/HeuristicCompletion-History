@@ -1,5 +1,20 @@
 "
 I orchestrate a complete project-level History experiment and write its report artifacts.
+
+During the replay of a repository history I run, for every commit, six
+benchmarks over the modified and added methods of the current session:
+    - message completion:   semantic, history, direct-package-dependency
+    - variable completion:  semantic, history, direct-package-dependency
+
+The six benchmarks, together with the project statistics, end up in a
+CooHistoryExperimentResult which is exported as:
+    - comparison figures:   <project>-messages.{svg,png},
+                            <project>-variables.{svg,png}
+    - LaTeX tables:         <project>-{statistics,messages-mrr,variables-mrr}.tex
+    - a STON summary:       <project>-results.ston
+
+Use the class-side #run: script entries (or #runMicrodown, #runRoassal,
+#runTestRepoForHistory) to start an experiment.
 "
 Class {
 	#name : 'CooHistoryExperimentRunner',
@@ -146,14 +161,14 @@ CooHistoryExperimentRunner >> historyVariableBuilderWithSession: aSession [
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
 	builder variablesHeuristic: (builder newHeuristicBuilder
-		add: CoLocalScopeVariablesHeuristic new;
-		add: CoWorkspaceVariablesHeuristic new;
-		add: CoInstanceAccessibleVariablesHeuristic new;
-		add: (CooSessionVariableHeuristic new
-			session: aSession;
-			yourself);
-		add: CoGlobalVariablesHeuristic new;
-		build).
+			add: CoLocalScopeVariablesHeuristic new;
+			add: CoWorkspaceVariablesHeuristic new;
+			add: CoInstanceAccessibleVariablesHeuristic new;
+			add: (CooSessionVariableHeuristic new
+				session: aSession;
+				yourself);
+			add: CoGlobalVariablesHeuristic new;
+			build).
 	^ builder
 ]
 
@@ -219,11 +234,9 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	aSession resetProgramEntities. "Replay commits from old to new.
 	For EACH commit:
 	  1. install it
-	  2. extract its changes
-	  3. benchmark History
-	  4. benchmark Dependency
-	  5. collect statistics
-	  6. clear development items"
+	  2. benchmark message semantic, history and dependency
+	  3. benchmark variable semantic, history and dependency
+	  4. collect statistics"
 	commits allButLast reverseDo: [ :commit |
 			| loadSuccess |
 			loadSuccess := true.
@@ -284,7 +297,6 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 		repository: aConfiguration repository;
 		commitCount: statistics historyCommitCount;
 		statistics: statistics;
-		dependencyConfigurationName: 'self dependencyConfigurationName';
 		comparisonDescription:
 			'Complete semantics vs Complete semantics + History vs Complete semantics + Direct Package Dependencies';
 		messageSemanticBenchmark: commitsAndBench second;

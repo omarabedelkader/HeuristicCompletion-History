@@ -1,5 +1,15 @@
 "
-i collect data from the runner
+I capture the outcome of one project-level History experiment.
+
+I hold the six benchmarks produced by CooHistoryExperimentRunner — message and
+variable completion, each under the Semantic, History and Dependency
+configurations — together with the project metadata and the statistics
+collected while replaying the history.
+
+I am the source of truth consumed by:
+- CooHistoryBenchmarkPlotter (figures),
+- CooHistoryLatexExporter (LaTeX tables),
+- #saveSTON in the runner (machine-readable summary).
 "
 Class {
 	#name : 'CooHistoryExperimentResult',
@@ -13,7 +23,6 @@ Class {
 		'variableHistoryBenchmark',
 		'variableDependencyBenchmark',
 		'commitCount',
-		'dependencyConfigurationName',
 		'comparisonDescription',
 		'messageSemanticBenchmark',
 		'variableSemanticBenchmark'
@@ -30,7 +39,6 @@ CooHistoryExperimentResult >> asSTONDictionary [
 		  #project -> projectName.
 		  #repository -> repository.
 		  #commitsAnalyzed -> commitCount.
-		  #dependencyConfiguration -> dependencyConfigurationName.
 		  #comparison -> comparisonDescription.
 		  #statistics -> statistics asDictionary.
 		  #messages -> (Dictionary newFrom: {
@@ -68,18 +76,6 @@ CooHistoryExperimentResult >> comparisonDescription [
 CooHistoryExperimentResult >> comparisonDescription: anObject [
 
 	comparisonDescription := anObject
-]
-
-{ #category : 'accessing' }
-CooHistoryExperimentResult >> dependencyConfigurationName [
-
-	^ dependencyConfigurationName
-]
-
-{ #category : 'accessing' }
-CooHistoryExperimentResult >> dependencyConfigurationName: anObject [
-
-	dependencyConfigurationName := anObject
 ]
 
 { #category : 'converting' }
@@ -120,6 +116,7 @@ CooHistoryExperimentResult >> messageDependencyBenchmark: anObject [
 
 { #category : 'accessing' }
 CooHistoryExperimentResult >> messageDependencyValues [
+
 	messageDependencyBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: messageDependencyBenchmark
 ]
@@ -221,7 +218,7 @@ CooHistoryExperimentResult >> variableDependencyBenchmark: anObject [
 { #category : 'accessing' }
 CooHistoryExperimentResult >> variableDependencyValues [
 
-	variableDependencyBenchmark ifNil: [ ^#()].
+	variableDependencyBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: variableDependencyBenchmark
 ]
 
@@ -239,7 +236,8 @@ CooHistoryExperimentResult >> variableHistoryBenchmark: anObject [
 
 { #category : 'accessing' }
 CooHistoryExperimentResult >> variableHistoryValues [
-	variableHistoryBenchmark ifNil: [ ^#() ].
+
+	variableHistoryBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: variableHistoryBenchmark
 ]
 

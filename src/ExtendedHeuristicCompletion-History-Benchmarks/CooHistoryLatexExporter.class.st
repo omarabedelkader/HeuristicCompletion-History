@@ -1,5 +1,13 @@
 "
-I export LaTeX tables from a CooHistoryExperimentResult.
+I export LaTeX report tables from a CooHistoryExperimentResult.
+
+#exportAllFor:to: writes three files per project:
+	<project>-statistics.tex       project and replayed-history statistics
+	<project>-messages-mrr.tex     message-completion MRR by prefix length
+	<project>-variables-mrr.tex    variable-completion MRR by prefix length
+
+Each MRR table reports, for every strategy, the overall MRR together with the
+MRR observed for prefix lengths 2 to 8.
 "
 Class {
 	#name : 'CooHistoryLatexExporter',
@@ -81,9 +89,9 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 				  on: stream ].
 		  historyBenchmark ifNotNil: [
 			  self
-			  writeMRRRowNamed: 'History'
-			  benchmark: historyBenchmark
-			  on: stream ].
+				  writeMRRRowNamed: 'History'
+				  benchmark: historyBenchmark
+				  on: stream ].
 		  dependencyBenchmark ifNotNil: [
 			  self
 				  writeMRRRowNamed: 'Dependency'
