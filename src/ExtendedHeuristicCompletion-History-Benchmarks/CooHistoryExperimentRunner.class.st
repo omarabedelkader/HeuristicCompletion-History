@@ -119,34 +119,38 @@ CooHistoryExperimentRunner >> initialize [
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [ 
+CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
-	| populator commits historyBenchmark dependencyBenchmark |
-	populator := HistoryPopulatorForBench
-		repositoryNamed: aConfiguration repository.
+	| populator commits historyBenchmark dependencyBenchmark semanticBenchmark |
+	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
 	historyBenchmark := CooStaticBenchmarksMessageHistory new
-		name: 'History';
-		session: aSession;
-		builder: (self historyMessageBuilderWithSession: aSession);
-		yourself.
+		                    name: 'History';
+		                    session: aSession;
+		                    builder: (self historyMessageBuilderWithSession: aSession);
+		                    yourself.
 
 	dependencyBenchmark := CooStaticBenchmarksMessageHistory new
-		name: 'Dependency';
-		session: aSession;
-		builder: self completeDirectDependencyMessageBuilder;
-		yourself.
+		                       name: 'Dependency';
+		                       session: aSession;
+		                       builder: self completeDirectDependencyMessageBuilder;
+		                       yourself.
 
-	"Load the oldest commit as the initial state.
+
+	semanticBenchmark := CooStaticBenchmarksMessageHistory new
+		                     name: 'Semantic';
+		                     session: aSession;
+		                     builder: self completeSemanticMessageBuilder;
+		                     yourself. 
+		
+		
+ 	"Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
 	from which to obtain meaningful development changes."
-	commits last
-		checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 
-	aSession resetProgramEntities.
-
-	"Replay commits from old to new.
+	aSession resetProgramEntities. "Replay commits from old to new.
 	For EACH commit:
 	  1. install it
 	  2. extract its changes
@@ -155,27 +159,25 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	  5. collect statistics
 	  6. clear development items"
 	commits allButLast reverseDo: [ :commit |
-		| loadSuccess |
-		loadSuccess := true. 
-		[ 
-		self loadFromOldToNewCommit: commit.
-		] 
-			on: Error 
-			do: [ loadSuccess := false. 
-				Transcript cr; show: 'Error loading ', commit printString ].
-		loadSuccess ifTrue: [ 	
-			historyBenchmark run.
-			dependencyBenchmark run.
-			statistics collectHistoryStatisticsFrom: aSession.
-			].	
-		"aSession resetDevelopmentItems" 	
-	].
+			| loadSuccess |
+			loadSuccess := true.
+			[ self loadFromOldToNewCommit: commit ]
+				on: Error
+				do: [
+						loadSuccess := false.
+						Transcript
+							cr;
+							show: 'Error loading ' , commit printString ].
+			loadSuccess ifTrue: [ "aSession resetDevelopmentItems"
+					historyBenchmark run.
+					dependencyBenchmark run.
+					statistics collectHistoryStatisticsFrom: aSession ] ].
 
 	^ {
-		commits.
-		historyBenchmark.
-		dependencyBenchmark
-	}
+		  commits.
+		  historyBenchmark.
+		semanticBenchmark run.
+		  dependencyBenchmark }
 ]
 
 { #category : 'private' }
@@ -191,15 +193,16 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 
 	| result commitsAndBench |
 	aConfiguration outputDirectory ensureCreateDirectory.
-	Transcript cr; show: 'Loading project for History experiment: '; show: aConfiguration name.
+	Transcript
+		cr;
+		show: 'Loading project for History experiment: ';
+		show: aConfiguration name.
 	aConfiguration loadProject.
 
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 
-	commitsAndBench := self
-		   analyzeHistoryAndBenchmarksFor: aConfiguration
-			session: CooSession current.
+	commitsAndBench := self analyzeHistoryAndBenchmarksFor: aConfiguration session: CooSession current.
 
 	result := CooHistoryExperimentResult new.
 	result
@@ -208,23 +211,16 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 		commitCount: statistics historyCommitCount;
 		statistics: statistics;
 		dependencyConfigurationName: 'self dependencyConfigurationName';
-		comparisonDescription:
-			'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
+		comparisonDescription: 'Complete semantics + History vs Complete semantics + Direct Package Dependencies';
 		messageHistoryBenchmark: commitsAndBench second;
-		messageDependencyBenchmark: commitsAndBench third
-		"messageDependencyBenchmark: messageDependency;
+		messageDependencyBenchmark: commitsAndBench third;
+		messageDependencyBenchmark: commitsAndBench fourth. "messageDependencyBenchmark: messageDependency;
 		variableHistoryBenchmark: variableHistory;
-		variableDependencyBenchmark: variableDependency".
+		variableDependencyBenchmark: variableDependency"
 
-	CooHistoryBenchmarkPlotter new
-		exportAllFor: result
-		to: aConfiguration outputDirectory.
-	CooHistoryLatexExporter new
-		exportAllFor: result
-		to: aConfiguration outputDirectory.
-	self
-		saveSTON: result
-		to: aConfiguration outputDirectory.
+	CooHistoryBenchmarkPlotter new exportAllFor: result to: aConfiguration outputDirectory.
+	CooHistoryLatexExporter new exportAllFor: result to: aConfiguration outputDirectory.
+	self saveSTON: result to: aConfiguration outputDirectory.
 
 	^ result
 ]

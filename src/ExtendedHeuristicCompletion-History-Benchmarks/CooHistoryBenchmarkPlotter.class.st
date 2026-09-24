@@ -4,6 +4,10 @@ I export project comparison plots from a CooHistoryExperimentResult.
 Class {
 	#name : 'CooHistoryBenchmarkPlotter',
 	#superclass : 'Object',
+	#instVars : [
+		'anExperimentResult',
+		'messageSemanticValues'
+	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Tools',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#tag : 'Tools'
@@ -64,9 +68,10 @@ CooHistoryBenchmarkPlotter >> appendGridOn: aStream left: left top: top width: w
 			cr ]
 ]
 
-{ #category : 'svg' }
+{ #category : 'png' }
 CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 
+	"History"
 	aStream
 		nextPutAll: '<circle cx="';
 		nextPutAll: (self svgNumber: x);
@@ -74,6 +79,7 @@ CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 		nextPutAll: (self svgNumber: y);
 		nextPutAll: '" r="5" fill="#1f77b4"/>';
 		cr.
+
 	aStream
 		nextPutAll: '<text x="';
 		nextPutAll: (self svgNumber: x + 14);
@@ -81,18 +87,39 @@ CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 		nextPutAll: (self svgNumber: y + 5);
 		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">History</text>';
 		cr.
-	self
-		appendTriangleOn: aStream
-		x: x + 120
-		y: y
-		color: '#d62728'.
+
+	"Semantic"
+	aStream
+		nextPutAll: '<circle cx="';
+		nextPutAll: (self svgNumber: x + 120);
+		nextPutAll: '" cy="';
+		nextPutAll: (self svgNumber: y);
+		nextPutAll: '" r="5" fill="#2ca02c"/>';
+		cr.
+
 	aStream
 		nextPutAll: '<text x="';
 		nextPutAll: (self svgNumber: x + 134);
 		nextPutAll: '" y="';
 		nextPutAll: (self svgNumber: y + 5);
+		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">Semantic</text>';
+		cr.
+
+	"Dependency"
+	self
+		appendTriangleOn: aStream
+		x: x + 260
+		y: y
+		color: '#d62728'.
+
+	aStream
+		nextPutAll: '<text x="';
+		nextPutAll: (self svgNumber: x + 274);
+		nextPutAll: '" y="';
+		nextPutAll: (self svgNumber: y + 5);
 		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">Dependency</text>';
 		cr
+
 ]
 
 { #category : 'svg' }
@@ -135,6 +162,79 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 		top: top
 		width: width
 		height: height.
+	self
+		appendSeries: dependencyValues
+		color: '#d62728'
+		marker: #triangle
+		on: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
+	aStream
+		nextPutAll: '<text x="';
+		nextPutAll: (self svgNumber: left + (width / 2));
+		nextPutAll: '" y="';
+		nextPutAll: (self svgNumber: top + height + 54);
+		nextPutAll: '" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#333">Prefix Length</text>';
+		cr
+]
+
+{ #category : 'png' }
+CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: aStream left: left top: top width: width height: height [
+
+	aStream
+		nextPutAll: '<text x="';
+		nextPutAll: (self svgNumber: left + (width / 2));
+		nextPutAll: '" y="';
+		nextPutAll: (self svgNumber: top - 26);
+		nextPutAll: '" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111">';
+		nextPutAll: (self xmlEscape: aTitle);
+		nextPutAll: '</text>';
+		cr.
+
+	self
+		appendGridOn: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
+	self
+		appendAxesOn: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
+	self
+		appendXTicksOn: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
+	self
+		appendSeries: historyValues
+		color: '#1f77b4'
+		marker: #circle
+		on: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
+	self
+		appendSeries: semanticValues
+		color: '#2ca02c'
+		marker: #circle
+		on: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+
 	self
 		appendSeries: dependencyValues
 		color: '#d62728'
@@ -344,6 +444,95 @@ CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyVa
 ]
 
 { #category : 'png' }
+CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: canvas left: left top: top width: width height: height [ 
+
+	| axisColor gridColor textColor |
+	axisColor := Color r: 0.2 g: 0.2 b: 0.2.
+	gridColor := Color r: 0.9 g: 0.91 b: 0.92.
+	textColor := Color r: 0.1 g: 0.1 b: 0.1.
+
+	self
+		drawString: aTitle
+		on: canvas
+		at: (left + (width / 2) - 45) rounded @ (top - 42) rounded
+		color: textColor.
+
+	#( 0 0.2 0.4 0.6 0.8 1.0 ) do: [ :tick |
+		| y |
+		y := (self yForMrr: tick top: top height: height) rounded.
+
+		self
+			drawLineOn: canvas
+			from: left rounded @ y
+			to: (left + width) rounded @ y
+			width: 1
+			color: gridColor.
+
+		self
+			drawString: (tick asFloat printShowingDecimalPlaces: 1)
+			on: canvas
+			at: (left - 36) rounded @ (y - 7)
+			color: textColor ].
+
+	self
+		drawLineOn: canvas
+		from: left rounded @ top rounded
+		to: left rounded @ (top + height) rounded
+		width: 2
+		color: axisColor.
+
+	self
+		drawLineOn: canvas
+		from: left rounded @ (top + height) rounded
+		to: (left + width) rounded @ (top + height) rounded
+		width: 2
+		color: axisColor.
+
+	self prefixes do: [ :prefix |
+		| x |
+		x := (self xForPrefix: prefix left: left width: width) rounded.
+
+		self
+			drawString: prefix asString
+			on: canvas
+			at: (x - 4) @ (top + height + 12) rounded
+			color: textColor ].
+
+	"History"
+	self
+		drawPNGSeries: historyValues
+		on: canvas
+		left: left
+		top: top
+		width: width
+		height: height
+		color: (Color r: 0.12 g: 0.47 b: 0.71)
+		marker: #circle.
+
+	"Semantic"
+	self
+		drawPNGSeries: semanticValues
+		on: canvas
+		left: left
+		top: top
+		width: width
+		height: height
+		color: (Color r: 0.17 g: 0.63 b: 0.17)
+		marker: #circle.
+
+	"Dependency"
+	self
+		drawPNGSeries: dependencyValues
+		on: canvas
+		left: left
+		top: top
+		width: width
+		height: height
+		color: (Color r: 0.84 g: 0.15 b: 0.16)
+		marker: #triangle
+]
+
+{ #category : 'png' }
 CooHistoryBenchmarkPlotter >> drawPNGSeries: values on: canvas left: left top: top width: width height: height color: color marker: marker [
 
 	| previousPoint |
@@ -484,52 +673,61 @@ CooHistoryBenchmarkPlotter >> strokeTriangleOn: canvas center: centerPoint color
 		color: color
 ]
 
-{ #category : 'svg' }
+{ #category : 'png' }
 CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult [
 
 	^ String streamContents: [ :stream |
-		  stream
-			  nextPutAll: '<?xml version="1.0" encoding="UTF-8"?>';
-			  cr.
-		  stream
-			  nextPutAll:
-				  '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">';
-			  cr.
-		  stream
-			  nextPutAll: '<rect width="1200" height="620" fill="white"/>';
-			  cr.
-		  stream
-			  nextPutAll:
-				  '<text x="600" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#111">';
-			  nextPutAll:
-				  (self xmlEscape: anExperimentResult projectName asUppercase);
-			  nextPutAll: '</text>';
-			  cr.
-		  self
-			  appendPanelNamed: 'Messages'
-			  historyValues: anExperimentResult messageHistoryValues
-			  dependencyValues: anExperimentResult messageDependencyValues
-			  on: stream
-			  left: 80
-			  top: 100
-			  width: 460
-			  height: 360.
-		  self
-			  appendPanelNamed: 'Variables'
-			  historyValues: anExperimentResult variableHistoryValues
-			  dependencyValues: anExperimentResult variableDependencyValues
-			  on: stream
-			  left: 660
-			  top: 100
-			  width: 460
-			  height: 360.
-		  self
-			  appendLegendOn: stream
-			  x: 470
-			  y: 555.
-		  stream
-			  nextPutAll: '</svg>';
-			  cr ]
+		stream
+			nextPutAll: '<?xml version="1.0" encoding="UTF-8"?>';
+			cr.
+
+		stream
+			nextPutAll:
+				'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">';
+			cr.
+
+		stream
+			nextPutAll: '<rect width="1200" height="620" fill="white"/>';
+			cr.
+
+		stream
+			nextPutAll:
+				'<text x="600" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#111">';
+			nextPutAll:
+				(self xmlEscape: anExperimentResult projectName asUppercase);
+			nextPutAll: '</text>';
+			cr.
+
+		self
+			appendPanelNamed: 'Messages'
+			historyValues: anExperimentResult messageHistoryValues
+			semanticValues: anExperimentResult messageSemanticValues
+			dependencyValues: anExperimentResult messageDependencyValues
+			on: stream
+			left: 80
+			top: 100
+			width: 460
+			height: 360.
+
+		self
+			appendPanelNamed: 'Variables'
+			historyValues: anExperimentResult variableHistoryValues
+			semanticValues: #()
+			dependencyValues: anExperimentResult variableDependencyValues
+			on: stream
+			left: 660
+			top: 100
+			width: 460
+			height: 360.
+
+		self
+			appendLegendOn: stream
+			x: 400
+			y: 555.
+
+		stream
+			nextPutAll: '</svg>';
+			cr ]
 ]
 
 { #category : 'private' }
