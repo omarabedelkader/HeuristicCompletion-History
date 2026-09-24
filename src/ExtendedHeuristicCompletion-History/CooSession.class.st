@@ -312,10 +312,50 @@ CooSession >> addNewMethodInVocabulary: anAnn [
 ]
 
 { #category : 'for benchmark' }
+CooSession >> addedAndModifiedMethodDescriptions [
+	"When we load code from a commit we can only have added OR modified OR removed 
+	never both of them (This can happens during development but not in the benches by construction. 
+	"
+	
+	^ methodDescriptions select: [ :each | (each event = #added) | (each event = #modified) ]
+	
+]
+
+{ #category : 'for benchmark' }
+CooSession >> addedAndModifiedMethods [
+	
+	| col |
+	col := OrderedCollection new. 
+	
+	self addedAndModifiedMethodDescriptions do: [ :each |
+		| metaclass clss |
+		metaclass := false.
+		clss := each nameOfClass.
+		(each nameOfClass endsWith: ' class') ifTrue: [
+			metaclass := true.
+			clss := each nameOfClass allButLast: 6 ].
+			self class environment at: clss asSymbol ifPresent: [ :myClass |
+				col add: (metaclass
+					ifTrue: [ myClass class >> each selector ]
+				   ifFalse: [ myClass >> each selector ]) ] ].
+	^ col 
+]
+
+{ #category : 'for benchmark' }
 CooSession >> addedMethodDescriptions [
+	"When we load code from a commit we can only have added OR modified OR removed 
+	never both of them (This can happens during development but not in the benches by construction. 
+	"
+	
+	^ methodDescriptions select: [ :each | each event = #added ]
+	
+]
+
+{ #category : 'to remove unused for benchs' }
+CooSession >> addedMethodDescriptionsReDoneForMergingMultipleCommits [
 	"this is unclear how to handle removed method when we load commits"
 	
-	| tmps removed existing |
+	| tmps existing |
 	tmps := methodDescriptions reversed.
 	existing := Set new.
 	
@@ -408,7 +448,7 @@ CooSession >> computeDeltaMessageOf: aMethodModifiedAnnouncement [
 	
 ]
 
-{ #category : 'for benchmark' }
+{ #category : 'to remove unused for benchs' }
 CooSession >> existingMethodDescriptions [
 
 	| tmps removed existing |
@@ -422,27 +462,6 @@ CooSession >> existingMethodDescriptions [
 	^ existing
 ]
 
-{ #category : 'for benchmark' }
-CooSession >> existingMethods [
-	"pay attention this requires that the classes are loaded in Pharo."
-	"we may have some extensions...."
-	| col |
-	col := OrderedCollection new. 
-	
-	self existingMethodDescriptions do: [ :each |
-		| metaclass clss |
-		metaclass := false.
-		clss := each nameOfClass.
-		(each nameOfClass endsWith: ' class') ifTrue: [
-			metaclass := true.
-			clss := each nameOfClass allButLast: 6 ].
-			self class environment at: clss asSymbol ifPresent: [ :myClass |
-				col add: (metaclass
-					ifTrue: [ myClass class >> each selector ]
-				   ifFalse: [ myClass >> each selector ]) ] ].
-	^ col 
-]
-
 { #category : 'initialization' }
 CooSession >> initialize [
 
@@ -454,33 +473,35 @@ CooSession >> initialize [
 	recorder := CooNullEventRecorder new
 ]
 
-{ #category : 'low-level' }
-CooSession >> methodDescriptions [ 
+{ #category : 'to remove unused for benchs' }
+CooSession >> methodDescriptions [
 	
-	^ methodDescriptions 
-]
-
-{ #category : 'for benchmark' }
-CooSession >> modifiedMethodDescriptions [
-	"this is unclear how to handle removed method when we load commits"
-	
-	| tmps removed existing |
-	tmps := methodDescriptions copy.
-	tmps := tmps select: [ :each | each event = #modified  ].
-	existing := OrderedCollection new.
-	removed := OrderedCollection new.
+	| tmps existing |
+	tmps := methodDescriptions reversed.
+	existing := Set new.
 	
 	tmps do: [ :each |
-			"we make sure that if a method was removed we do not handle it.
-			Now this unclear if we get removed method when loading back code so the following
-			test looks useless."
-			each event = #removed ifTrue: [ removed add: each ].
-			(removed anySatisfy: [ :r | r selector = each selector and: [ r nameOfClass = each nameOfClass ] ]) 
-				ifFalse: [ existing add: each ] ].
+			each event = #removed 
+				ifTrue: [ (existing 
+								anySatisfy: [ :r | r selector = each selector 
+								and: [ r nameOfClass = each nameOfClass ] ]) ifTrue: [ existing remove: each ]]
+				ifFalse: [ (each event = #added | each event = #modified)
+									ifTrue: [ existing add: each ] ]
+			].
 	^ existing
 ]
 
 { #category : 'for benchmark' }
+CooSession >> modifiedMethodDescriptions [
+	"When we load code from a commit we can only have added OR modified OR removed 
+	never both of them (This can happens during development but not in the benches by construction. 
+	"
+	
+	^ methodDescriptions select: [ :each | each event = #modified ]
+	
+]
+
+{ #category : 'to remove unused for benchs' }
 CooSession >> modifiedMethods [
 	"pay attention this requires that the classes are loaded in Pharo."
 	"we may have some extensions...."
@@ -507,7 +528,7 @@ CooSession >> modifiedMethodsAndDescriptions [
 	"pay attention this requires that the classes are loaded in Pharo."
 	"we may have some extensions...."
 	
-	| col modified res |
+	| col modified |
 	col := OrderedCollection new. 
 	modified := self modifiedMethodDescriptions.
 	modified do: [ :each |

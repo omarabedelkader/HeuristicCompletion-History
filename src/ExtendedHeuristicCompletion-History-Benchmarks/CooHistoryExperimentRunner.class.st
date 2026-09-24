@@ -91,7 +91,7 @@ CooHistoryExperimentRunner >> completeDirectDependencyVariableBuilder [
 ]
 
 { #category : 'benchs' }
-CooHistoryExperimentRunner >> completeSemanticMessageBuilder [
+CooHistoryExperimentRunner >> completeSemanticsMessageBuilder [
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
@@ -147,6 +147,27 @@ CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 	^ builder
 ]
 
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> historyVariableBuilderWithSession: aSession [
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+		add: CoSelfMessageHeuristic new;
+		add: CoSuperMessageHeuristic new;
+		add: CoTypedReceiverMessageHeuristic new;
+		add: CoInitializeInferencedMessageHeuristic new;
+		add: CoLiteralMessageHeuristic new;
+		add: CoGlobalVariableMessageHeuristic new;
+		add: CoVariableWithTypeNameMessageHeuristic new;
+		add: (CooSessionVariableHeuristic new
+			session: aSession;
+			yourself);
+		add: CoUnknownMessageHeuristic new;
+		build).
+	^ builder
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> initialize [
 
@@ -157,29 +178,47 @@ CooHistoryExperimentRunner >> initialize [
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
-	| populator commits historyBenchmark dependencyBenchmark semanticBenchmark |
+	| populator commits historyBenchmark dependencyBenchmark semanticBenchmark semanticsVariableBenchmark dependencyVariableBenchmark historyVariableBenchmark |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
 	historyBenchmark := CooStaticBenchmarksMessageHistory new
-		                    name: 'History';
+		                    name: 'History Messages';
 		                    session: aSession;
 		                    builder: (self historyMessageBuilderWithSession: aSession);
 		                    yourself.
 
 	dependencyBenchmark := CooStaticBenchmarksMessageHistory new
-		                       name: 'Dependency';
+		                       name: 'Dependency Messages';
 		                       session: aSession;
 		                       builder: self completeDirectDependencyMessageBuilder;
 		                       yourself.
 
 
 	semanticBenchmark := CooStaticBenchmarksMessageHistory new
-		                     name: 'Semantic';
+		                     name: 'Semantic Messages';
 		                     session: aSession;
-		                     builder: self completeSemanticMessageBuilder;
+		                     builder: self completeSemanticsMessageBuilder;
 		                     yourself. 
 		
+	semanticsVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: self completeSemanticsVariableBuilder;
+		                     yourself. 
+		
+	dependencyVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: self completeSemanticsVariableBuilder ;
+		                     yourself. 
+	
+	historyVariableBenchmark := CooStaticBenchmarksVariableHistory new
+		                     name: 'Semantic Variables';
+		                     session: aSession;
+		                     builder: (self historyVariableBuilderWithSession: aSession) ;
+		                     yourself. 
+	
 		
  	"Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
@@ -204,18 +243,27 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 						Transcript
 							cr;
 							show: 'Error loading ' , commit printString ].
-			loadSuccess ifTrue: [ "aSession resetDevelopmentItems"
-					semanticBenchmark run.
+			loadSuccess ifTrue: [ 
+					"semanticBenchmark run."
 					historyBenchmark run.
 					dependencyBenchmark run.
+					semanticsVariableBenchmark run.
 					
-					statistics collectHistoryStatisticsFrom: aSession ] ].
+					statistics collectHistoryStatisticsFrom: aSession.
+					"Pay attention do not remove the following line
+					it flushes the entities loading for a single commit. 
+					It does not touch the handlers that may naturally accumulate data 
+					across multiple commits."
+					aSession resetDevelopmentItems ] ].
 
 	^ {
 		  commits .
-			semanticBenchmark.
+			"semanticBenchmark."
 		  	historyBenchmark.
-		  	dependencyBenchmark }
+		  	dependencyBenchmark .
+			semanticsVariableBenchmark
+		  	"historyBenchmark.
+		  	dependencyBenchmark"  }
 ]
 
 { #category : 'private' }

@@ -24,7 +24,7 @@ CooHistoryExperimentConfiguration class >> microdown [
 	^ self new
 		  name: 'Microdown';
 		  repository: 'git@github.com:pillar-markup/Microdown.git';
-		  numberOfCommits: 70;
+		  numberOfCommits: 11;
 		  packageNamePrefix: 'Microdown';
 		  loader: [
 			  Smalltalk globals
