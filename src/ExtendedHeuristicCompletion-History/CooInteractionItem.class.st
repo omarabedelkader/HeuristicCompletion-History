@@ -76,7 +76,6 @@ CooInteractionItem >> prepareForSerialization [
 
 	| dic |
 	dic := Dictionary new.
-	self halt.
 	dic at: #className put: self nameOfClass.
 	
 	^ dic
