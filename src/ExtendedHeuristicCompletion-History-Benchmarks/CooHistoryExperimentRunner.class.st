@@ -182,7 +182,7 @@ CooHistoryExperimentRunner >> initialize [
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
-	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark |
+	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark semanticsVariableBenchmark dependencyVariableBenchmark historyVariableBenchmark |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
@@ -202,7 +202,7 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	messageSemanticBenchmark := CooStaticBenchmarksMessageHistory new
 		                     name: 'Semantic';
 		                     session: aSession;
-		                     builder: self completeSemanticMessageBuilder;
+		                     builder: self completeSemanticsMessageBuilder;
 		                     yourself.
 
 	variableHistoryBenchmark := CooStaticBenchmarksVariableHistory new

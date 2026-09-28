@@ -300,6 +300,20 @@ CooHistoryBenchmarkPlotter >> canvasExtent [
 ]
 
 { #category : 'png' }
+CooHistoryBenchmarkPlotter >> drawCenteredString: aString on: canvas at: aPoint color: aColor [
+
+	| font width point |
+	font := TextStyle defaultFont.
+	width := font widthOfString: aString.
+	point := (aPoint x - (width / 2)) rounded @ aPoint y.
+	self
+		drawString: aString
+		on: canvas
+		at: point
+		color: aColor
+]
+
+{ #category : 'png' }
 CooHistoryBenchmarkPlotter >> drawLineOn: canvas from: startPoint to: endPoint width: width color: color [
 
 	[ canvas
@@ -455,20 +469,6 @@ CooHistoryBenchmarkPlotter >> drawString: aString on: canvas at: aPoint color: a
 				color: aColor ]
 ]
 
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> drawCenteredString: aString on: canvas at: aPoint color: aColor [
-
-	| font width point |
-	font := TextStyle defaultFont.
-	width := font widthOfString: aString.
-	point := (aPoint x - (width / 2)) rounded @ aPoint y.
-	self
-		drawString: aString
-		on: canvas
-		at: point
-		color: aColor
-]
-
 { #category : 'exporting' }
 CooHistoryBenchmarkPlotter >> exportAllFor: anExperimentResult to: aDirectory [
 
@@ -505,33 +505,39 @@ CooHistoryBenchmarkPlotter >> exportAllFor: anExperimentResult to: aDirectory [
 		  pngVariablesPath }
 ]
 
-{ #category : 'exporting' }
-CooHistoryBenchmarkPlotter >> writeSVG: anSVGString to: aFileReference [
+{ #category : 'png' }
+CooHistoryBenchmarkPlotter >> fillOvalOn: canvas center: centerPoint radius: radius color: color [
 
-	self
-		write: anSVGString
-		to: aFileReference asFileReference
+	| rectangle |
+	rectangle := (centerPoint x - radius) @ (centerPoint y - radius)
+		             corner:
+			             (centerPoint x + radius) @ (centerPoint y + radius).
+	[ canvas
+		fillOval: rectangle
+		color: color
+		borderWidth: 1
+		borderColor: color ]
+		on: MessageNotUnderstood
+		do: [ :exception |
+			canvas
+				fillOval: rectangle
+				color: color ]
 ]
 
-{ #category : 'exporting' }
-CooHistoryBenchmarkPlotter >> writePNG: aForm to: aFileReference [
+{ #category : 'private' }
+CooHistoryBenchmarkPlotter >> join: aCollection separatedBy: separatorString [
 
-	| reference stream |
-	(Smalltalk globals includesKey: #PNGReadWriter)
-		ifFalse: [ ^ nil ].
+	^ String streamContents: [ :stream |
+		  aCollection
+			  do: [ :each | stream nextPutAll: each ]
+			  separatedBy: [ stream nextPutAll: separatorString ] ]
+]
 
-	reference := aFileReference asFileReference.
-	reference parent ensureCreateDirectory.
-	^ [ stream := reference binaryWriteStream.
-		[ PNGReadWriter putForm: aForm on: stream ]
-			ensure: [ stream close ] ]
-		on: Error
-		do: [ :exception |
-			Transcript
-				cr;
-				show: 'Could not export PNG plot: ';
-				show: exception messageText.
-			nil ]
+{ #category : 'private' }
+CooHistoryBenchmarkPlotter >> normalizedMrr: aNumber [
+
+	aNumber ifNil: [ ^ 0 ].
+	^ ((aNumber asFloat max: 0) min: 1)
 ]
 
 { #category : 'private' }
@@ -587,41 +593,6 @@ CooHistoryBenchmarkPlotter >> pngForVariables: anExperimentResult [
 		dependencyValues: anExperimentResult variableDependencyValues
 ]
 
-{ #category : 'png' }
-CooHistoryBenchmarkPlotter >> fillOvalOn: canvas center: centerPoint radius: radius color: color [
-
-	| rectangle |
-	rectangle := (centerPoint x - radius) @ (centerPoint y - radius)
-		             corner:
-			             (centerPoint x + radius) @ (centerPoint y + radius).
-	[ canvas
-		fillOval: rectangle
-		color: color
-		borderWidth: 1
-		borderColor: color ]
-		on: MessageNotUnderstood
-		do: [ :exception |
-			canvas
-				fillOval: rectangle
-				color: color ]
-]
-
-{ #category : 'private' }
-CooHistoryBenchmarkPlotter >> join: aCollection separatedBy: separatorString [
-
-	^ String streamContents: [ :stream |
-		  aCollection
-			  do: [ :each | stream nextPutAll: each ]
-			  separatedBy: [ stream nextPutAll: separatorString ] ]
-]
-
-{ #category : 'private' }
-CooHistoryBenchmarkPlotter >> normalizedMrr: aNumber [
-
-	aNumber ifNil: [ ^ 0 ].
-	^ ((aNumber asFloat max: 0) min: 1)
-]
-
 { #category : 'accessing' }
 CooHistoryBenchmarkPlotter >> prefixes [
 
@@ -653,28 +624,6 @@ CooHistoryBenchmarkPlotter >> strokeTriangleOn: canvas center: centerPoint color
 		to: topPoint
 		width: 2
 		color: color
-]
-
-{ #category : 'svg' }
-CooHistoryBenchmarkPlotter >> svgForMessages: anExperimentResult [
-
-	^ self
-		svgFor: anExperimentResult
-		panelTitle: 'Message Completion'
-		historyValues: anExperimentResult messageHistoryValues
-		semanticValues: anExperimentResult messageSemanticValues
-		dependencyValues: anExperimentResult messageDependencyValues
-]
-
-{ #category : 'svg' }
-CooHistoryBenchmarkPlotter >> svgForVariables: anExperimentResult [
-
-	^ self
-		svgFor: anExperimentResult
-		panelTitle: 'Variable Completion'
-		historyValues: anExperimentResult variableHistoryValues
-		semanticValues: anExperimentResult variableSemanticValues
-		dependencyValues: anExperimentResult variableDependencyValues
 ]
 
 { #category : 'svg' }
@@ -723,6 +672,28 @@ CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle hist
 			cr ]
 ]
 
+{ #category : 'svg' }
+CooHistoryBenchmarkPlotter >> svgForMessages: anExperimentResult [
+
+	^ self
+		svgFor: anExperimentResult
+		panelTitle: 'Message Completion'
+		historyValues: anExperimentResult messageHistoryValues
+		semanticValues: anExperimentResult messageSemanticValues
+		dependencyValues: anExperimentResult messageDependencyValues
+]
+
+{ #category : 'svg' }
+CooHistoryBenchmarkPlotter >> svgForVariables: anExperimentResult [
+
+	^ self
+		svgFor: anExperimentResult
+		panelTitle: 'Variable Completion'
+		historyValues: anExperimentResult variableHistoryValues
+		semanticValues: anExperimentResult variableSemanticValues
+		dependencyValues: anExperimentResult variableDependencyValues
+]
+
 { #category : 'private' }
 CooHistoryBenchmarkPlotter >> svgNumber: aNumber [
 
@@ -736,6 +707,35 @@ CooHistoryBenchmarkPlotter >> write: aString to: aFileReference [
 	aFileReference writeStreamDo: [ :stream |
 		stream nextPutAll: aString ].
 	^ aFileReference
+]
+
+{ #category : 'exporting' }
+CooHistoryBenchmarkPlotter >> writePNG: aForm to: aFileReference [
+
+	| reference stream |
+	(Smalltalk globals includesKey: #PNGReadWriter)
+		ifFalse: [ ^ nil ].
+
+	reference := aFileReference asFileReference.
+	reference parent ensureCreateDirectory.
+	^ [ stream := reference binaryWriteStream.
+		[ PNGReadWriter putForm: aForm on: stream ]
+			ensure: [ stream close ] ]
+		on: Error
+		do: [ :exception |
+			Transcript
+				cr;
+				show: 'Could not export PNG plot: ';
+				show: exception messageText.
+			nil ]
+]
+
+{ #category : 'exporting' }
+CooHistoryBenchmarkPlotter >> writeSVG: anSVGString to: aFileReference [
+
+	self
+		write: anSVGString
+		to: aFileReference asFileReference
 ]
 
 { #category : 'private' }
