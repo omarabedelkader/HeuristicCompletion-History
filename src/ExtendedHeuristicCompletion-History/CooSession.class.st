@@ -552,7 +552,6 @@ CooSession >> mostRecentFrequentSelectionHandling [
 CooSession >> navigationClassEntries [
 
 	| seen entries |
-	navigationItems ifNil: [ ^ #() ].
 	seen := Set new.
 	entries := OrderedCollection new.
 	navigationItems do: [ :item |
