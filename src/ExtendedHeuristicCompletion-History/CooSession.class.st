@@ -476,19 +476,7 @@ CooSession >> initialize [
 { #category : 'to remove unused for benchs' }
 CooSession >> methodDescriptions [
 	
-	| tmps existing |
-	tmps := methodDescriptions reversed.
-	existing := Set new.
-	
-	tmps do: [ :each |
-			each event = #removed 
-				ifTrue: [ (existing 
-								anySatisfy: [ :r | r selector = each selector 
-								and: [ r nameOfClass = each nameOfClass ] ]) ifTrue: [ existing remove: each ]]
-				ifFalse: [ (each event = #added | each event = #modified)
-									ifTrue: [ existing add: each ] ]
-			].
-	^ existing
+	^ methodDescriptions 
 ]
 
 { #category : 'for benchmark' }
