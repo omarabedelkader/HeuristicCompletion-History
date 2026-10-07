@@ -5,6 +5,8 @@ But the frequencies is taken into account so that the most recent has a good lik
 The idea is that if the user selects 50 times OrderedCollection the next one has a high chance to be OrderedCollection. But it after 50 times OrderedCollection the user selects two times OrderedDictionary
 then may be OrderedDictionary should have a good likehood to be proposed to the users. 
 
+Note that I mix class and selectors because I have only one structure to hold the frequency.
+
 So there is a mix between mere frequencies and temporal aspects of the user behavior
 "
 Class {
