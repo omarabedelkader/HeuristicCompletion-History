@@ -201,12 +201,14 @@ CooSession class >> withEntityHandler: aProgramEntityHandler [
 
 { #category : 'class handling' }
 CooSession >> addClassItem: anItem [
+	"secondary API. Do not call externally"
 	
 	classDescriptions addFirst: anItem.
 	
 	"Instead of poking the handler during each addition we could pass it all the info when 
 	requesting a list of entries."
 	programEntityHandler handleNewClassItem: anItem.
+	
 	"
 	Do not record structural event for now
 	self recorder log: anItem prepareForSerialization" 
@@ -275,8 +277,9 @@ CooSession >> addNavigationItem: aNavigationHistoryItem [
 
 { #category : 'class handling' }
 CooSession >> addNewClassInVocabulary: ann [
-
-	|historyItem|
+	"main API"
+	
+	| historyItem |
 
 	historyItem := CooAddedClassHistoryItem new
 			 nameOfClass: ann classAdded name;
@@ -550,14 +553,15 @@ CooSession >> mostRecentFrequentSelectionHandling [
 
 { #category : 'navigation' }
 CooSession >> navigationClassEntries [
-	"It would be nice to delegate to a specific handler.
-	In addition it looks like we keep indefinitively the elements and we create global entries 
-	to keep 5 of them at the end!"
+	"It would be nice to delegate to a specific handler."
+	
 	| seen entries |
-
 	seen := Set new.
 	entries := OrderedCollection new.
-	navigationItems do: [ :item |
+	"in case of multiple navigation to the same item we treat more than needed in the end."
+	1 to:  (navigationItems size min: 10) do: [ :index |
+		| item |
+		item := navigationItems at: index.
 		(item isClassObservation and: [ (seen includes: item name) not ]) ifTrue: [
 			seen add: item name.
 			entries add: ((CoGlobalEntry contents: item name node: nil)
