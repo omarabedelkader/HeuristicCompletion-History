@@ -8,8 +8,9 @@ I can be instantiated either when the image starts and the user selects NO on th
 Class {
 	#name : 'CooNullHistoryEventRecorderOld',
 	#superclass : 'CooHistoryEventRecorder',
-	#category : 'ExtendedHeuristicCompletion-History-Recorder',
-	#package : 'ExtendedHeuristicCompletion-History-Recorder'
+	#category : 'ExtendedHeuristicCompletion-History-Recorder-Old',
+	#package : 'ExtendedHeuristicCompletion-History-Recorder',
+	#tag : 'Old'
 }
 
 { #category : 'actions' }

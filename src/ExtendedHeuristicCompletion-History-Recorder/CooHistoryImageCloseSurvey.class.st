@@ -9,8 +9,9 @@ Class {
 		'promptInProgress',
 		'promptedForCurrentQuit'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Recorder',
-	#package : 'ExtendedHeuristicCompletion-History-Recorder'
+	#category : 'ExtendedHeuristicCompletion-History-Recorder-Old',
+	#package : 'ExtendedHeuristicCompletion-History-Recorder',
+	#tag : 'Old'
 }
 
 { #category : 'survey' }

@@ -8,7 +8,7 @@ consent decision, I either enable remote history recording or install the null
 recorder, then close the window.
 "
 Class {
-	#name : 'CooHistorySetupPresenter',
+	#name : 'CooHistorySetupPresenter2',
 	#superclass : 'SpPresenter',
 	#instVars : [
 		'titleLabel',
@@ -27,7 +27,7 @@ Class {
 }
 
 { #category : 'progress' }
-CooHistorySetupPresenter class >> indeterminateProgressFrom: current start: start end: end step: step [
+CooHistorySetupPresenter2 class >> indeterminateProgressFrom: current start: start end: end step: step [
 
 	| boundedStart boundedEnd boundedCurrent next |
 	boundedStart := ((start ifNil: [ 0 ]) max: 0) min: 1.
@@ -41,36 +41,36 @@ CooHistorySetupPresenter class >> indeterminateProgressFrom: current start: star
 ]
 
 { #category : 'instance creation' }
-CooHistorySetupPresenter class >> open [
+CooHistorySetupPresenter2 class >> open [
 	"Open the setup wizard."
 
 	^ self new open
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> contentContainer [
+CooHistorySetupPresenter2 >> contentContainer [
 
 	^ contentContainer
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> contentContainer: anObject [
+CooHistorySetupPresenter2 >> contentContainer: anObject [
 
 	contentContainer := anObject
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> continueSetupAfterConsentDecision [
+CooHistorySetupPresenter2 >> continueSetupAfterConsentDecision [
 
-	self showSetupStep.
-	statusLabel label: (CooHistorySettings historyRecordingConsentAccepted
+	titleLabel label: 'Setting up Code Completion History'.
+	statusLabel label: ( CooHistoryEventRecorder2 shareNames
 		ifTrue: [ 'Enabling history recorder...' ]
 		ifFalse: [ 'Installing the null recorder.' ]).
-	self startSetup
+
 ]
 
 { #category : 'layout' }
-CooHistorySetupPresenter >> defaultLayout [
+CooHistorySetupPresenter2 >> defaultLayout [
 
 	^ SpBoxLayout newTopToBottom
 		  spacing: 10;
@@ -82,32 +82,20 @@ CooHistorySetupPresenter >> defaultLayout [
 		  yourself
 ]
 
-{ #category : 'initialization' }
-CooHistorySetupPresenter >> deferUI: aBlock [
-
-	| ui |
-	ui := [ UIManager default ] on: Error do: [ nil ].
-
-	(ui notNil and: [ ui respondsTo: #defer: ]) ifTrue: [
-		^ ui defer: aBlock ].
-
-	^ aBlock value
-]
-
 { #category : 'accessing' }
-CooHistorySetupPresenter >> descriptionLabel [
+CooHistorySetupPresenter2 >> descriptionLabel [
 
 	^ descriptionLabel
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> descriptionLabel: anObject [
+CooHistorySetupPresenter2 >> descriptionLabel: anObject [
 
 	descriptionLabel := anObject
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> handleConsentAccepted [
+CooHistorySetupPresenter2 >> handleConsentAccepted [
 
 	CooHistorySettings recordHistoryRecordingConsentAccepted: true.
 	statusLabel label: 'Anonymous history telemetry is now enabled. Continuing setup...'.
@@ -115,7 +103,7 @@ CooHistorySetupPresenter >> handleConsentAccepted [
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> handleConsentDeclined [
+CooHistorySetupPresenter2 >> handleConsentDeclined [
 
 	CooHistorySettings recordHistoryRecordingConsentAccepted: false.
 	statusLabel label: 'Anonymous history telemetry is disabled. Continuing setup...'.
@@ -123,13 +111,13 @@ CooHistorySetupPresenter >> handleConsentDeclined [
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> handleOk [
+CooHistorySetupPresenter2 >> handleOk [
 
 	self continueSetupAfterConsentDecision
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> initializePresenters [
+CooHistorySetupPresenter2 >> initializePresenters [
 
 	super initializePresenters.
 
@@ -145,25 +133,15 @@ CooHistorySetupPresenter >> initializePresenters [
 		label: '';
 		yourself.
 
-	setupProgress := 0.
-	progressIsIndeterminate := false.
-	indeterminateProgressStart := 0.
-	indeterminateProgressEnd := 1.
-	progressBar := self newProgressBar.
-	progressBar
-		progress: [ self progressBarValue ]
-		every: 0.1 second.
-
 	contentContainer := SpPresenter new.
 
 	self showWelcomeStep
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> initializeWindow: aWindowPresenter [
+CooHistorySetupPresenter2 >> initializeWindow: aWindowPresenter [
 
 	super initializeWindow: aWindowPresenter.
-
 	aWindowPresenter
 		title: 'Code Completion History Setup';
 		initialExtent: 560 @ 420;
@@ -171,43 +149,8 @@ CooHistorySetupPresenter >> initializeWindow: aWindowPresenter [
 
 ]
 
-{ #category : 'accessing' }
-CooHistorySetupPresenter >> performSetup [
-
-	self setupProgressPercentage: 0.
-	self deferUI: [ statusLabel label: '' ].
-
-	self deferUI: [
-		statusLabel label: (CooHistorySettings historyRecordingConsentAccepted
-			ifTrue: [ 'Enabling history recording...' ]
-			ifFalse: [ 'Disabling history recording...' ]) ].
-
-	CooHistorySettings historyRecordingConsentAccepted
-		ifTrue: [ CooHistorySettings enableRemoteHistoryRecording ]
-		ifFalse: [ CooHistorySettings declineHistoryRecordingConsent ].
-
-	self deferUI: [
-		self setupProgressPercentage: 100.
-		statusLabel label: 'OKAY! Code Completion History setup is complete.'.
-		CooHistorySettings notifyUser: 'OKAY! Code Completion History setup is complete.'.
-		self window close ]
-]
-
 { #category : 'initialization' }
-CooHistorySetupPresenter >> progressBarValue [
-
-	progressIsIndeterminate ifTrue: [
-		setupProgress := self class
-			indeterminateProgressFrom: setupProgress
-			start: indeterminateProgressStart
-			end: indeterminateProgressEnd
-			step: 0.004 ].
-
-	^ setupProgress ifNil: [ 0 ]
-]
-
-{ #category : 'initialization' }
-CooHistorySetupPresenter >> setupProgressPercentage: aNumber [
+CooHistorySetupPresenter2 >> setupProgressPercentage: aNumber [
 
 	| bounded |
 	progressIsIndeterminate := false.
@@ -217,7 +160,7 @@ CooHistorySetupPresenter >> setupProgressPercentage: aNumber [
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> showConsentChoiceStep [
+CooHistorySetupPresenter2 >> showConsentChoiceStep [
 
 	| messageLabel telemetryStateLabel learnMoreButton noButton yesButton buttonRow |
 	titleLabel label: 'Help improve Pharo'.
@@ -268,7 +211,7 @@ CooHistorySetupPresenter >> showConsentChoiceStep [
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> showLearnMoreStepReturningTo: returnBlock includeConsentButtons: includeConsentButtons [
+CooHistorySetupPresenter2 >> showLearnMoreStepReturningTo: returnBlock includeConsentButtons: includeConsentButtons [
 
 	| detailsText backButton noButton yesButton continueButton buttonRow |
 	titleLabel label: 'Anonymous Usage Research'.
@@ -325,25 +268,14 @@ CooHistorySetupPresenter >> showLearnMoreStepReturningTo: returnBlock includeCon
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> showSetupStep [
+CooHistorySetupPresenter2 >> showSetupStep [
 
 	titleLabel label: 'Setting up Code Completion History'.
-	descriptionLabel label: 'LOADING .....'.
-	statusLabel label: ''.
-
-	self setupProgressPercentage: 0.
-
-	contentContainer layout: (SpBoxLayout newTopToBottom
-		spacing: 12;
-		add: progressBar expand: false;
-		add: SpNullPresenter new expand: true;
-		yourself).
-
-	self layout: self defaultLayout
+	
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> showWelcomeStep [
+CooHistorySetupPresenter2 >> showWelcomeStep [
 
 	titleLabel label: 'Welcome to Code Completion History'.
 	descriptionLabel label: 'History-based completion for Pharo.'.
@@ -355,7 +287,7 @@ CooHistorySetupPresenter >> showWelcomeStep [
 ]
 
 { #category : 'initialization' }
-CooHistorySetupPresenter >> showWelcomeStepAfterConsentDecision [
+CooHistorySetupPresenter2 >> showWelcomeStepAfterConsentDecision [
 
 	| messageLabel learnMoreButton continueButton buttonRow |
 	messageLabel := self newLabel
@@ -392,34 +324,26 @@ CooHistorySetupPresenter >> showWelcomeStepAfterConsentDecision [
 	self layout: self defaultLayout
 ]
 
-{ #category : 'initialization' }
-CooHistorySetupPresenter >> startSetup [
-
-	setupProcess := [
-		self performSetup
-	] forkAt: Processor userBackgroundPriority named: 'Code Completion History setup'
-]
-
 { #category : 'accessing' }
-CooHistorySetupPresenter >> statusLabel [
+CooHistorySetupPresenter2 >> statusLabel [
 
 	^ statusLabel
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> statusLabel: anObject [
+CooHistorySetupPresenter2 >> statusLabel: anObject [
 
 	statusLabel := anObject
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> titleLabel [
+CooHistorySetupPresenter2 >> titleLabel [
 
 	^ titleLabel
 ]
 
 { #category : 'accessing' }
-CooHistorySetupPresenter >> titleLabel: anObject [
+CooHistorySetupPresenter2 >> titleLabel: anObject [
 
 	titleLabel := anObject
 ]
