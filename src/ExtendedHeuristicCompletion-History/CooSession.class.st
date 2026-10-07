@@ -354,25 +354,6 @@ CooSession >> addedMethodDescriptions [
 	
 ]
 
-{ #category : 'to remove unused for benchs' }
-CooSession >> addedMethodDescriptionsReDoneForMergingMultipleCommits [
-	"this is unclear how to handle removed method when we load commits"
-	
-	| tmps existing |
-	tmps := methodDescriptions reversed.
-	existing := Set new.
-	
-	tmps do: [ :each |
-			each event = #removed 
-				ifTrue: [ (existing 
-								anySatisfy: [ :r | r selector = each selector 
-								and: [ r nameOfClass = each nameOfClass ] ]) ifTrue: [ existing remove: each ]]
-				ifFalse: [ (each event = #added | each event = #modified)
-									ifTrue: [ existing add: each ] ]
-			].
-	^ existing
-]
-
 { #category : 'for benchmark' }
 CooSession >> addedMethods [
 	"pay attention this requires that the classes are loaded in Pharo."
@@ -476,7 +457,7 @@ CooSession >> initialize [
 	recorder := CooNullEventRecorder new
 ]
 
-{ #category : 'to remove unused for benchs' }
+{ #category : 'accessing' }
 CooSession >> methodDescriptions [
 	
 	^ methodDescriptions 
@@ -492,7 +473,7 @@ CooSession >> modifiedMethodDescriptions [
 	
 ]
 
-{ #category : 'to remove unused for benchs' }
+{ #category : 'for benchmark' }
 CooSession >> modifiedMethods [
 	"pay attention this requires that the classes are loaded in Pharo."
 	"we may have some extensions...."

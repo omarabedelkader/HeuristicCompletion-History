@@ -1,0 +1,82 @@
+Class {
+	#name : 'BaselineOfExtendedHeuristicCompletionHistoryForBenchmarks',
+	#superclass : 'BaselineOf',
+	#category : 'BaselineOfExtendedHeuristicCompletionHistory',
+	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
+}
+
+{ #category : 'private' }
+BaselineOfExtendedHeuristicCompletionHistoryForBenchmarks class >> showHistoryPrivacySetupIfNeeded [
+
+	[
+		(Delay forMilliseconds: 500) wait.
+
+		World ifNotNil: [
+			CooHistorySettings firstLaunchCompleted ifFalse: [
+				WorldMorph doOneCycle.
+				CooHistorySettings openFirstLaunchSetup ] ]
+	] fork
+]
+
+{ #category : 'baselines' }
+BaselineOfExtendedHeuristicCompletionHistoryForBenchmarks >> baseline: spec [
+	<baseline>
+
+	spec for: #common do: [
+		spec postLoadDoIt: #postLoad.
+
+		spec
+			baseline: 'ExtendedHeuristicCompletionBenchmarks'
+			with: [
+				spec repository:
+					'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].
+
+		spec
+			baseline: 'PharoXPEventRecorder'
+			with: [
+				spec repository:
+					'github://omarabedelkader/pharo-data-collector:main' ].
+		spec
+			package: 'ExtendedHeuristicCompletion-History'.
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Recorder'
+			with: [
+				spec requires: #(
+					'PharoXPEventRecorder'
+					'ExtendedHeuristicCompletion-History'
+				) ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Spec'
+			with: [
+				spec requires:
+					'ExtendedHeuristicCompletion-History-Recorder' ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Spec-Tests'
+			with: [
+				spec requires:
+					'ExtendedHeuristicCompletion-History-Spec' ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Tests'
+			with: [
+				spec requires:
+					'ExtendedHeuristicCompletion-History' ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Benchmarks'
+			with: [
+				spec requires: #(
+					'ExtendedHeuristicCompletion-History'
+					'ExtendedHeuristicCompletionBenchmarks'
+				) ].
+
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Recorder-Tests'
+			with: [
+				spec requires:
+					'ExtendedHeuristicCompletion-History-Recorder' ]
+	]
+]
