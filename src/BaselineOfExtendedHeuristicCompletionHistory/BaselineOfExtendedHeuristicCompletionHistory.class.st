@@ -33,7 +33,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	
 		spec
 			group: 'Core' 
-			with: #( 'ExtendedHeuristicCompletion' );
+			with: #( 'ExtendedHeuristicCompletion-History' );
 			group: 'Tests'
 			with: #('ExtendedHeuristicCompletion-History-Tests' ); 
 			group: 'default' 
