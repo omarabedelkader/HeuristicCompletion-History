@@ -78,18 +78,6 @@ HistoryCachePopulatorTest >> setUp [
 ]
 
 { #category : 'running' }
-HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenReturnsNewSelectors [
-
-	| oldAst newAst deltaMessages |
-	oldAst := RBParser parseMethod: 'sample ^ self alpha'.
-	newAst := RBParser parseMethod: 'sample  self beta. ^ self alpha'.
-	deltaMessages := populator computeDeltaMessageBetween: newAst andOld: oldAst.
-
-	self assert: (deltaMessages includes: #beta).
-	self deny: (deltaMessages includes: #alpha)
-]
-
-{ #category : 'running' }
 HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenFiltersBinarySelectors [
 
 	| oldAst newAst deltaMessages |
@@ -106,6 +94,18 @@ HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenFiltersBinarySelector
 	self assert: (deltaMessages includes: #beta:).
 	self deny: (deltaMessages includes: #,).
 	self deny: (deltaMessages includes: #+)
+]
+
+{ #category : 'running' }
+HistoryCachePopulatorTest >> testComputeDeltaMessageBetweenReturnsNewSelectors [
+
+	| oldAst newAst deltaMessages |
+	oldAst := RBParser parseMethod: 'sample ^ self alpha'.
+	newAst := RBParser parseMethod: 'sample  self beta. ^ self alpha'.
+	deltaMessages := populator computeDeltaMessageBetween: newAst andOld: oldAst.
+
+	self assert: (deltaMessages includes: #beta).
+	self deny: (deltaMessages includes: #alpha)
 ]
 
 { #category : 'running' }

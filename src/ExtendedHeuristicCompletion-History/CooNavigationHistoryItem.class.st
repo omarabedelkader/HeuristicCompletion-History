@@ -12,11 +12,10 @@ I carry:
 "
 Class {
 	#name : 'CooNavigationHistoryItem',
-	#superclass : 'Object',
+	#superclass : 'CooItem',
 	#instVars : [
 		'name',
 		'kind',
-		'timestamp',
 		'browserTitle',
 		'paneIndex'
 	],
@@ -122,16 +121,4 @@ CooNavigationHistoryItem >> printOn: aStream [
 	browserTitle ifNotNil: [
 		aStream nextPutAll: ' @ '.
 		aStream nextPutAll: browserTitle ]
-]
-
-{ #category : 'accessing' }
-CooNavigationHistoryItem >> timestamp [
-
-	^ timestamp
-]
-
-{ #category : 'accessing' }
-CooNavigationHistoryItem >> timestamp: anObject [
-
-	timestamp := anObject
 ]

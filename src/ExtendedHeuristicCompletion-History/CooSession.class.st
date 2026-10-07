@@ -554,6 +554,7 @@ CooSession >> navigationClassEntries [
 	In addition it looks like we keep indefinitively the elements and we create global entries 
 	to keep 5 of them at the end!"
 	| seen entries |
+
 	seen := Set new.
 	entries := OrderedCollection new.
 	navigationItems do: [ :item |

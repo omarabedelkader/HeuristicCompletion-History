@@ -1,5 +1,8 @@
+"
+So far the navigation only report entries for Class navigation.
+"
 Class {
-	#name : 'CooNavigationHistoryTest',
+	#name : 'CooClassNavigationHistoryTest',
 	#superclass : 'TestCase',
 	#instVars : [
 		'session'
@@ -10,7 +13,7 @@ Class {
 }
 
 { #category : 'running' }
-CooNavigationHistoryTest >> setUp [
+CooClassNavigationHistoryTest >> setUp [
 
 	super setUp.
 	session := CooSession new.
@@ -18,7 +21,7 @@ CooNavigationHistoryTest >> setUp [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testAddNavigationItemAppearsInClassEntries [
+CooClassNavigationHistoryTest >> testAddNavigationItemAppearsInClassEntries [
 
 	| item entries |
 	item := CooNavigationHistoryItem class: 'OrderedCollection'.
@@ -31,19 +34,7 @@ CooNavigationHistoryTest >> testAddNavigationItemAppearsInClassEntries [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testAddNavigationItemAppearsInSelectorEntries [
-
-	| item entries |
-	item := CooNavigationHistoryItem selector: #at:put:.
-	session addNavigationItem: item.
-
-	entries := session selectorEntries.
-	self assert: entries size equals: 1.
-	self assert: entries first contents equals: 'at:put:'
-]
-
-{ #category : 'running' }
-CooNavigationHistoryTest >> testClassObservationDoesNotLeakIntoSelectorEntries [
+CooClassNavigationHistoryTest >> testClassObservationDoesNotLeakIntoSelectorEntries [
 
 	session addNavigationItem: (CooNavigationHistoryItem class: 'Array').
 
@@ -52,7 +43,7 @@ CooNavigationHistoryTest >> testClassObservationDoesNotLeakIntoSelectorEntries [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testNavigationEntriesAreCappedAtFive [
+CooClassNavigationHistoryTest >> testNavigationEntriesAreCappedAtFive [
 
 	1 to: 12 do: [ :i |
 		session addNavigationItem: (CooNavigationHistoryItem selector: ('selector', i asString) asSymbol) ].
@@ -61,7 +52,7 @@ CooNavigationHistoryTest >> testNavigationEntriesAreCappedAtFive [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testNavigationEntriesAreDeduplicated [
+CooClassNavigationHistoryTest >> testNavigationEntriesAreDeduplicated [
 
 	session addNavigationItem: (CooNavigationHistoryItem selector: #foo).
 	session addNavigationItem: (CooNavigationHistoryItem selector: #foo).
@@ -71,7 +62,7 @@ CooNavigationHistoryTest >> testNavigationEntriesAreDeduplicated [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testNavigationItemDefaultsTimestamp [
+CooClassNavigationHistoryTest >> testNavigationItemDefaultsTimestamp [
 
 	| item |
 	item := CooNavigationHistoryItem selector: #foo.
@@ -82,7 +73,7 @@ CooNavigationHistoryTest >> testNavigationItemDefaultsTimestamp [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testNavigationItemForClassReportsClassKind [
+CooClassNavigationHistoryTest >> testNavigationItemForClassReportsClassKind [
 
 	| item |
 	item := CooNavigationHistoryItem class: 'String'.
@@ -94,7 +85,7 @@ CooNavigationHistoryTest >> testNavigationItemForClassReportsClassKind [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testResetNavigationItemsClearsHistory [
+CooClassNavigationHistoryTest >> testResetNavigationItemsClearsHistory [
 
 	session addNavigationItem: (CooNavigationHistoryItem class: 'Foo').
 	session resetNavigationItems.
@@ -104,7 +95,7 @@ CooNavigationHistoryTest >> testResetNavigationItemsClearsHistory [
 ]
 
 { #category : 'running' }
-CooNavigationHistoryTest >> testScrapperDegradesGracefullyWithoutBrowsers [
+CooClassNavigationHistoryTest >> testScrapperDegradesGracefullyWithoutBrowsers [
 
 	| items |
 	items := CooNavigationScrapper new snapshotItems.

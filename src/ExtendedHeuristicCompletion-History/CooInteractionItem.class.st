@@ -11,14 +11,13 @@ Ideally we should also record all the available fetchers so that we can see late
 "
 Class {
 	#name : 'CooInteractionItem',
-	#superclass : 'Object',
+	#superclass : 'CooItem',
 	#instVars : [
 		'choices',
 		'fetchers',
 		'selectedItem',
 		'token',
-		'index',
-		'timestamp'
+		'index'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-UserInteractionModel',
 	#package : 'ExtendedHeuristicCompletion-History',

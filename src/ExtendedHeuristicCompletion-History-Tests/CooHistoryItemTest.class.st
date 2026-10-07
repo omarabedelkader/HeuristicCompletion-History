@@ -47,12 +47,12 @@ CooHistoryItemTest >> testLiveFlagSetToTrue [
 ]
 
 { #category : 'tests' }
-CooHistoryItemTest >> testMethodItemDefaultDeltaMessagesIsEmpty [
+CooHistoryItemTest >> testMessageCompletionSelectorAcceptsUnaryAndKeywordSelectors [
 
-	| item |
-	item := CooMethodHistoryItem new.
-
-	self assert: item deltaMessages equals: #()
+	self assert:
+		(CooMethodHistoryItem isMessageCompletionSelector: #yourself).
+	self assert:
+		(CooMethodHistoryItem isMessageCompletionSelector: #at:put:)
 ]
 
 { #category : 'tests' }
@@ -61,15 +61,6 @@ CooHistoryItemTest >> testMessageCompletionSelectorRejectsPunctuation [
 	#( ',' '.' ';' '+' '->' '<=' ) do: [ :selector |
 		self deny:
 			(CooMethodHistoryItem isMessageCompletionSelector: selector) ]
-]
-
-{ #category : 'tests' }
-CooHistoryItemTest >> testMessageCompletionSelectorAcceptsUnaryAndKeywordSelectors [
-
-	self assert:
-		(CooMethodHistoryItem isMessageCompletionSelector: #yourself).
-	self assert:
-		(CooMethodHistoryItem isMessageCompletionSelector: #at:put:)
 ]
 
 { #category : 'tests' }
@@ -87,6 +78,15 @@ CooHistoryItemTest >> testMessageCompletionSelectorsFromASTFiltersBinarySelector
 	self assert: (selectors includes: #beta:).
 	self deny: (selectors includes: #,).
 	self deny: (selectors includes: #+)
+]
+
+{ #category : 'tests' }
+CooHistoryItemTest >> testMethodItemDefaultDeltaMessagesIsEmpty [
+
+	| item |
+	item := CooMethodHistoryItem new.
+
+	self assert: item deltaMessages equals: #()
 ]
 
 { #category : 'tests' }
