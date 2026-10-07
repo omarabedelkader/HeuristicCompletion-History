@@ -44,10 +44,10 @@ CooSessionCompositionTest >> testClassEntriesComposesUserSelectionsAndStructural
 	session addClassItem: (CooAddedClassHistoryItem new nameOfClass: 'StructuralClass'; yourself).
 
 	"Add uppercase user selection"
-	session userSelectionHandler: CooDualMostRecentFrequencyHandler new.
+	session userInteractionHandler: CooDualMostRecentFrequencyHandler new.
 	entry := self fakeGlobalEntryWithContents: 'UserClass'.
 	item := self fakeInteractionItemWithToken: 'Us' selectedIndex: 1 choices: { entry }.
-	session userSelectionHandler handleNewSelectionItem: item.
+	session userInteractionHandler handleNewSelectionItem: item.
 
 	self assert: session classEntries size equals: 2.
 	self assert: ((session classEntries collect: [ :e | e contents ]) includes: 'UserClass').
@@ -67,8 +67,8 @@ CooSessionCompositionTest >> testDualHandlerSeparatesUpperAndLowerInSession [
 	lowerItem := self fakeInteractionItemWithToken: 'col' selectedIndex: 1 choices: { lowerEntry }.
 	upperItem := self fakeInteractionItemWithToken: 'Ord' selectedIndex: 1 choices: { upperEntry }.
 
-	session userSelectionHandler handleNewSelectionItem: lowerItem.
-	session userSelectionHandler handleNewSelectionItem: upperItem.
+	session userInteractionHandler handleNewSelectionItem: lowerItem.
+	session userInteractionHandler handleNewSelectionItem: upperItem.
 
 	"selectorEntries uses sortedUserLowercasedEntries -> should have 'collect:'"
 	self assert: ((session selectorEntries collect: [ :e | e contents ]) includes: 'collect:').
@@ -98,7 +98,7 @@ CooSessionCompositionTest >> testResetProgramEntitiesDoesNotAffectCompletionItem
 	session addMethodItem: (CooAddedMethodHistoryItem new selector: #structural; nameOfClass: 'A'; yourself).
 	entry := self fakeEntryWithContents: 'userPick'.
 	item := self fakeInteractionItemWithToken: 'us' selectedIndex: 1 choices: { entry }.
-	session userSelectionHandler handleNewSelectionItem: item.
+	session userInteractionHandler handleNewSelectionItem: item.
 
 	self assert: session selectorEntries size equals: 2.
 
@@ -120,10 +120,10 @@ CooSessionCompositionTest >> testSelectorEntriesComposesUserSelectionsAndStructu
 	session addMethodItem: (CooAddedMethodHistoryItem new selector: #structuralMethod; nameOfClass: 'A'; yourself).
 
 	"Add user selection"
-	session userSelectionHandler: CooMostRecentFrequencyHandler new.
+	session userInteractionHandler: CooMostRecentFrequencyHandler new.
 	entry := self fakeEntryWithContents: 'userChoice'.
 	item := self fakeInteractionItemWithToken: 'us' selectedIndex: 1 choices: { entry }.
-	session userSelectionHandler handleNewSelectionItem: item.
+	session userInteractionHandler handleNewSelectionItem: item.
 
 	"selectorEntries should contain both the user selection and the structural method"
 	self assert: session selectorEntries size equals: 2.
@@ -157,7 +157,7 @@ CooSessionCompositionTest >> testSwitchingUserSelectionHandlerMidSession [
 	session mostRecentFrequentSelectionHandling.
 	entry := self fakeEntryWithContents: 'bar'.
 	item := self fakeInteractionItemWithToken: 'ba' selectedIndex: 1 choices: { entry }.
-	session userSelectionHandler handleNewSelectionItem: item.
+	session userInteractionHandler handleNewSelectionItem: item.
 
 	"Now we should have 1 structural + 1 user selection = 2"
 	self assert: session selectorEntries size equals: 2

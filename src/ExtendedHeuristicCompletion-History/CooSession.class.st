@@ -36,12 +36,12 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'completionItems',
-		'userSelectionHandler',
 		'programEntityHandler',
 		'classDescriptions',
 		'methodDescriptions',
 		'navigationItems',
-		'recorder'
+		'recorder',
+		'userInteractionHandler'
 	],
 	#classVars : [
 		'Current'
@@ -230,7 +230,7 @@ CooSession >> addCompletionItem: aCompletionEntryItem [
 	completionItems addFirst: item.
 	" we do not need to keep this list locally since we send the item to the recoreder. "	
 	
-	userSelectionHandler handleNewSelectionItem: item. 
+	userInteractionHandler handleNewSelectionItem: item. 
 	Transcript show: 'Completion item added: ', item printString;cr.
 	"pass the selected item to the recorder"
 	self recorder log: item prepareForSerialization
@@ -401,7 +401,7 @@ CooSession >> classDescriptions [
 { #category : 'matching' }
 CooSession >> classEntries [
 	
-	^ userSelectionHandler sortedUserUppercasedEntries
+	^ userInteractionHandler sortedUserUppercasedEntries
 		, self navigationClassEntries
 		, programEntityHandler classEntries
 ]
@@ -410,7 +410,7 @@ CooSession >> classEntries [
 CooSession >> completionClassSpies [
 	"return the first result recorded completion items and the information about the completion items"
 	
-	^ {userSelectionHandler sortedUserUppercasedEntries first . completionItems first}
+	^ {userInteractionHandler sortedUserUppercasedEntries first . completionItems first}
 ]
 
 { #category : 'interaction items' }
@@ -539,13 +539,13 @@ CooSession >> modifiedMethodsAndDescriptions [
 { #category : 'interaction configuration' }
 CooSession >> mostDualRecentFrequentSelectionHandling [
 
-	userSelectionHandler := CooDualMostRecentFrequencyHandler new.
+	userInteractionHandler := CooDualMostRecentFrequencyHandler new.
 ]
 
 { #category : 'interaction configuration' }
 CooSession >> mostRecentFrequentSelectionHandling [
 
-	userSelectionHandler := CooMostRecentFrequencyHandler new.
+	userInteractionHandler := CooMostRecentFrequencyHandler new.
 ]
 
 { #category : 'navigation' }
@@ -593,7 +593,7 @@ CooSession >> navigationSelectorEntries [
 { #category : 'interaction configuration' }
 CooSession >> noUserSelectionHandling [
 
-	userSelectionHandler := CooNullUserSelectionHandler new.
+	userInteractionHandler := CooNullUserSelectionHandler new.
 ]
 
 { #category : 'printing' }
@@ -604,7 +604,7 @@ CooSession >> printOn: aStream [
 	aStream space ; nextPutAll: (programEntityHandler class name allButFirst: 3).
 	aStream space ; nextPutAll: 'mths '; print: methodDescriptions size.
 	aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
-	aStream space ; nextPutAll: (userSelectionHandler class name allButFirst: 3).
+	aStream space ; nextPutAll: (userInteractionHandler class name allButFirst: 3).
 	aStream space ; nextPutAll: 'interaction'; print: completionItems size.
 	aStream space ; nextPutAll: 'navigation'; print: (navigationItems ifNil: [ 0 ] ifNotNil: [ navigationItems size ]).
 ]
@@ -672,7 +672,7 @@ CooSession >> reportString [
 		aStream space ; nextPutAll: (programEntityHandler class name allButFirst: 3).
 		aStream space ; nextPutAll: 'mths '; print: methodDescriptions size.
 		aStream space ; nextPutAll: 'cls '; print: classDescriptions size.
-		aStream space ; nextPutAll: (userSelectionHandler class name allButFirst: 3).
+		aStream space ; nextPutAll: (userInteractionHandler class name allButFirst: 3).
 		aStream space ; nextPutAll: 'interaction'; print: completionItems size .
 	aStream space ; nextPutAll: 'navigation'; print: (navigationItems ifNil: [ 0 ] ifNotNil: [ navigationItems size ]) ]
 ]
@@ -721,7 +721,7 @@ CooSession >> selectorEntries [
 	"here I would love to know the token because I could then 
 	decide if the user is looking for a global or not."
 
-	^ userSelectionHandler sortedUserLowercasedEntries
+	^ userInteractionHandler sortedUserLowercasedEntries
 		", self navigationSelectorEntries"
 		, programEntityHandler selectorEntries
 ]
@@ -736,7 +736,7 @@ CooSession >> shiftHandlerTo: aCooHandler [
 		programEntityHandler handleNewClassItem: item ]
 ]
 
-{ #category : 'accessing - handlers' }
+{ #category : 'accessing' }
 CooSession >> size [ 
 
 	^ programEntityHandler size
@@ -757,14 +757,14 @@ CooSession >> structuralTemporal [
 	
 ]
 
-{ #category : 'accessing' }
-CooSession >> userSelectionHandler [
+{ #category : 'accessing - handlers' }
+CooSession >> userInteractionHandler [
 
-	^ userSelectionHandler
+	^ userInteractionHandler
 ]
 
 { #category : 'accessing - handlers' }
-CooSession >> userSelectionHandler: aUserSelectionHandler [
+CooSession >> userInteractionHandler: aUserSelectionHandler [
 
-	userSelectionHandler := aUserSelectionHandler
+	userInteractionHandler := aUserSelectionHandler
 ]

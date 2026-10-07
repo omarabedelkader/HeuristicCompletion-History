@@ -1,3 +1,6 @@
+"
+I'm the superclass of the items (add addition, item selection, class navigation) that are passed to session handlers to propose some completion choices. 
+"
 Class {
 	#name : 'CooItem',
 	#superclass : 'Object',
