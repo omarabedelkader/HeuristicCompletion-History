@@ -5,19 +5,6 @@ Class {
 	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
 }
 
-{ #category : 'private' }
-BaselineOfExtendedHeuristicCompletionHistory class >> showHistoryPrivacySetupIfNeeded [
-
-	[
-		(Delay forMilliseconds: 500) wait.
-
-		World ifNotNil: [
-			CooHistorySettings firstLaunchCompleted ifFalse: [
-				WorldMorph doOneCycle.
-				CooHistorySettings openFirstLaunchSetup ] ]
-	] fork
-]
-
 { #category : 'baselines' }
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	<baseline>

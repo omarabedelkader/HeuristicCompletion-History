@@ -4,9 +4,8 @@ Class {
 	#classInstVars : [
 		'sharedNames'
 	],
-	#category : 'ExtendedHeuristicCompletion-History-Recorder-New',
-	#package : 'ExtendedHeuristicCompletion-History-Recorder',
-	#tag : 'New'
+	#category : 'ExtendedHeuristicCompletion-History-Recorder',
+	#package : 'ExtendedHeuristicCompletion-History-Recorder'
 }
 
 { #category : 'settings' }
