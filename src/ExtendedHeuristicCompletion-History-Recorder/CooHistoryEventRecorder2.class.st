@@ -60,5 +60,5 @@ CooHistoryEventRecorder2 class >> shareNamesDefault [
 CooHistoryEventRecorder2 >> log: info [
 
 	self class shareNames 
-		ifTrue: [ self log: info ]
+		ifTrue: [ super log: info ]
 ]
