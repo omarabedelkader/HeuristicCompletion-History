@@ -11,21 +11,51 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 
 	spec for: #common do: [
 		spec
-			package: 'ExtendedHeuristicCompletion-History'.
-		spec
+			package: 'ExtendedHeuristicCompletion-History';
 			package: 'ExtendedHeuristicCompletion-History-Tests'
-			with: [
-				spec requires:
-					'ExtendedHeuristicCompletion-History' ].
+			with: [ spec requires: 'ExtendedHeuristicCompletion-History' ].
+	
+	
+		spec
+			baseline: 'ExtendedHeuristicCompletionBenchmarks'
+			with: [ spec repository: 'github://omarabedelkader/HeuristicCompletion-Benchmarks:main/src' ].	
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Benchmarks'
+			with: [ spec requires: #(
+						'ExtendedHeuristicCompletion-History'
+						'ExtendedHeuristicCompletionBenchmarks') ].
+	
+	
+	
+		"spec postLoadDoIt: #postLoad."
+		
+		spec
+			baseline: 'PharoXPEventRecorder'
+			with: [ spec repository: 'github://omarabedelkader/pharo-data-collector:main' ].
+		spec	
+			package: 'ExtendedHeuristicCompletion-History-Recorder'
+			with: [ spec requires: #( 'PharoXPEventRecorder' 'ExtendedHeuristicCompletion-History') ];
+			package: 'ExtendedHeuristicCompletion-History-Spec'
+			with: [ spec requires:	'ExtendedHeuristicCompletion-History-Recorder' ].
+	
+	
+	
 	
 		spec
 			group: 'Core' 
 			with: #( 'ExtendedHeuristicCompletion-History' );
 			group: 'Tests'
-			with: #('ExtendedHeuristicCompletion-History-Tests' ); 
+			with: #('ExtendedHeuristicCompletion-History-Tests' );
+			
+			group: 'Bench'
+			with: #('ExtendedHeuristicCompletion-History-Benchmarks' );
+			
+			group: 'Sharing'
+			with: #('ExtendedHeuristicCompletion-History-Recorder' 'ExtendedHeuristicCompletion-History-Spec'); 
+			
 			group: 'default' 
 			with: #( 'Core' 'Tests' );
 			group: 'full' 
-			with: #( 'default' ) ]
+			with: #( 'default' 'Bench' 'Sharing') ]
 
 ]
