@@ -75,18 +75,13 @@ CooInteractionItem >> prepareForSerialization [
 
 	| dic |
 	dic := Dictionary new.
-	dic at: #className put: self class name.
 	dic at: #token put: self token.
 	dic at: #index put: self index. 
 	dic at: #fetchers put: self fetchers.
-	"dic at: #sourceCode put: self sourceCode." 
-	dic at: #selectedItemDescription put: self selectedItem description description asString.
-	dic at: #entries put: 
+	dic at: #choices put: 
 		(self choices collect: 
 			[ :e | 
-				{e contents . 
-				e node ifNotNil: [:n | n sourceCode ifNil: [''] ]
-				} ]).
+				{ e contents . e fetcherName . e node class name } ]).
 	^ dic
 ]
 

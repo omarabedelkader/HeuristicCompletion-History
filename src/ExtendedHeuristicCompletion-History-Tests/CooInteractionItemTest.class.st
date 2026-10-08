@@ -44,7 +44,7 @@ CooInteractionItemTest >> testSelectedItemStringReturnsChoiceAtIndex [
 	item := CooInteractionItem new.
 	item choices: { entry1. entry2 }.
 	item index: 1.
-
+		self flag: #SD. "why that? remove one! "
 	self assert: item selectedItemString equals: item selectedItemEntry
 ]
 

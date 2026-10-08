@@ -155,7 +155,7 @@ CooInteractionAndSelectionIntegrationTest >> testInteractionItemSelectedItemStri
 	item := CooInteractionItem new.
 	item choices: { entry }.
 	item index: 1.
-
+	self flag: #SD. "why that? remove one! "
 	self assert: item selectedItemString == item selectedItemEntry
 ]
 
