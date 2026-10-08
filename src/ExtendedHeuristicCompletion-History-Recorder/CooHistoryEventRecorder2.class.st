@@ -42,7 +42,7 @@ CooHistoryEventRecorder2 class >> settingsOn: aBuilder [
 { #category : 'settings' }
 CooHistoryEventRecorder2 class >> shareNames [
 
-	^ sharedNames
+	^ sharedNames ifNil: [ sharedNames := self shareNamesDefault ]
 ]
 
 { #category : 'settings' }
