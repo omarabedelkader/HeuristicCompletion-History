@@ -158,6 +158,10 @@ CooHistoryLatexExporter >> latexStatisticsFor: anExperimentResult [
 			  value: stats historyCommitCount
 			  on: stream.
 		  self
+			  addMetric: 'Failed commit checkouts'
+			  value: stats failedCommitCount
+			  on: stream.
+		  self
 			  addMetric: 'History classes'
 			  value: stats historyClassCount
 			  on: stream.

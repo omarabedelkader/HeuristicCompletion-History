@@ -54,6 +54,62 @@ CooHistoryExperimentRunner class >> runTestRepoForHistory [
 	^ self run: CooHistoryExperimentConfiguration testRepoForHistory
 ]
 
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runMooseCI [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration mooseCI
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runDruid [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration druid
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runFamix [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration famix
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runFASTPython [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration fastPython
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runFASTTypescript [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration fastTypescript
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runFame [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration fame
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runGitProjectHealth [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration gitProjectHealth
+]
+
+{ #category : 'running' }
+CooHistoryExperimentRunner class >> runTinyLogger [
+
+	<script>
+	^ self run: CooHistoryExperimentConfiguration tinyLogger
+]
+
 { #category : 'private' }
 CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration session: aSession [
 
@@ -64,7 +120,6 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 		loadCommitsAndBench: aConfiguration
 		session: aSession.
 		
-	statistics historyCommitCount: commitsAndBench first size.
 	^ commitsAndBench
 ]
 
@@ -249,36 +304,17 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 	from which to obtain meaningful development changes."
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
 
-	aSession resetProgramEntities. "Replay commits from old to new.
-	For EACH commit:
-	  1. install it
-	  2. benchmark message semantic, history and dependency
-	  3. benchmark variable semantic, history and dependency
-	  4. collect statistics"
-	commits allButLast reverseDo: [ :commit |
-			| loadSuccess |
-			loadSuccess := true.
-			[ self loadFromOldToNewCommit: commit ]
-				on: Error
-				do: [
-						loadSuccess := false.
-						Transcript
-							cr;
-							show: 'Error loading ' , commit printString ].
-			loadSuccess ifTrue: [ "aSession resetDevelopmentItems"
-					messageSemanticBenchmark run.
-					messageHistoryBenchmark run.
-					messageDependencyBenchmark run.
-					variableSemanticBenchmark run.
-					variableHistoryBenchmark run.
-					variableDependencyBenchmark run.
-					
-					statistics collectHistoryStatisticsFrom: aSession.
-					"Pay attention do not remove the following line
-					it flushes the entities loading for a single commit. 
-					It does not touch the handlers that may naturally accumulate data 
-					across multiple commits."
-					aSession resetDevelopmentItems ] ].
+	aSession resetProgramEntities.
+	self
+		replayCommits: commits allButLast
+		session: aSession
+		benchmarks: {
+			messageSemanticBenchmark.
+			messageHistoryBenchmark.
+			messageDependencyBenchmark.
+			variableSemanticBenchmark.
+			variableHistoryBenchmark.
+			variableDependencyBenchmark }.
 
 	^ {
 		  commits .
@@ -298,10 +334,38 @@ CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 		
 ]
 
+{ #category : 'private' }
+CooHistoryExperimentRunner >> replayCommits: commits session: aSession benchmarks: benchmarks [
+	"The commits are newest first and exclude the initial baseline checkout."
+
+	commits reverseDo: [ :commit |
+		| loadSuccess |
+		loadSuccess := true.
+		[ self loadFromOldToNewCommit: commit ]
+			on: Error
+			do: [ :error |
+				loadSuccess := false.
+				statistics recordFailedCommit.
+				Transcript
+					cr;
+					show: 'Error loading ' , commit printString;
+					show: ': ' , error messageText ].
+		[
+			loadSuccess ifTrue: [
+				benchmarks do: [ :benchmark | benchmark run ].
+				statistics collectHistoryStatisticsFrom: aSession.
+				statistics recordSuccessfulCommit ]
+		] ensure: [
+			"Clear per-commit events even after a partial checkout or benchmark error.
+			The history handlers continue to accumulate across commits."
+			aSession resetDevelopmentItems ] ]
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> run: aConfiguration [
 
 	| result commitsAndBench |
+	statistics := CooHistoryProjectStatistics new.
 	aConfiguration outputDirectory ensureCreateDirectory.
 	Transcript
 		cr;

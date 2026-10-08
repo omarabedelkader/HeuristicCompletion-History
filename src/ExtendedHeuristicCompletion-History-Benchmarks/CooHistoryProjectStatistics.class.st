@@ -10,6 +10,7 @@ Class {
 		'classCount',
 		'methodCount',
 		'historyCommitCount',
+		'failedCommitCount',
 		'historyMethodCount',
 		'historyClassCount',
 		'addedMethods',
@@ -61,6 +62,8 @@ CooHistoryProjectStatistics >> asDictionary [
 		  #classes -> classCount.
 		  #methods -> methodCount.
 		  #historyCommits -> historyCommitCount.
+		  #successfulCommitCount -> self successfulCommitCount.
+		  #failedCommitCount -> self failedCommitCount.
 		  #historyMethods -> historyMethodCount.
 		  #historyClasses -> historyClassCount.
 		  #addedMethods -> addedMethods.
@@ -192,6 +195,7 @@ CooHistoryProjectStatistics >> initialize [
 	classCount := 0.
 	methodCount := 0.
 	historyCommitCount := 0.
+	failedCommitCount := 0.
 	historyMethodCount := 0.
 	historyClassCount := 0.
 	addedMethods := 0.
@@ -363,4 +367,29 @@ CooHistoryProjectStatistics >> variableCallsites [
 CooHistoryProjectStatistics >> variableCallsites: anInteger [
 
 	variableCallsites := anInteger
+]
+
+{ #category : 'accessing' }
+CooHistoryProjectStatistics >> failedCommitCount [
+
+	^ failedCommitCount
+]
+
+{ #category : 'collecting' }
+CooHistoryProjectStatistics >> recordFailedCommit [
+
+	failedCommitCount := failedCommitCount + 1
+]
+
+{ #category : 'collecting' }
+CooHistoryProjectStatistics >> recordSuccessfulCommit [
+
+	historyCommitCount := historyCommitCount + 1
+]
+
+{ #category : 'accessing' }
+CooHistoryProjectStatistics >> successfulCommitCount [
+	"Only commits whose checkout and all six benchmarks completed."
+
+	^ historyCommitCount
 ]
