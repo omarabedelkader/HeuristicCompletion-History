@@ -77,9 +77,7 @@ BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
 
 	self class environment at: #CooHistoryEventRecorder2 ifPresent: [ :p|
 		"the group sharing has been loaded"
-		
 		CooSession current recorder: CooHistoryEventRecorder2 new.
-		
-		
+		CooCompletionSharingPreferencesPresenter open.
 		]
 ]
