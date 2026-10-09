@@ -35,6 +35,9 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			with: [ spec requires: #(
 						'ExtendedHeuristicCompletion-History'
 						'ExtendedHeuristicCompletionBenchmarks') ].
+		spec
+			package: 'ExtendedHeuristicCompletion-History-Benchmarks-Tests'
+			with: [ spec requires: 'ExtendedHeuristicCompletion-History-Benchmarks' ].
 	
 	
 	
@@ -60,6 +63,8 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			
 			group: 'Bench'
 			with: #('ExtendedHeuristicCompletion-History-Benchmarks' );
+			group: 'BenchTests'
+			with: #('ExtendedHeuristicCompletion-History-Benchmarks-Tests' );
 			
 			group: 'Sharing'
 			with: #('ExtendedHeuristicCompletion-History-Recorder' 'ExtendedHeuristicCompletion-History-Spec'); 
