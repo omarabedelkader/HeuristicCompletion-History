@@ -44,7 +44,7 @@ CooCompletionSharingPreferencesPresenter >> initializePresenters [
 	text := self newText.
 	text text: self textContents.
 	label := self newLabel.
-	label label: 'Enable completion sharing preferences'.
+	label label: 'Enable completion sharing'.
 	
 	radioButton := self newCheckBox.
 	radioButton label: 'Share information'.

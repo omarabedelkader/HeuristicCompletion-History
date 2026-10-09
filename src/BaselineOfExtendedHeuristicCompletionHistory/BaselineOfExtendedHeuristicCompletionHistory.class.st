@@ -5,11 +5,22 @@ Class {
 	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
 }
 
+{ #category : 'script' }
+BaselineOfExtendedHeuristicCompletionHistory class >> postLoad [
+
+
+	self class environment at: #CooHistoryEventRecorder2 ifPresent: [ :p|
+		"the group sharing has been loaded"
+		
+		 ]
+]
+
 { #category : 'baselines' }
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	<baseline>
 
 	spec for: #common do: [
+		spec postLoadDoIt: #postLoad.
 		spec
 			package: 'ExtendedHeuristicCompletion-History';
 			package: 'ExtendedHeuristicCompletion-History-Tests'
@@ -58,4 +69,17 @@ BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 			group: 'full' 
 			with: #( 'default' 'Bench' 'Sharing') ]
 
+]
+
+{ #category : 'baselines' }
+BaselineOfExtendedHeuristicCompletionHistory >> postLoad [
+
+
+	self class environment at: #CooHistoryEventRecorder2 ifPresent: [ :p|
+		"the group sharing has been loaded"
+		
+		CooSession current recorder: CooHistoryEventRecorder2 new.
+		
+		
+		]
 ]
