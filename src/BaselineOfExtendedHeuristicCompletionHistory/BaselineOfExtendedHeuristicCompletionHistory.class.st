@@ -5,16 +5,6 @@ Class {
 	#package : 'BaselineOfExtendedHeuristicCompletionHistory'
 }
 
-{ #category : 'script' }
-BaselineOfExtendedHeuristicCompletionHistory class >> postLoad [
-
-
-	self class environment at: #CooHistoryEventRecorder2 ifPresent: [ :p|
-		"the group sharing has been loaded"
-		
-		 ]
-]
-
 { #category : 'baselines' }
 BaselineOfExtendedHeuristicCompletionHistory >> baseline: spec [
 	<baseline>

@@ -39,8 +39,9 @@ CooStaticBenchmarksMessageHistory >> run [
 			we should bench all call sites"
 	
 	| pos |
-	scannedMethods := 0.
-	matchedCallsites := 0.
+	"Counters accumulate over all the replayed commits."
+	scannedMethods := self scannedMethods.
+	matchedCallsites := self matchedCallsites.
 	
 	Transcript cr; show: '# Running Message Benchmark ', self class name.
 	

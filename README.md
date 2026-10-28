@@ -20,3 +20,17 @@ Metacello new
   load.
 ```
 
+
+## Running the History benchmarks
+
+`scripts/run-history-benchmarks.sh` downloads a fresh Pharo 14 image, installs this checkout (group `Bench`),
+runs every project experiment in its own copy of that image and writes one summary:
+
+```bash
+scripts/run-history-benchmarks.sh                    # all projects
+scripts/run-history-benchmarks.sh microdown roassal  # only some of them
+```
+
+Results land in `history-bench/results/`: one folder per project, plus `summary.svg` / `summary.png`
+(overall MRR of Semantic, History and Dependency for every project, with the table of numbers) and
+`summary.md`, `summary.csv`, `summary.tex`. The projects are cloned over SSH, so GitHub needs your SSH key.

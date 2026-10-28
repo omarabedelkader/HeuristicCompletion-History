@@ -30,8 +30,9 @@ CooStaticBenchmarksVariableHistory >> matchedCallsites [
 { #category : 'running' }
 CooStaticBenchmarksVariableHistory >> run [
 
-	scannedMethods := 0.
-	matchedCallsites := 0.
+	"Counters accumulate over all the replayed commits."
+	scannedMethods := self scannedMethods.
+	matchedCallsites := self matchedCallsites.
 
 	Transcript 
 		cr; cr;
@@ -45,7 +46,6 @@ CooStaticBenchmarksVariableHistory >> run [
 				parseTree nodesDo: [ :node |
 							(node isVariable and: [ node name first isUppercase ]) 
 								ifTrue: [
-									node name = 'Dictionary' ifTrue: [ self halt. ].
 									Transcript
 										cr;
 										show: '## Benched class: ';	 show: node name;

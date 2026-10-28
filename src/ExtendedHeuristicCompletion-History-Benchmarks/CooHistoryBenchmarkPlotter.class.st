@@ -718,8 +718,9 @@ CooHistoryBenchmarkPlotter >> writePNG: aForm to: aFileReference [
 
 	reference := aFileReference asFileReference.
 	reference parent ensureCreateDirectory.
+	reference ensureDelete.
 	^ [ stream := reference binaryWriteStream.
-		[ PNGReadWriter putForm: aForm on: stream ]
+		[ PNGReadWriter putForm: aForm onStream: stream ]
 			ensure: [ stream close ] ]
 		on: Error
 		do: [ :exception |

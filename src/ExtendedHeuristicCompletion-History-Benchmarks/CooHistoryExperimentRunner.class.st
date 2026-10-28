@@ -34,6 +34,25 @@ CooHistoryExperimentRunner class >> run: aConfiguration [
 ]
 
 { #category : 'running' }
+CooHistoryExperimentRunner class >> runConfigurationNamed: aSelector outputDirectory: aDirectory [
+	"Entry point for unattended runs (see scripts/run-history-benchmarks.sh).
+	aSelector is one of the CooHistoryExperimentConfiguration class-side constructors, e.g. #microdown.
+	Warnings (e.g. Monticello asking to override dirty packages) are resumed because no one can answer them headless."
+
+	| configuration |
+	configuration := CooHistoryExperimentConfiguration perform: aSelector asSymbol.
+	configuration outputDirectory: aDirectory asFileReference.
+	^ [ self run: configuration ]
+		  on: Warning
+		  do: [ :warning |
+			  Transcript
+				  cr;
+				  show: 'Warning resumed: ';
+				  show: warning messageText asString.
+			  warning resume: true ]
+]
+
+{ #category : 'running' }
 CooHistoryExperimentRunner class >> runMicrodown [
 
 	<script>
@@ -192,9 +211,17 @@ CooHistoryExperimentRunner >> completeSemanticsVariableBuilder [
 { #category : 'benchs' }
 CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 
+	"The session heuristic comes first. Placed after the semantic heuristics it can never
+	change a rank: the selectors it knows are those defined during the session, and they are
+	mostly sent to self or super, so the self/super heuristics already propose them earlier
+	and the history entries are dropped as repetitions."
+
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
 	builder messagesHeuristic: (builder newHeuristicBuilder
+		add: (CooSessionMessagesHeuristic new
+			session: aSession;
+			yourself);
 		add: CoSelfMessageHeuristic new;
 		add: CoSuperMessageHeuristic new;
 		add: CoTypedReceiverMessageHeuristic new;
@@ -202,9 +229,6 @@ CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 		add: CoLiteralMessageHeuristic new;
 		add: CoGlobalVariableMessageHeuristic new;
 		add: CoVariableWithTypeNameMessageHeuristic new;
-		add: (CooSessionMessagesHeuristic new
-			session: aSession;
-			yourself);
 		add: CoUnknownMessageHeuristic new;
 		build).
 	^ builder
@@ -237,7 +261,7 @@ CooHistoryExperimentRunner >> initialize [
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
 
-	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark semanticsVariableBenchmark dependencyVariableBenchmark historyVariableBenchmark |
+	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
 
@@ -279,27 +303,8 @@ CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSess
 		                             session: aSession;
 		                             builder: self completeSemanticsVariableBuilder;
 		                             yourself.
-		
-	semanticsVariableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     name: 'Semantic Variables';
-		                     session: aSession;
-		                     builder: self completeSemanticsVariableBuilder;
-		                     yourself. 
-		
-	dependencyVariableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     name: 'Semantic Variables';
-		                     session: aSession;
-		                     builder: self completeSemanticsVariableBuilder ;
-		                     yourself. 
-	
-	historyVariableBenchmark := CooStaticBenchmarksVariableHistory new
-		                     name: 'Semantic Variables';
-		                     session: aSession;
-		                     builder: (self historyVariableBuilderWithSession: aSession) ;
-		                     yourself. 
-	
-		
- 	"Load the oldest commit as the initial state.
+
+	"Load the oldest commit as the initial state.
 	We do not benchmark it because there is no previous commit
 	from which to obtain meaningful development changes."
 	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
@@ -377,6 +382,9 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 	CooSession current noUserSelectionHandling.
 
 	commitsAndBench := self analyzeHistoryAndBenchmarksFor: aConfiguration session: CooSession current.
+	statistics
+		recordBenchmarkPopulationFromMessageBenchmark: commitsAndBench second
+		variableBenchmark: commitsAndBench fifth.
 
 	result := CooHistoryExperimentResult new.
 	result
