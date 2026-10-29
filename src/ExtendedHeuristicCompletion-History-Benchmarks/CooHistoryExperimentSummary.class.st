@@ -3,7 +3,7 @@ I aggregate the results of several History experiments into one summary.
 
 I read every `*-results.ston` file written by CooHistoryExperimentRunner below a directory
 and export, next to them:
-	- summary.svg / summary.png: one picture with the overall MRR of the three strategies
+	- summary.svg / summary.png: one picture with the overall MRR of the five strategies
 	  for every project (messages and variables) and the table of the numbers,
 	- summary.md, summary.csv, summary.tex: the same table as text.
 
@@ -38,7 +38,7 @@ CooHistoryExperimentSummary >> appendBarPanel: aTitle kind: aKind on: aStream to
 	left := 80.
 	height := 260.
 	groupWidth := (width - left - 40) / (rows size max: 1).
-	barWidth := (groupWidth - 24) / 3 min: 40.
+	barWidth := (groupWidth - 24) / self strategies size min: 40.
 
 	self appendText: aTitle on: aStream x: width / 2 y: top - 18 size: 18 weight: 700 anchor: 'middle'.
 	#( 0 0.2 0.4 0.6 0.8 1.0 ) do: [ :tick |
@@ -51,7 +51,7 @@ CooHistoryExperimentSummary >> appendBarPanel: aTitle kind: aKind on: aStream to
 
 	rows doWithIndex: [ :row :index |
 		| groupLeft |
-		groupLeft := left + ((index - 1) * groupWidth) + ((groupWidth - (3 * barWidth)) / 2).
+		groupLeft := left + ((index - 1) * groupWidth) + ((groupWidth - (self strategies size * barWidth)) / 2).
 		self strategies doWithIndex: [ :strategy :strategyIndex |
 			| value x barHeight |
 			value := self mrrOf: row kind: aKind strategy: strategy.
@@ -124,9 +124,11 @@ CooHistoryExperimentSummary >> appendText: aString on: aStream x: x y: y size: s
 CooHistoryExperimentSummary >> colorFor: aStrategy [
 
 	^ (Dictionary newFrom: {
+			  #baseline -> '#7f7f7f'.
 			  #semantic -> '#2ca02c'.
 			  #history -> '#1f77b4'.
-			  #completeDirectDependency -> '#d62728' }) at: aStrategy
+			  #completeDirectDependency -> '#d62728'.
+			  #hybrid -> '#9467bd' }) at: aStrategy
 ]
 
 { #category : 'exporting' }
@@ -155,9 +157,11 @@ CooHistoryExperimentSummary >> exportTo: aDirectory [
 CooHistoryExperimentSummary >> labelFor: aStrategy [
 
 	^ (Dictionary newFrom: {
+			  #baseline -> 'Baseline'.
 			  #semantic -> 'Semantic'.
 			  #history -> 'History'.
-			  #completeDirectDependency -> 'Dependency' }) at: aStrategy
+			  #completeDirectDependency -> 'Dependency'.
+			  #hybrid -> 'Hybrid' }) at: aStrategy
 ]
 
 { #category : 'exporting' }
@@ -176,7 +180,7 @@ CooHistoryExperimentSummary >> latexString [
 		  stream
 			  nextPutAll: '\bottomrule'; lf;
 			  nextPutAll: '\end{tabular}'; lf;
-			  nextPutAll: '\caption{Overall MRR per project. S: complete semantics, H: + session history, D: + direct package dependencies.}'; lf;
+			  nextPutAll: '\caption{Overall MRR per project. B: global fallback only, S: complete semantics, H: + session history, D: + direct package dependencies, Y: + both.}'; lf;
 			  nextPutAll: '\label{tab:history-summary}'; lf;
 			  nextPutAll: '\end{table}'; lf ]
 ]
@@ -233,14 +237,14 @@ CooHistoryExperimentSummary >> statisticOf: aRow named: aKey [
 { #category : 'private' }
 CooHistoryExperimentSummary >> strategies [
 
-	^ #( #semantic #history #completeDirectDependency )
+	^ #( #baseline #semantic #history #completeDirectDependency #hybrid )
 ]
 
 { #category : 'exporting' }
 CooHistoryExperimentSummary >> svgString [
 
 	| width height |
-	width := 200 + (rows size * 150) max: 1100.
+	width := 200 + (rows size * 200) max: 1300.
 	height := 830 + (rows size * 24).
 	^ String streamContents: [ :stream |
 		  stream
@@ -250,7 +254,7 @@ CooHistoryExperimentSummary >> svgString [
 			  nextPutAll: '">'; cr;
 			  nextPutAll: '<rect width="100%" height="100%" fill="white"/>'; cr.
 		  self appendText: 'History experiments: overall MRR per project' on: stream x: width / 2 y: 36 size: 22 weight: 700 anchor: 'middle'.
-		  self appendLegendOn: stream x: width / 2 - 220 y: 68.
+		  self appendLegendOn: stream x: width / 2 - 375 y: 68.
 		  self appendBarPanel: 'Message completion' kind: #messages on: stream top: 120 width: width.
 		  self appendBarPanel: 'Variable completion' kind: #variables on: stream top: 450 width: width.
 		  self appendTableOn: stream top: 790 width: width.
@@ -260,7 +264,7 @@ CooHistoryExperimentSummary >> svgString [
 { #category : 'exporting' }
 CooHistoryExperimentSummary >> tableHeader [
 
-	^ #( 'Project' 'Commits' 'Msg sites' 'Msg S' 'Msg H' 'Msg D' 'Var sites' 'Var S' 'Var H' 'Var D' )
+	^ #( 'Project' 'Commits' 'Msg sites' 'Msg B' 'Msg S' 'Msg H' 'Msg D' 'Msg Y' 'Var sites' 'Var B' 'Var S' 'Var H' 'Var D' 'Var Y' )
 ]
 
 { #category : 'exporting' }

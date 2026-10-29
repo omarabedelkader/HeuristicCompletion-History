@@ -20,7 +20,10 @@ Class {
 	#name : 'CooHistoryExperimentRunner',
 	#superclass : 'Object',
 	#instVars : [
-		'statistics'
+		'statistics',
+		'projectPackageNames',
+		'historySnapshot',
+		'log'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
@@ -142,6 +145,90 @@ CooHistoryExperimentRunner >> analyzeHistoryAndBenchmarksFor: aConfiguration ses
 	^ commitsAndBench
 ]
 
+{ #category : 'private' }
+CooHistoryExperimentRunner >> checkout: aCommit [
+	"Only the project packages loaded at the start are checked out, as long as the commit has them.
+	IceCheckoutAlreadyLoadedPackages would instead stop loading for good a package that one commit lacks.
+
+	Iceberg computes the patch against what it believes is loaded. When a project is loaded
+	from a different version than the replayed history, the patch can remove a method that the
+	image does not have, and the KeyNotFound aborts the whole checkout. The method is already
+	absent, so that removal is skipped and the checkout goes on."
+
+	| strategy |
+	strategy := IceCheckoutSelectedPackages new
+		            packages: (self projectPackageNamesIn: aCommit);
+		            yourself.
+	^ [ aCommit checkoutWithStrategy: strategy ]
+		  on: KeyNotFound
+		  do: [ :error |
+			  (error signalerContext findContextSuchThat: [ :context |
+				   context selector = #removeSelector:fromClass: ])
+				  ifNil: [ error pass ]
+				  ifNotNil: [ :removal |
+					  Transcript
+						  cr;
+						  show: 'Skipped removal of a method absent from the image: ';
+						  show: error key printString.
+					  removal return: nil ] ]
+]
+
+{ #category : 'private' }
+CooHistoryExperimentRunner >> checkoutInitialCommit: aCommit [
+	"Answer whether aCommit could be checked out as the starting state of the replay."
+
+	^ [
+	  self checkout: aCommit.
+	  true ]
+		  on: Error
+		  do: [ :error |
+			  statistics recordFailedCommit.
+			  Transcript
+				  cr;
+				  show: 'Error loading initial ' , aCommit printString;
+				  show: ': ' , error messageText.
+			  false ]
+]
+
+{ #category : 'private' }
+CooHistoryExperimentRunner >> commitsContainingProjectPackages: commits [
+	"commits are newest first. Going back in time, I stop before the first commit that has none
+	of the project packages (the initial empty commit of a repository, or a commit from before the
+	packages were renamed): checking it out would unload the whole project and the following
+	commits would replay nothing."
+
+	| index |
+	index := commits findFirst: [ :commit | (self projectPackageNamesIn: commit) isEmpty ].
+	^ index = 0
+		  ifTrue: [ commits ]
+		  ifFalse: [ commits first: index - 1 ]
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> completeBaselineMessageBuilder [
+	"Same baseline as CooBenchRunnerMessage>>#completeBaseline: no semantics, only the global selector list."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> completeBaselineVariableBuilder [
+	"Flat namespace: only the global variables, without local, workspace or instance scopes.
+	CooBenchRunnerVariables>>#completeBaseline uses CoGlobalSorterResultSetBuilder, which no longer exists."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoGlobalVariablesHeuristic new;
+			 build).
+	^ builder
+]
+
 { #category : 'benchs' }
 CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 
@@ -170,7 +257,7 @@ CooHistoryExperimentRunner >> completeDirectDependencyVariableBuilder [
 			 add: CoLocalScopeVariablesHeuristic new;
 			 add: CoWorkspaceVariablesHeuristic new;
 			 add: CoInstanceAccessibleVariablesHeuristic new;
-			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass: CoDependencyGlobalVariableFetcher);
+			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass: CooDependencyGlobalVariableFetcher);
 			 add: CoGlobalVariablesHeuristic new;
 			 build).
 	^ builder
@@ -251,6 +338,50 @@ CooHistoryExperimentRunner >> historyVariableBuilderWithSession: aSession [
 	^ builder
 ]
 
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> hybridMessageBuilderWithSession: aHistory [
+	"History first, as in the History builder, and the direct package dependencies before the
+	global fallback, as in the Dependency builder."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: (CooSessionMessagesHeuristic new
+					  session: aHistory;
+					  yourself);
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CoDependencyMessageHeuristics new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> hybridVariableBuilderWithSession: aHistory [
+	"The history classes, then the classes of the direct package dependencies, then all globals."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoLocalScopeVariablesHeuristic new;
+			 add: CoWorkspaceVariablesHeuristic new;
+			 add: CoInstanceAccessibleVariablesHeuristic new;
+			 add: (CooSessionVariableHeuristic new
+					  session: aHistory;
+					  yourself);
+			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass:
+					  CooDependencyGlobalVariableFetcher);
+			 add: CoGlobalVariablesHeuristic new;
+			 build).
+	^ builder
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> initialize [
 
@@ -259,92 +390,104 @@ CooHistoryExperimentRunner >> initialize [
 ]
 
 { #category : 'private' }
-CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
+CooHistoryExperimentRunner >> benchmark: aBenchmarkClass named: aName builder: aBuilder session: aSession [
 
-	| populator commits messageHistoryBenchmark messageDependencyBenchmark messageSemanticBenchmark variableHistoryBenchmark variableDependencyBenchmark variableSemanticBenchmark |
+	^ aBenchmarkClass new
+		  name: aName;
+		  session: aSession;
+		  builder: aBuilder;
+		  log: log;
+		  yourself
+]
+
+{ #category : 'private' }
+CooHistoryExperimentRunner >> benchmarksForSession: aSession [
+	"Every strategy answers the same call sites. The history strategies read the snapshot, not the
+	session: while a commit is benchmarked they only know the history of the previous commits."
+
+	| benchmarks |
+	benchmarks := OrderedDictionary new.
+	{
+		#Baseline -> { self completeBaselineMessageBuilder. self completeBaselineVariableBuilder }.
+		#Semantic -> { self completeSemanticsMessageBuilder. self completeSemanticsVariableBuilder }.
+		#History -> {
+			(self historyMessageBuilderWithSession: historySnapshot).
+			(self historyVariableBuilderWithSession: historySnapshot) }.
+		#Dependency -> {
+			self completeDirectDependencyMessageBuilder.
+			self completeDirectDependencyVariableBuilder }.
+		#Hybrid -> {
+			(self hybridMessageBuilderWithSession: historySnapshot).
+			(self hybridVariableBuilderWithSession: historySnapshot) } } do: [ :strategy |
+		benchmarks
+			at: #message -> strategy key
+			put: (self
+					 benchmark: CooStaticBenchmarksMessageHistory
+					 named: strategy key
+					 builder: strategy value first
+					 session: aSession);
+			at: #variable -> strategy key
+			put: (self
+					 benchmark: CooStaticBenchmarksVariableHistory
+					 named: strategy key
+					 builder: strategy value second
+					 session: aSession) ].
+	^ benchmarks
+]
+
+{ #category : 'private' }
+CooHistoryExperimentRunner >> loadCommitsAndBench: aConfiguration session: aSession [
+	"Answer the replayed commits and the benchmarks, keyed by kind -> strategy (e.g. #message -> #History)."
+
+	| populator commits benchmarks |
 	populator := HistoryPopulatorForBench repositoryNamed: aConfiguration repository.
 	commits := populator commitsForHead: aConfiguration numberOfCommits.
+	projectPackageNames := self loadedPackageNamesIn: commits first repository.
+	commits := self commitsContainingProjectPackages: commits.
+	Transcript
+		cr;
+		show: 'Replaying ' , commits size printString , ' commits on packages ';
+		show: projectPackageNames printString.
 
-	messageHistoryBenchmark := CooStaticBenchmarksMessageHistory new
-		                    name: 'History';
-		                    session: aSession;
-		                    builder: (self historyMessageBuilderWithSession: aSession);
-		                    yourself.
+	benchmarks := self benchmarksForSession: aSession.
 
-	messageDependencyBenchmark := CooStaticBenchmarksMessageHistory new
-		                       name: 'Dependency';
-		                       session: aSession;
-		                       builder: self completeDirectDependencyMessageBuilder;
-		                       yourself.
-
-
-	messageSemanticBenchmark := CooStaticBenchmarksMessageHistory new
-		                     name: 'Semantic';
-		                     session: aSession;
-		                     builder: self completeSemanticsMessageBuilder;
-		                     yourself.
-
-	variableHistoryBenchmark := CooStaticBenchmarksVariableHistory new
-		                            name: 'History';
-		                            session: aSession;
-		                            builder:
-			                            (self historyVariableBuilderWithSession: aSession);
-		                            yourself.
-
-	variableDependencyBenchmark := CooStaticBenchmarksVariableHistory new
-		                               name: 'Dependency';
-		                               session: aSession;
-		                               builder:
-			                               self completeDirectDependencyVariableBuilder;
-		                               yourself.
-
-	variableSemanticBenchmark := CooStaticBenchmarksVariableHistory new
-		                             name: 'Semantic';
-		                             session: aSession;
-		                             builder: self completeSemanticsVariableBuilder;
-		                             yourself.
-
-	"Load the oldest commit as the initial state.
-	We do not benchmark it because there is no previous commit
-	from which to obtain meaningful development changes."
-	commits last checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.
+	"The oldest commit is the initial state; it is not benchmarked since no previous commit gives
+	development changes. Old commits may not load against today's dependencies. A half-loaded initial
+	state would make the first replayed commit look huge, so the replay starts from the oldest commit that loads."
+	[ commits size > 1 and: [ (self checkoutInitialCommit: commits last) not ] ]
+		whileTrue: [ commits := commits allButLast ].
 
 	aSession resetProgramEntities.
-	self
-		replayCommits: commits allButLast
-		session: aSession
-		benchmarks: {
-			messageSemanticBenchmark.
-			messageHistoryBenchmark.
-			messageDependencyBenchmark.
-			variableSemanticBenchmark.
-			variableHistoryBenchmark.
-			variableDependencyBenchmark }.
+	self replayCommits: commits allButLast session: aSession benchmarks: benchmarks values.
+	^ commits -> benchmarks
+]
 
-	^ {
-		  commits .
-		  messageSemanticBenchmark.
-		  messageHistoryBenchmark.
-		  messageDependencyBenchmark.
-		  variableSemanticBenchmark.
-		  variableHistoryBenchmark.
-		  variableDependencyBenchmark }
+{ #category : 'private' }
+CooHistoryExperimentRunner >> loadedPackageNamesIn: aRepository [
+	"The project packages the configuration loaded, baselines excepted."
+
+	^ (aRepository workingCopy packages
+		   select: [ :package | package isLoaded ]
+		   thenCollect: [ :package | package name ]) reject: [ :name |
+		  name beginsWith: 'BaselineOf' ]
 ]
 
 { #category : 'private' }
 CooHistoryExperimentRunner >> loadFromOldToNewCommit: commit [
 
 	Transcript cr;cr; show: 'Loading and importing '; show: commit printString.	
-	commit checkoutWithStrategy: IceCheckoutAlreadyLoadedPackages new.			
-		
+	self checkout: commit
 ]
 
 { #category : 'private' }
 CooHistoryExperimentRunner >> replayCommits: commits session: aSession benchmarks: benchmarks [
-	"The commits are newest first and exclude the initial baseline checkout."
+	"The commits are newest first and exclude the initial baseline checkout.
+	The history is captured before a commit is loaded: its own changes join the history only for the
+	following commits, after every strategy answered its call sites."
 
-	commits reverseDo: [ :commit |
+	commits reversed withIndexDo: [ :commit :index |
 		| loadSuccess |
+		historySnapshot updateFrom: aSession.
 		loadSuccess := true.
 		[ self loadFromOldToNewCommit: commit ]
 			on: Error
@@ -357,6 +500,7 @@ CooHistoryExperimentRunner >> replayCommits: commits session: aSession benchmark
 					show: ': ' , error messageText ].
 		[
 			loadSuccess ifTrue: [
+				log commit: commit index: index.
 				benchmarks do: [ :benchmark | benchmark run ].
 				statistics collectHistoryStatisticsFrom: aSession.
 				statistics recordSuccessfulCommit ]
@@ -366,10 +510,18 @@ CooHistoryExperimentRunner >> replayCommits: commits session: aSession benchmark
 			aSession resetDevelopmentItems ] ]
 ]
 
+{ #category : 'private' }
+CooHistoryExperimentRunner >> projectPackageNamesIn: aCommit [
+
+	| present |
+	present := (aCommit packages collect: [ :package | package name ]) asSet.
+	^ projectPackageNames select: [ :name | present includes: name ]
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> run: aConfiguration [
 
-	| result commitsAndBench |
+	| result commitsAndBench benchmarks |
 	statistics := CooHistoryProjectStatistics new.
 	aConfiguration outputDirectory ensureCreateDirectory.
 	Transcript
@@ -381,10 +533,18 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 	CooSession resetProgramEntities.
 	CooSession current noUserSelectionHandling.
 
-	commitsAndBench := self analyzeHistoryAndBenchmarksFor: aConfiguration session: CooSession current.
+	log := CooCallsiteLog new
+		       openOn: aConfiguration outputDirectory asFileReference
+		       project: (aConfiguration name asLowercase copyReplaceAll: ' ' with: '-').
+	[
+	historySnapshot := CooHistorySnapshot new.
+	log history: historySnapshot.
+	commitsAndBench := self analyzeHistoryAndBenchmarksFor: aConfiguration session: CooSession current ]
+		ensure: [ log close ].
+	benchmarks := commitsAndBench value.
 	statistics
-		recordBenchmarkPopulationFromMessageBenchmark: commitsAndBench second
-		variableBenchmark: commitsAndBench fifth.
+		recordBenchmarkPopulationFromMessageBenchmark: (benchmarks at: #message -> #Semantic)
+		variableBenchmark: (benchmarks at: #variable -> #Semantic).
 
 	result := CooHistoryExperimentResult new.
 	result
@@ -393,13 +553,17 @@ CooHistoryExperimentRunner >> run: aConfiguration [
 		commitCount: statistics historyCommitCount;
 		statistics: statistics;
 		comparisonDescription:
-			'Complete semantics vs Complete semantics + History vs Complete semantics + Direct Package Dependencies';
-		messageSemanticBenchmark: commitsAndBench second;
-		messageHistoryBenchmark: commitsAndBench third;
-		messageDependencyBenchmark: commitsAndBench fourth;
-		variableSemanticBenchmark: commitsAndBench fifth;
-		variableHistoryBenchmark: commitsAndBench sixth;
-		variableDependencyBenchmark: commitsAndBench seventh.
+			'Baseline vs Complete semantics vs + History vs + Direct Package Dependencies vs + History and Dependencies';
+		messageBaselineBenchmark: (benchmarks at: #message -> #Baseline);
+		messageSemanticBenchmark: (benchmarks at: #message -> #Semantic);
+		messageHistoryBenchmark: (benchmarks at: #message -> #History);
+		messageDependencyBenchmark: (benchmarks at: #message -> #Dependency);
+		messageHybridBenchmark: (benchmarks at: #message -> #Hybrid);
+		variableBaselineBenchmark: (benchmarks at: #variable -> #Baseline);
+		variableSemanticBenchmark: (benchmarks at: #variable -> #Semantic);
+		variableHistoryBenchmark: (benchmarks at: #variable -> #History);
+		variableDependencyBenchmark: (benchmarks at: #variable -> #Dependency);
+		variableHybridBenchmark: (benchmarks at: #variable -> #Hybrid).
 
 	CooHistoryBenchmarkPlotter new exportAllFor: result to: aConfiguration outputDirectory.
 	CooHistoryLatexExporter new exportAllFor: result to: aConfiguration outputDirectory.

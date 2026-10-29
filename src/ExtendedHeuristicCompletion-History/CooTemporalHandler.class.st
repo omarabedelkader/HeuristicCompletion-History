@@ -39,14 +39,23 @@ CooTemporalHandler >> classDescriptions: aCollection [
 
 { #category : 'accessing' }
 CooTemporalHandler >> classEntries [
-	"Clearly we should manage what happen when we remove a class
-	
-	"
+	"Recently added classes first, then the classes whose methods were recently added or modified:
+	editing a method is activity on its class too. Only adding a class would leave the class history
+	almost empty, since most development changes existing classes.
+	Clearly we should manage what happen when we remove a class"
 
-	^ classDescriptions collect: [ :each |
-			  (CoGlobalEntry contents: each nameOfClass node: nil)
-				  sessionItem: each;
-				  fetcherName: 'Session Temporal' ]
+	| seen entries |
+	seen := Set new.
+	entries := OrderedCollection new.
+	classDescriptions , methodDescriptions do: [ :each |
+		| className |
+		className := each nameOfClass ifNotNil: [ :name | (name withoutSuffix: ' class') asSymbol ].
+		(className notNil and: [ (seen includes: className) not ]) ifTrue: [
+			seen add: className.
+			entries add: ((CoGlobalEntry contents: className node: nil)
+					 sessionItem: each;
+					 fetcherName: 'Session Temporal') ] ].
+	^ entries
 ]
 
 { #category : 'api' }

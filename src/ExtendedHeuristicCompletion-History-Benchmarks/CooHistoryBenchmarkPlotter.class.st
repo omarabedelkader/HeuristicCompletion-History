@@ -124,12 +124,42 @@ CooHistoryBenchmarkPlotter >> appendLegendOn: aStream x: x y: y [
 		nextPutAll: '" y="';
 		nextPutAll: (self svgNumber: y + 5);
 		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">Dependency</text>';
+		cr.
+
+	"Baseline"
+	aStream
+		nextPutAll: '<circle cx="';
+		nextPutAll: (self svgNumber: x + 400);
+		nextPutAll: '" cy="';
+		nextPutAll: (self svgNumber: y);
+		nextPutAll: '" r="5" fill="#7f7f7f"/>';
+		cr.
+	aStream
+		nextPutAll: '<text x="';
+		nextPutAll: (self svgNumber: x + 414);
+		nextPutAll: '" y="';
+		nextPutAll: (self svgNumber: y + 5);
+		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">Baseline</text>';
+		cr.
+
+	"Hybrid"
+	self
+		appendTriangleOn: aStream
+		x: x + 520
+		y: y
+		color: '#9467bd'.
+	aStream
+		nextPutAll: '<text x="';
+		nextPutAll: (self svgNumber: x + 534);
+		nextPutAll: '" y="';
+		nextPutAll: (self svgNumber: y + 5);
+		nextPutAll: '" font-family="Arial, sans-serif" font-size="14" fill="#222">Hybrid</text>';
 		cr
 
 ]
 
 { #category : 'svg' }
-CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: aStream left: left top: top width: width height: height [
+CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues baselineValues: baselineValues hybridValues: hybridValues on: aStream left: left top: top width: width height: height [
 
 	aStream
 		nextPutAll: '<text x="';
@@ -155,6 +185,24 @@ CooHistoryBenchmarkPlotter >> appendPanelNamed: aTitle historyValues: historyVal
 		height: height.
 	self
 		appendXTicksOn: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+	self
+		appendSeries: baselineValues
+		color: '#7f7f7f'
+		marker: #circle
+		on: aStream
+		left: left
+		top: top
+		width: width
+		height: height.
+	self
+		appendSeries: hybridValues
+		color: '#9467bd'
+		marker: #triangle
+		on: aStream
 		left: left
 		top: top
 		width: width
@@ -330,7 +378,7 @@ CooHistoryBenchmarkPlotter >> drawLineOn: canvas from: startPoint to: endPoint w
 ]
 
 { #category : 'png' }
-CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues on: canvas left: left top: top width: width height: height [
+CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues baselineValues: baselineValues hybridValues: hybridValues on: canvas left: left top: top width: width height: height [
 
 	| axisColor gridColor textColor |
 	axisColor := Color r: 0.2 g: 0.2 b: 0.2.
@@ -383,6 +431,28 @@ CooHistoryBenchmarkPlotter >> drawPNGPanelNamed: aTitle historyValues: historyVa
 			on: canvas
 			at: (x - 4) @ (top + height + 12) rounded
 			color: textColor ].
+
+	"Baseline"
+	self
+		drawPNGSeries: baselineValues
+		on: canvas
+		left: left
+		top: top
+		width: width
+		height: height
+		color: (Color r: 0.5 g: 0.5 b: 0.5)
+		marker: #circle.
+
+	"Hybrid"
+	self
+		drawPNGSeries: hybridValues
+		on: canvas
+		left: left
+		top: top
+		width: width
+		height: height
+		color: (Color r: 0.58 g: 0.4 b: 0.74)
+		marker: #triangle.
 
 	"History"
 	self
@@ -541,7 +611,7 @@ CooHistoryBenchmarkPlotter >> normalizedMrr: aNumber [
 ]
 
 { #category : 'private' }
-CooHistoryBenchmarkPlotter >> pngFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues [
+CooHistoryBenchmarkPlotter >> pngFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues baselineValues: baselineValues hybridValues: hybridValues [
 
 	| form canvas |
 	form := Form extent: self canvasExtent depth: 32.
@@ -562,6 +632,8 @@ CooHistoryBenchmarkPlotter >> pngFor: anExperimentResult panelTitle: aTitle hist
 		historyValues: historyValues
 		semanticValues: semanticValues
 		dependencyValues: dependencyValues
+		baselineValues: baselineValues
+		hybridValues: hybridValues
 		on: canvas
 		left: 150
 		top: 150
@@ -580,6 +652,8 @@ CooHistoryBenchmarkPlotter >> pngForMessages: anExperimentResult [
 		historyValues: anExperimentResult messageHistoryValues
 		semanticValues: anExperimentResult messageSemanticValues
 		dependencyValues: anExperimentResult messageDependencyValues
+		baselineValues: anExperimentResult messageBaselineValues
+		hybridValues: anExperimentResult messageHybridValues
 ]
 
 { #category : 'exporting' }
@@ -591,6 +665,8 @@ CooHistoryBenchmarkPlotter >> pngForVariables: anExperimentResult [
 		historyValues: anExperimentResult variableHistoryValues
 		semanticValues: anExperimentResult variableSemanticValues
 		dependencyValues: anExperimentResult variableDependencyValues
+		baselineValues: anExperimentResult variableBaselineValues
+		hybridValues: anExperimentResult variableHybridValues
 ]
 
 { #category : 'accessing' }
@@ -627,7 +703,7 @@ CooHistoryBenchmarkPlotter >> strokeTriangleOn: canvas center: centerPoint color
 ]
 
 { #category : 'svg' }
-CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues [
+CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle historyValues: historyValues semanticValues: semanticValues dependencyValues: dependencyValues baselineValues: baselineValues hybridValues: hybridValues [
 
 	^ String streamContents: [ :stream |
 		stream
@@ -656,6 +732,8 @@ CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle hist
 			historyValues: historyValues
 			semanticValues: semanticValues
 			dependencyValues: dependencyValues
+			baselineValues: baselineValues
+			hybridValues: hybridValues
 			on: stream
 			left: 150
 			top: 150
@@ -664,7 +742,7 @@ CooHistoryBenchmarkPlotter >> svgFor: anExperimentResult panelTitle: aTitle hist
 
 		self
 			appendLegendOn: stream
-			x: 420
+			x: 300
 			y: 585.
 
 		stream
@@ -681,6 +759,8 @@ CooHistoryBenchmarkPlotter >> svgForMessages: anExperimentResult [
 		historyValues: anExperimentResult messageHistoryValues
 		semanticValues: anExperimentResult messageSemanticValues
 		dependencyValues: anExperimentResult messageDependencyValues
+		baselineValues: anExperimentResult messageBaselineValues
+		hybridValues: anExperimentResult messageHybridValues
 ]
 
 { #category : 'svg' }
@@ -692,6 +772,8 @@ CooHistoryBenchmarkPlotter >> svgForVariables: anExperimentResult [
 		historyValues: anExperimentResult variableHistoryValues
 		semanticValues: anExperimentResult variableSemanticValues
 		dependencyValues: anExperimentResult variableDependencyValues
+		baselineValues: anExperimentResult variableBaselineValues
+		hybridValues: anExperimentResult variableHybridValues
 ]
 
 { #category : 'private' }

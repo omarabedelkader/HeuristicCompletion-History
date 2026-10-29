@@ -338,9 +338,9 @@ CooSession >> addedAndModifiedMethods [
 			metaclass := true.
 			clss := each nameOfClass allButLast: 6 ].
 			self class environment at: clss asSymbol ifPresent: [ :myClass |
-				col add: (metaclass
-					ifTrue: [ myClass class >> each selector ]
-				   ifFalse: [ myClass >> each selector ]) ] ].
+				((metaclass ifTrue: [ myClass class ] ifFalse: [ myClass ])
+					compiledMethodAt: each selector
+					ifAbsent: [ nil ]) ifNotNil: [ :method | col add: method ] ] ].
 	^ col 
 ]
 
@@ -370,9 +370,9 @@ CooSession >> addedMethods [
 			metaclass := true.
 			clss := each nameOfClass allButLast: 6 ].
 			self class environment at: clss asSymbol ifPresent: [ :myClass |
-				col add: (metaclass
-					ifTrue: [ myClass class >> each selector ]
-				   ifFalse: [ myClass >> each selector ]) ] ].
+				((metaclass ifTrue: [ myClass class ] ifFalse: [ myClass ])
+					compiledMethodAt: each selector
+					ifAbsent: [ nil ]) ifNotNil: [ :method | col add: method ] ] ].
 	^ col 
 ]
 
@@ -489,15 +489,16 @@ CooSession >> modifiedMethods [
 			metaclass := true.
 			clss := each nameOfClass allButLast: 6 ].
 			self class environment at: clss asSymbol ifPresent: [ :myClass |
-				col add: (metaclass
-					ifTrue: [ myClass class >> each selector ]
-				   ifFalse: [ myClass >> each selector ]) ] ].
+				((metaclass ifTrue: [ myClass class ] ifFalse: [ myClass ])
+					compiledMethodAt: each selector
+					ifAbsent: [ nil ]) ifNotNil: [ :method | col add: method ] ] ].
 	^ col 
 ]
 
 { #category : 'for benchmark' }
 CooSession >> modifiedMethodsAndDescriptions [
-	"pay attention this requires that the classes are loaded in Pharo."
+	"pay attention this requires that the classes are loaded in Pharo.
+	A recorded method may be gone since (removed again later in the same load): it is skipped."
 	"we may have some extensions...."
 	
 	| col modified |
@@ -514,9 +515,9 @@ CooSession >> modifiedMethodsAndDescriptions [
 			self class environment 
 				at: clss asSymbol 
 				ifPresent: [ :myClass |
-				col add: ((metaclass
-							ifTrue: [ myClass class >> each selector ]
-				  			 ifFalse: [ myClass >> each selector ]) -> each) ] ].
+				((metaclass ifTrue: [ myClass class ] ifFalse: [ myClass ])
+					compiledMethodAt: each selector
+					ifAbsent: [ nil ]) ifNotNil: [ :method | col add: method -> each ] ] ].
 	^ col  
 ]
 

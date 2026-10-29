@@ -65,7 +65,7 @@ CooHistoryLatexExporter >> latexEscape: aString [
 ]
 
 { #category : 'latex' }
-CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchmarkKind semanticBenchmark: semanticBenchmark historyBenchmark: historyBenchmark dependencyBenchmark: dependencyBenchmark label: label [
+CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchmarkKind baselineBenchmark: baselineBenchmark semanticBenchmark: semanticBenchmark historyBenchmark: historyBenchmark dependencyBenchmark: dependencyBenchmark hybridBenchmark: hybridBenchmark label: label [
 
 	^ String streamContents: [ :stream |
 		  stream
@@ -82,6 +82,11 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 			  nextPutAll: '\midrule';
 			  cr.
 		  
+		  baselineBenchmark ifNotNil: [
+			  self
+				  writeMRRRowNamed: 'Baseline'
+				  benchmark: baselineBenchmark
+				  on: stream ].
 		  semanticBenchmark ifNotNil: [
 			  self
 				  writeMRRRowNamed: 'Semantic'
@@ -97,6 +102,11 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 				  writeMRRRowNamed: 'Dependency'
 				  benchmark: dependencyBenchmark
 				  on: stream ].
+		  hybridBenchmark ifNotNil: [
+			  self
+				  writeMRRRowNamed: 'Hybrid'
+				  benchmark: hybridBenchmark
+				  on: stream ].
 		  stream
 			  nextPutAll: '\bottomrule';
 			  cr;
@@ -106,7 +116,7 @@ CooHistoryLatexExporter >> latexMRRForProject: projectName benchmarkKind: benchm
 			  nextPutAll:
 				  (self latexEscape: projectName , ' ' , benchmarkKind
 					   ,
-						   ' MRR. Semantic denotes complete semantics, History adds session history, and Dependency adds direct package dependencies.');
+						   ' MRR. Baseline denotes the global fallback only, Semantic denotes complete semantics, History adds session history, Dependency adds direct package dependencies, and Hybrid adds both.');
 			  nextPutAll: '}';
 			  cr;
 			  nextPutAll: '\label{';
@@ -123,9 +133,11 @@ CooHistoryLatexExporter >> latexMessagesMRRFor: anExperimentResult [
 	^ self
 		  latexMRRForProject: anExperimentResult projectName
 		  benchmarkKind: 'message completion'
+		  baselineBenchmark: anExperimentResult messageBaselineBenchmark
 		  semanticBenchmark: anExperimentResult messageSemanticBenchmark
 		  historyBenchmark: anExperimentResult messageHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult messageDependencyBenchmark
+		  hybridBenchmark: anExperimentResult messageHybridBenchmark
 		  label: 'tab:' , anExperimentResult filename , '-messages-mrr'
 ]
 
@@ -235,9 +247,11 @@ CooHistoryLatexExporter >> latexVariablesMRRFor: anExperimentResult [
 	^ self
 		  latexMRRForProject: anExperimentResult projectName
 		  benchmarkKind: 'variable completion'
+		  baselineBenchmark: anExperimentResult variableBaselineBenchmark
 		  semanticBenchmark: anExperimentResult variableSemanticBenchmark
 		  historyBenchmark: anExperimentResult variableHistoryBenchmark
 		  dependencyBenchmark: anExperimentResult variableDependencyBenchmark
+		  hybridBenchmark: anExperimentResult variableHybridBenchmark
 		  label: 'tab:' , anExperimentResult filename , '-variables-mrr'
 ]
 

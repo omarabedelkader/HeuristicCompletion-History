@@ -1,8 +1,8 @@
 "
 I capture the outcome of one project-level History experiment.
 
-I hold the six benchmarks produced by CooHistoryExperimentRunner — message and
-variable completion, each under the Semantic, History and Dependency
+I hold the ten benchmarks produced by CooHistoryExperimentRunner — message and
+variable completion, each under the Baseline, Semantic, History, Dependency and Hybrid
 configurations — together with the project metadata and the statistics
 collected while replaying the history.
 
@@ -25,7 +25,11 @@ Class {
 		'commitCount',
 		'comparisonDescription',
 		'messageSemanticBenchmark',
-		'variableSemanticBenchmark'
+		'variableSemanticBenchmark',
+		'messageBaselineBenchmark',
+		'variableBaselineBenchmark',
+		'messageHybridBenchmark',
+		'variableHybridBenchmark'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
@@ -42,15 +46,19 @@ CooHistoryExperimentResult >> asSTONDictionary [
 		  #comparison -> comparisonDescription.
 		  #statistics -> statistics asDictionary.
 		  #messages -> (Dictionary newFrom: {
+				   #baseline -> (self dictionaryForBenchmark: messageBaselineBenchmark).
 				   #semantic -> (self dictionaryForBenchmark: messageSemanticBenchmark).
 				   #history -> (self dictionaryForBenchmark: messageHistoryBenchmark).
 				   #completeDirectDependency -> (self dictionaryForBenchmark:
-						    messageDependencyBenchmark) }).
+						    messageDependencyBenchmark).
+				   #hybrid -> (self dictionaryForBenchmark: messageHybridBenchmark) }).
 		  #variables -> (Dictionary newFrom: {
+				   #baseline -> (self dictionaryForBenchmark: variableBaselineBenchmark).
 				   #semantic -> (self dictionaryForBenchmark: variableSemanticBenchmark).
 				   #history -> (self dictionaryForBenchmark: variableHistoryBenchmark).
 				   #completeDirectDependency -> (self dictionaryForBenchmark:
-						    variableDependencyBenchmark) }) }
+						    variableDependencyBenchmark).
+				   #hybrid -> (self dictionaryForBenchmark: variableHybridBenchmark) }) }
 
 ]
 
@@ -103,6 +111,24 @@ CooHistoryExperimentResult >> filename [
 ]
 
 { #category : 'accessing' }
+CooHistoryExperimentResult >> messageBaselineBenchmark [
+
+	^ messageBaselineBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageBaselineBenchmark: aBenchmark [
+
+	messageBaselineBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageBaselineValues [
+
+	^ self valuesForBenchmark: messageBaselineBenchmark
+]
+
+{ #category : 'accessing' }
 CooHistoryExperimentResult >> messageDependencyBenchmark [
 
 	^ messageDependencyBenchmark
@@ -137,6 +163,42 @@ CooHistoryExperimentResult >> messageHistoryBenchmark: anObject [
 CooHistoryExperimentResult >> messageHistoryValues [
 
 	^ self valuesForBenchmark: messageHistoryBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridBenchmark [
+
+	^ messageHybridBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridBenchmark: aBenchmark [
+
+	messageHybridBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridValues [
+
+	^ self valuesForBenchmark: messageHybridBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridBenchmark [
+
+	^ messageHybridBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridBenchmark: aBenchmark [
+
+	messageHybridBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> messageHybridValues [
+
+	^ self valuesForBenchmark: messageHybridBenchmark
 ]
 
 { #category : 'accessing' }
@@ -204,6 +266,24 @@ CooHistoryExperimentResult >> valuesForBenchmark: aBenchmark [
 ]
 
 { #category : 'accessing' }
+CooHistoryExperimentResult >> variableBaselineBenchmark [
+
+	^ variableBaselineBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableBaselineBenchmark: aBenchmark [
+
+	variableBaselineBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableBaselineValues [
+
+	^ self valuesForBenchmark: variableBaselineBenchmark
+]
+
+{ #category : 'accessing' }
 CooHistoryExperimentResult >> variableDependencyBenchmark [
 
 	^ variableDependencyBenchmark
@@ -239,6 +319,24 @@ CooHistoryExperimentResult >> variableHistoryValues [
 
 	variableHistoryBenchmark ifNil: [ ^ #() ].
 	^ self valuesForBenchmark: variableHistoryBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableHybridBenchmark [
+
+	^ variableHybridBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableHybridBenchmark: aBenchmark [
+
+	variableHybridBenchmark := aBenchmark
+]
+
+{ #category : 'accessing' }
+CooHistoryExperimentResult >> variableHybridValues [
+
+	^ self valuesForBenchmark: variableHybridBenchmark
 ]
 
 { #category : 'accessing' }

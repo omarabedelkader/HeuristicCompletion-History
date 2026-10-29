@@ -14,12 +14,49 @@ Class {
 		'selectorCache',
 		'session',
 		'scannedMethods',
-		'matchedCallsites'
+		'matchedCallsites',
+		'log'
 	],
 	#category : 'ExtendedHeuristicCompletion-History-Benchmarks-Core',
 	#package : 'ExtendedHeuristicCompletion-History-Benchmarks',
 	#tag : 'Core'
 }
+
+{ #category : 'benchmarks' }
+CooStaticBenchmarksMessageHistory >> benchCallsite: aMessageNode atPosition: aPosition [
+	"As in my superclass, and every completion is also written to the call site log."
+
+	| originalSelector |
+	originalSelector := aMessageNode selectorNode value.
+	2 to: (self maxPrefixSizeFor: originalSelector) do: [ :index |
+		| prefix startTime startMemory completion candidates completionIndex |
+		startTime := self startTimeMeasurement.
+		startMemory := self startMemoryMeasurement.
+		prefix := self extractPrefixFrom: originalSelector at: index.
+		aMessageNode selectorNode value: prefix.
+		completion := self buildCompletionFor: aMessageNode atPosition: aPosition.
+		candidates := self fetchTopCandidatesFrom: completion usingPrefix: prefix.
+		completionIndex := self findCompletionIndexFor: originalSelector inCandidates: candidates.
+		self trackCompletionResultsFor: originalSelector atIndex: completionIndex withPrefix: prefix.
+		log ifNotNil: [
+			log
+				recordKind: #message
+				strategy: self name
+				node: aMessageNode
+				target: originalSelector
+				prefix: prefix size
+				rank: completionIndex
+				milliseconds: Time millisecondClockValue - startTime ].
+		self logMemoryUsageSince: startMemory forPrefixSize: prefix size.
+		self logExecutionTimeSince: startTime forPrefixSize: prefix size ].
+	aMessageNode selectorNode value: originalSelector
+]
+
+{ #category : 'accessing' }
+CooStaticBenchmarksMessageHistory >> log: aCallsiteLog [
+
+	log := aCallsiteLog
+]
 
 { #category : 'accessing' }
 CooStaticBenchmarksMessageHistory >> matchedCallsites [
@@ -51,6 +88,7 @@ CooStaticBenchmarksMessageHistory >> run [
 			description := methodAndDescription value.
 			
 			scannedMethods := scannedMethods + 1.
+			log ifNotNil: [ log method: method ].
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
 							(node isMessage and: [
@@ -68,6 +106,7 @@ CooStaticBenchmarksMessageHistory >> run [
 	"Here we do not need the descriptions because we should scan all the nodes"	
 	self session addedMethods do: [ :method |
 			scannedMethods := scannedMethods + 1.
+			log ifNotNil: [ log method: method ].
 			method parseTree ifNotNil: [ :parseTree |
 					parseTree nodesDo: [ :node |
 							(node isMessage and: [ self shouldBenchmarkMessageSelector: node selector ]) ifTrue: [

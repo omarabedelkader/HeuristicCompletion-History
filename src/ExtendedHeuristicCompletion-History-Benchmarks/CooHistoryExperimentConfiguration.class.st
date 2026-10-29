@@ -24,7 +24,7 @@ CooHistoryExperimentConfiguration class >> microdown [
 	^ self new
 		  name: 'Microdown';
 		  repository: 'git@github.com:pillar-markup/Microdown.git';
-		  numberOfCommits: 11;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'Microdown';
 		  loader: [
 			  Smalltalk globals
@@ -88,7 +88,7 @@ CooHistoryExperimentConfiguration class >> druid [
 	^ self new
 		  name: 'Druid';
 		  repository: 'git@github.com:Alamvic/druid.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'Druid';
 		  loader: [
 			  Metacello new
@@ -108,7 +108,7 @@ CooHistoryExperimentConfiguration class >> fame [
 	^ self new
 		  name: 'Fame';
 		  repository: 'git@github.com:moosetechnology/Fame.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'Fame';
 		  loader: [
 			  Metacello new
@@ -128,7 +128,7 @@ CooHistoryExperimentConfiguration class >> famix [
 	^ self new
 		  name: 'FAMIX';
 		  repository: 'git@github.com:moosetechnology/Famix.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'Famix';
 		  loader: [
 			  Metacello new
@@ -147,7 +147,7 @@ CooHistoryExperimentConfiguration class >> fastPython [
 	^ self new
 		  name: 'FASTPython';
 		  repository: 'git@github.com:moosetechnology/FAST-Python.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'FAST-Python';
 		  loader: [
 			  Metacello new
@@ -167,7 +167,7 @@ CooHistoryExperimentConfiguration class >> fastTypescript [
 	^ self new
 		  name: 'FASTTypescript';
 		  repository: 'git@github.com:moosetechnology/FASTTypescript.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'FAST-TypeScript';
 		  loader: [
 			  Metacello new
@@ -187,7 +187,7 @@ CooHistoryExperimentConfiguration class >> gitProjectHealth [
 	^ self new
 		  name: 'GitProjectHealth';
 		  repository: 'git@github.com:moosetechnology/GitProjectHealth.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNames: #(
 			  'GitLabHealth-Model'
 			  'GitLabHealth-Model-Analysis'
@@ -213,7 +213,7 @@ CooHistoryExperimentConfiguration class >> mooseCI [
 	^ self new
 		  name: 'MooseCI';
 		  repository: 'git@github.com:moosetechnology/MooseCI.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'MooseCI';
 		  loader: [
 			  Metacello new
@@ -228,12 +228,212 @@ CooHistoryExperimentConfiguration class >> mooseCI [
 ]
 
 { #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> bloc [
+
+	^ self new
+		  name: 'Bloc';
+		  repository: 'git@github.com:pharo-graphics/Bloc.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Bloc';
+		  loader: [
+			  Metacello new
+				  baseline: 'Bloc';
+				  repository: 'github://pharo-graphics/Bloc:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Bloc';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> toplo [
+
+	^ self new
+		  name: 'Toplo';
+		  repository: 'git@github.com:pharo-graphics/Toplo.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Toplo';
+		  loader: [
+			  Metacello new
+				  baseline: 'Toplo';
+				  repository: 'github://pharo-graphics/Toplo:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Toplo';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> polyMath [
+
+	^ self new
+		  name: 'PolyMath';
+		  repository: 'git@github.com:PolyMathOrg/PolyMath.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Math-';
+		  loader: [
+			  Metacello new
+				  baseline: 'PolyMath';
+				  repository: 'github://PolyMathOrg/PolyMath:master/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'PolyMath';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> dataFrame [
+
+	^ self new
+		  name: 'DataFrame';
+		  repository: 'git@github.com:PolyMathOrg/DataFrame.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'DataFrame';
+		  loader: [
+			  Metacello new
+				  baseline: 'DataFrame';
+				  repository: 'github://PolyMathOrg/DataFrame:master/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'DataFrame';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> seaside [
+
+	^ self new
+		  name: 'Seaside';
+		  repository: 'git@github.com:SeasideSt/Seaside.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Seaside';
+		  loader: [
+			  Metacello new
+				  baseline: 'Seaside3';
+				  repository: 'github://SeasideSt/Seaside:master/repository';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Seaside';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> pillar [
+
+	^ self new
+		  name: 'Pillar';
+		  repository: 'git@github.com:pillar-markup/pillar.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Pillar';
+		  loader: [
+			  Metacello new
+				  baseline: 'Pillar';
+				  repository: 'github://pillar-markup/pillar:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Pillar';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> mooseIDE [
+
+	^ self new
+		  name: 'MooseIDE';
+		  repository: 'git@github.com:moosetechnology/MooseIDE.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'MooseIDE';
+		  loader: [
+			  Metacello new
+				  baseline: 'MooseIDE';
+				  repository: 'github://moosetechnology/MooseIDE:development/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'MooseIDE';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> voyage [
+
+	^ self new
+		  name: 'Voyage';
+		  repository: 'git@github.com:pharo-nosql/voyage.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Voyage';
+		  loader: [
+			  Metacello new
+				  baseline: 'Voyage';
+				  repository: 'github://pharo-nosql/voyage:master/mc';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Voyage';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> chatPharo [
+
+	^ self new
+		  name: 'ChatPharo';
+		  repository: 'git@github.com:omarabedelkader/ChatPharo.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'AI-ChatPharo';
+		  loader: [
+			  Metacello new
+				  baseline: 'AIChatPharo';
+				  repository: 'github://omarabedelkader/ChatPharo:main/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'ChatPharo';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> pharoLauncher [
+
+	^ self new
+		  name: 'PharoLauncher';
+		  repository: 'git@github.com:pharo-project/pharo-launcher.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'PharoLauncher';
+		  loader: [
+			  Metacello new
+				  baseline: 'PharoLauncher';
+				  repository: 'github://pharo-project/pharo-launcher:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'PharoLauncher';
+		  yourself
+]
+
+{ #category : 'instance creation' }
 CooHistoryExperimentConfiguration class >> tinyLogger [
 
 	^ self new
 		  name: 'TinyLogger';
 		  repository: 'git@github.com:jecisc/TinyLogger.git';
-		  numberOfCommits: 100;
+		  numberOfCommits: 200;
 		  packageNamePrefix: 'TinyLogger';
 		  loader: [
 			  Metacello new

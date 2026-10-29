@@ -160,7 +160,8 @@ HistoryScrapper >> commitsFromHead: anInteger [
 				         maxNumber: 1000;
 				         commits.
 			  com ].
-	^ commits copyFrom: 1 to: anInteger
+	"A young repository may have fewer commits than requested: take the whole history then."
+	^ commits copyFrom: 1 to: (anInteger min: commits size)
 ]
 
 { #category : 'actions' }
