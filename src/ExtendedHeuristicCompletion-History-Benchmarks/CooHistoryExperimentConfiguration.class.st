@@ -428,6 +428,206 @@ CooHistoryExperimentConfiguration class >> pharoLauncher [
 ]
 
 { #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> treeSitter [
+
+	^ self new
+		  name: 'TreeSitter';
+		  repository: 'git@github.com:Evref-BL/Pharo-Tree-Sitter.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'TreeSitter';
+		  loader: [
+			  Metacello new
+				  baseline: 'TreeSitter';
+				  repository: 'github://Evref-BL/Pharo-Tree-Sitter:main/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'TreeSitter';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> osSubprocess [
+
+	^ self new
+		  name: 'OSSubprocess';
+		  repository: 'git@github.com:pharo-contributions/OSSubprocess.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'OSSubprocess';
+		  loader: [
+			  Metacello new
+				  baseline: 'OSSubprocess';
+				  repository: 'github://pharo-contributions/OSSubprocess:master/repository';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'OSSubprocess';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> glorp [
+
+	^ self new
+		  name: 'Glorp';
+		  repository: 'git@github.com:pharo-rdbms/glorp.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Glorp';
+		  loader: [
+			  Metacello new
+				  baseline: 'Glorp';
+				  repository: 'github://pharo-rdbms/glorp:master/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Glorp';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> teapot [
+
+	^ self new
+		  name: 'Teapot';
+		  repository: 'git@github.com:zeroflag/Teapot.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Teapot';
+		  loader: [
+			  Metacello new
+				  baseline: 'Teapot';
+				  repository: 'github://zeroflag/Teapot:master/source';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Teapot';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> moose [
+
+	^ self new
+		  name: 'Moose';
+		  repository: 'git@github.com:moosetechnology/Moose.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Moose';
+		  loader: [
+			  Metacello new
+				  baseline: 'Moose';
+				  repository: 'github://moosetechnology/Moose:development/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Moose';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> openPonk [
+
+	^ self new
+		  name: 'OpenPonk';
+		  repository: 'git@github.com:OpenPonk/openponk.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'OpenPonk';
+		  loader: [
+			  Metacello new
+				  baseline: 'OpenPonk';
+				  repository: 'github://OpenPonk/openponk:master/repository';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'OpenPonk';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> alexandrie [
+
+	^ self new
+		  name: 'Alexandrie';
+		  repository: 'git@github.com:pharo-graphics/Alexandrie.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Alexandrie';
+		  loader: [
+			  Metacello new
+				  baseline: 'Alexandrie';
+				  repository: 'github://pharo-graphics/Alexandrie:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Alexandrie';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> fastJava [
+
+	^ self new
+		  name: 'FASTJava';
+		  repository: 'git@github.com:moosetechnology/FAST-JAVA.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'FAST-Java';
+		  loader: [
+			  Metacello new
+				  baseline: 'FASTJava';
+				  repository: 'github://moosetechnology/FAST-JAVA:v4/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'FASTJava';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> album [
+
+	^ self new
+		  name: 'Album';
+		  repository: 'git@github.com:pharo-graphics/Album.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Album';
+		  loader: [
+			  Metacello new
+				  baseline: 'Album';
+				  repository: 'github://pharo-graphics/Album:dev/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Album';
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CooHistoryExperimentConfiguration class >> chanel [
+
+	^ self new
+		  name: 'Chanel';
+		  repository: 'git@github.com:jecisc/Chanel.git';
+		  numberOfCommits: 200;
+		  packageNamePrefix: 'Chanel';
+		  loader: [
+			  Metacello new
+				  baseline: 'Chanel';
+				  repository: 'github://jecisc/Chanel:master/src';
+				  onConflict: [ :exception | exception useIncoming ];
+				  onUpgrade: [ :exception | exception useIncoming ];
+				  load ];
+		  outputDirectory:
+			  FileLocator workingDirectory / 'History-Bench-Results' / 'Chanel';
+		  yourself
+]
+
+{ #category : 'instance creation' }
 CooHistoryExperimentConfiguration class >> tinyLogger [
 
 	^ self new

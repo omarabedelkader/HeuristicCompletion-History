@@ -242,7 +242,7 @@ CooHistoryExperimentRunner >> completeDirectDependencyMessageBuilder [
 			 add: CoLiteralMessageHeuristic new;
 			 add: CoGlobalVariableMessageHeuristic new;
 			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: CoDependencyMessageHeuristics new;
+			 add: CooDependencyMessageHeuristic new;
 			 add: CoUnknownMessageHeuristic new;
 			 build).
 	^ builder
@@ -292,6 +292,30 @@ CooHistoryExperimentRunner >> completeSemanticsVariableBuilder [
 			 add: CoInstanceAccessibleVariablesHeuristic new;
 			 add: CoGlobalVariablesHeuristic new;
 			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> historyAfterSelfMessageBuilderWithSession: aHistory [
+	"A variant of the History builder: the session history comes right after the self and super
+	heuristics instead of first. These two heuristics only apply to sends to self and super, which they
+	rank well; for every other send the history still comes first. Class-name completion is unchanged."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+		add: CoSelfMessageHeuristic new;
+		add: CoSuperMessageHeuristic new;
+		add: (CooSessionMessagesHeuristic new
+			session: aHistory;
+			yourself);
+		add: CoTypedReceiverMessageHeuristic new;
+		add: CoInitializeInferencedMessageHeuristic new;
+		add: CoLiteralMessageHeuristic new;
+		add: CoGlobalVariableMessageHeuristic new;
+		add: CoVariableWithTypeNameMessageHeuristic new;
+		add: CoUnknownMessageHeuristic new;
+		build).
 	^ builder
 ]
 
@@ -356,7 +380,7 @@ CooHistoryExperimentRunner >> hybridMessageBuilderWithSession: aHistory [
 			 add: CoLiteralMessageHeuristic new;
 			 add: CoGlobalVariableMessageHeuristic new;
 			 add: CoVariableWithTypeNameMessageHeuristic new;
-			 add: CoDependencyMessageHeuristics new;
+			 add: CooDependencyMessageHeuristic new;
 			 add: CoUnknownMessageHeuristic new;
 			 build).
 	^ builder
@@ -416,6 +440,9 @@ CooHistoryExperimentRunner >> benchmarksForSession: aSession [
 		#Dependency -> {
 			self completeDirectDependencyMessageBuilder.
 			self completeDirectDependencyVariableBuilder }.
+		#HistoryAfterSelf -> {
+			(self historyAfterSelfMessageBuilderWithSession: historySnapshot).
+			(self historyVariableBuilderWithSession: historySnapshot) }.
 		#Hybrid -> {
 			(self hybridMessageBuilderWithSession: historySnapshot).
 			(self hybridVariableBuilderWithSession: historySnapshot) } } do: [ :strategy |

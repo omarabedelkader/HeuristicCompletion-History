@@ -26,12 +26,18 @@ import re
 import sys
 from collections import defaultdict
 
-STRATEGIES = ["Baseline", "Semantic", "History", "Dependency", "Hybrid"]
-SHORT = {"Baseline": "B", "Semantic": "S", "History": "H", "Dependency": "D", "Hybrid": "Y"}
+# Every configuration the benchmark may run, in display order; STRATEGIES is narrowed to the ones
+# present in the data of every project when the results are loaded.
+ALL_STRATEGIES = ["Baseline", "Semantic", "History", "HistoryAfterSelf", "Dependency", "Hybrid"]
+STRATEGIES = list(ALL_STRATEGIES)
+SHORT = {"Baseline": "B", "Semantic": "S", "History": "H", "HistoryAfterSelf": "Hs", "Dependency": "D", "Hybrid": "Y"}
+LABEL = {"HistoryAfterSelf": "H.\\,after self"}
 KINDS = ["message", "variable"]
 PREFIXES = range(2, 9)
-COMPARISONS = [("History", "Semantic"), ("Dependency", "Semantic"), ("History", "Dependency"),
-               ("Hybrid", "History"), ("Hybrid", "Dependency")]
+ALL_COMPARISONS = [("History", "Semantic"), ("Dependency", "Semantic"), ("History", "Dependency"),
+                   ("Hybrid", "History"), ("Hybrid", "Dependency"),
+                   ("HistoryAfterSelf", "Semantic"), ("HistoryAfterSelf", "History"), ("HistoryAfterSelf", "Dependency")]
+COMPARISONS = list(ALL_COMPARISONS)
 GROUPS = ["history only", "structure only", "both", "neither"]
 DEPTH_BINS = [(0, 0), (1, 10), (11, 50), (51, 200), (201, 1000), (1001, 10 ** 9)]
 
@@ -402,7 +408,7 @@ def table_subjects(summary):
 
 def table_mrr(summary, kind):
     lines = ["\\begin{tabular}{l" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Project & " + " & ".join(STRATEGIES) + "\\\\", "\\midrule"]
+             "Project & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
     for name, entry in summary["projects"].items():
         if not entry[kind]["callsites"]:
             continue
@@ -418,7 +424,7 @@ def table_mrr(summary, kind):
 
 def table_hits(summary):
     lines = ["\\begin{tabular}{ll" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Kind & Metric & " + " & ".join(STRATEGIES) + "\\\\", "\\midrule"]
+             "Kind & Metric & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
     for kind in KINDS:
         pooled = summary["pooled"][kind]
         rows = [("MRR@10", [pooled["mrr"][s] for s in STRATEGIES])]
@@ -504,7 +510,7 @@ def table_tests(summary, kind):
 
 def table_latency(summary):
     lines = ["\\begin{tabular}{l" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Completion time (ms) & " + " & ".join(STRATEGIES) + "\\\\", "\\midrule"]
+             "Completion time (ms) & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
     for kind in KINDS:
         latency = summary["pooled"][kind]["latency"]
         lines.append(f"{kind.capitalize()}, median & " + " & ".join(fmt(latency[s]['median'], 0) for s in STRATEGIES) + "\\\\")
@@ -602,6 +608,13 @@ def main():
                 print(f"loaded {project['statistics']['project']}: {len(project['callsites'])} call sites")
     if not projects:
         sys.exit(f"No project results found in {results}")
+    present = None
+    for project in projects.values():
+        names = {strategy for (_, strategy) in project["times"]}
+        present = names if present is None else present & names
+    STRATEGIES[:] = [s for s in ALL_STRATEGIES if s in present]
+    COMPARISONS[:] = [(a, b) for (a, b) in ALL_COMPARISONS if a in STRATEGIES and b in STRATEGIES]
+    print("configurations: " + ", ".join(STRATEGIES))
 
     summary = analyse(projects)
     write(os.path.join(output, "summary.json"), json.dumps(summary, indent=1, default=str))

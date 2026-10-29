@@ -34,13 +34,21 @@ LOGS="$WORK_DIR/logs"
 
 # Selectors of the CooHistoryExperimentConfiguration class-side constructors.
 ALL_PROJECTS=(microdown roassal druid fame famix fastPython fastTypescript gitProjectHealth mooseCI tinyLogger
-  bloc toplo polyMath dataFrame seaside pillar mooseIDE voyage chatPharo pharoLauncher)
+  bloc toplo polyMath dataFrame seaside pillar mooseIDE voyage chatPharo pharoLauncher
+  treeSitter osSubprocess glorp teapot moose openPonk alexandrie fastJava album chanel)
 if [ "$#" -gt 0 ]; then PROJECTS=("$@"); else PROJECTS=("${ALL_PROJECTS[@]}"); fi
 
 mkdir -p "$RESULTS" "$LOGS"
 cd "$WORK_DIR"
 
-with_timeout() { perl -e 'alarm shift; exec @ARGV or die "exec: $!"' "$@"; }
+# Runs a command in its own process group and kills the whole group after the given seconds:
+# ./pharo is a shell script that starts the VM as a child, which a plain alarm would leave running.
+with_timeout() {
+  perl -e 'my $seconds = shift; my $pid = fork; die "fork: $!" unless defined $pid;
+    if ($pid == 0) { setpgrp(0, 0); exec @ARGV or die "exec: $!" }
+    $SIG{ALRM} = sub { kill "KILL", -$pid; exit 124 };
+    alarm $seconds; waitpid($pid, 0); exit($? >> 8)' "$@"
+}
 
 pharo_st() { # image script.st [extra st options...]
   local image="$1" script="$2"; shift 2
@@ -102,8 +110,10 @@ run_project() { # project
 			Smalltalk exitFailure ].
 EOF
   echo "==> [$(date +%H:%M:%S)] start  $project (log: $LOGS/$project.log)"
-  if (cd "$dir" && with_timeout "$RUN_TIMEOUT" ./pharo run.image st --quit run.st) > "$LOGS/$project.log" 2>&1 \
-     && ls "$RESULTS/$project/"*-results.ston >/dev/null 2>&1; then
+  # Success is judged by the results file, written last: a project can break the image's own
+  # command-line tooling (e.g. by extending Clap), which then fails at exit after a complete experiment.
+  (cd "$dir" && with_timeout "$RUN_TIMEOUT" ./pharo run.image st --quit run.st) > "$LOGS/$project.log" 2>&1 || true
+  if ls "$RESULTS/$project/"*-results.ston >/dev/null 2>&1; then
     echo "==> [$(date +%H:%M:%S)] done   $project"
   else
     echo "==> [$(date +%H:%M:%S)] FAILED $project (failed or timed out), see $LOGS/$project.log" >&2
