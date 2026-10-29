@@ -23,14 +23,16 @@ Metacello new
 
 ## Running the History benchmarks
 
-The benchmark replays the last 200 commits of 20 Pharo projects and, for every call site a commit introduced,
-asks five completion configurations to complete the expected token from prefixes of 2 to 8 characters:
+The benchmark replays the last 200 commits of the first-parent history (main line: a merged branch is one step)
+of 30 Pharo projects and, for every call site a commit introduced, asks six completion configurations to complete
+the expected token from prefixes of 2 to 8 characters:
 
 | Configuration | Message completion | Variable (class name) completion |
 |---|---|---|
 | Baseline | all selectors | all globals |
 | Semantic | default Complishon heuristics | default Complishon heuristics |
 | History | session history first, then Semantic | Semantic, then session history |
+| HistoryAfterSelf | self/super heuristics, then session history, then the rest of Semantic | as History |
 | Dependency | Semantic, then direct package dependencies | Semantic, then direct package dependencies |
 | Hybrid | History and Dependency | History and Dependency |
 
@@ -43,7 +45,7 @@ While a commit is benchmarked, the history strategies only see the history of th
 and runs every project in its own directory with its own copy of the image:
 
 ```bash
-scripts/run-history-benchmarks.sh                       # the 20 projects
+scripts/run-history-benchmarks.sh                       # the 30 projects
 scripts/run-history-benchmarks.sh microdown roassal     # only some of them
 PARALLEL=7 scripts/run-history-benchmarks.sh            # 7 projects at a time
 ```

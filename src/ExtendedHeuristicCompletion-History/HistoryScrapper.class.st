@@ -150,18 +150,21 @@ HistoryScrapper >> commitCount: aNumber [
 
 { #category : 'actions' }
 HistoryScrapper >> commitsFromHead: anInteger [
-	"return last, last -1, last -2 .. commits up to last-anInteger"
-	
-	| commits |
-	commits := repository head withCommitWalkDo: [ :walk |
-			  | com |
-			  com := walk
-				         fromHead;
-				         maxNumber: 1000;
-				         commits.
-			  com ].
-	"A young repository may have fewer commits than requested: take the whole history then."
-	^ commits copyFrom: 1 to: (anInteger min: commits size)
+	"Answer the last anInteger commits of the first-parent history of the head, newest first:
+	head, its first parent, the first parent of that one, and so on.
+	A walk ordered by date would interleave the commits of parallel branches, and checking them out
+	one after the other would switch between branch states: the code of a whole branch would look
+	like the change of a single commit. Following first parents, each step is a change of the main
+	line, and a merged branch arrives as the one change its merge commit made.
+	A young repository may have fewer commits than requested: take the whole history then."
+
+	| commits commit |
+	commits := OrderedCollection new.
+	commit := repository headCommit.
+	[ commit notNil and: [ commits size < anInteger ] ] whileTrue: [
+		commits add: commit.
+		commit := commit ancestors ifEmpty: [ nil ] ifNotEmpty: [ :parents | parents first ] ].
+	^ commits
 ]
 
 { #category : 'actions' }
