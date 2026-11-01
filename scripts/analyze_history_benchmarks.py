@@ -460,7 +460,7 @@ def table_subjects(summary):
     lines = ["\\begin{tabular}{lrrrrrr" + SEPARATOR + "lrrrrrr}", "\\toprule",
              f"{header} & {header}\\\\", "\\midrule"]
     lines += [f"{a} & {b}\\\\" for a, b in zip(left, right)]
-    lines += ["\\midrule", f"{total_row}\\\\", "\\bottomrule", "\\end{tabular}"]
+    lines += ["\\bottomrule", "\\end{tabular}"]
     return "\n".join(lines) + "\n"
 
 
@@ -481,7 +481,7 @@ def table_mrr(summary, kind):
     return "\n".join(lines) + "\n"
 
 
-def table_mrr_both(summary):
+def table_mrr_both(summary, part="main"):
     """Message and class-name MRR@10 per project, side by side. Next to every value, a small superscript
     gives its change relative to Semantic in percent, in green or red (\\dif, \\up, \\down)."""
     n = len(STRATEGIES)
@@ -493,7 +493,7 @@ def table_mrr_both(summary):
     lines = ["\\begin{tabular}{l" + spec + separator + spec + "}", "\\toprule",
              f"& \\multicolumn{{{2 * n}}}{{c{separator}}}{{Message completion}} & \\multicolumn{{{2 * n}}}{{c}}{{Class-name completion}}\\\\",
              f"\\cmidrule(lr){{2-{2 * n + 1}}}\\cmidrule(lr){{{2 * n + 2}-{4 * n + 1}}}",
-             f"Project & {code_cells(True)} & {code_cells(False)}\\\\", "\\midrule"]
+             f"{'Project' if part == 'main' else ''} & {code_cells(True)} & {code_cells(False)}\\\\", "\\midrule"]
 
     def diff(value, reference):
         percent_change = round((value - reference) / reference * 100) if reference else 0
@@ -516,9 +516,23 @@ def table_mrr_both(summary):
             return ["--", ""] * n
         return cells([entry[kind]["mrr"][s] for s in STRATEGIES])
 
+    m, v = summary["pooled"]["message"], summary["pooled"]["variable"]
+    if part == "breakdown":
+        # MRR@10 over all call sites, split by origin of the expected token and by kind of receiver
+        lines.append("\\textit{By origin of the token}" + " &" * (4 * n) + "\\\\")
+        for group in GROUPS:
+            gm, gv = m["groups"][group], v["groups"][group]
+            left = cells([gm["mrr"][s] for s in STRATEGIES]) if gm["callsites"] else ["--", ""] * n
+            right = cells([gv["mrr"][s] for s in STRATEGIES]) if gv["callsites"] else ["--", ""] * n
+            lines.append(f"\\quad {group} & " + " & ".join(left + right) + "\\\\")
+        lines += ["\\midrule", "\\textit{By kind of receiver}" + " &" * (2 * n)
+                  + f" & \\multicolumn{{{2 * n}}}{{c}}{{\\textit{{does not apply: a class name has no receiver}}}}\\\\"]
+        for receiver, r in sorted(m["receivers"].items(), key=lambda item: -item[1]["callsites"]):
+            lines.append(f"\\quad \\texttt{{{receiver}}} & " + " & ".join(cells([r["mrr"][s] for s in STRATEGIES]) + [""] * (2 * n)) + "\\\\")
+        lines += ["\\bottomrule", "\\end{tabular}"]
+        return "\n".join(lines) + "\n"
     for name, entry in project_rows(summary):
         lines.append(latex_name(name) + " & " + " & ".join(half(entry, "message") + half(entry, "variable")) + "\\\\")
-    m, v = summary["pooled"]["message"], summary["pooled"]["variable"]
     best_in = lambda pooled: [c for s in STRATEGIES for c in (str(pooled["projects_where_best"][s]), "")]
     plain = lambda values: [c for value in values for c in (value, "")]
     both = lambda get: cells([get(m, s) for s in STRATEGIES]) + cells([get(v, s) for s in STRATEGIES])
@@ -804,7 +818,7 @@ def main():
     write(os.path.join(output, "tables", "hits.tex"), table_hits(summary))
     write(os.path.join(output, "tables", "mrr.tex"), table_mrr_both(summary))
     write(os.path.join(output, "tables", "origin-tests.tex"), table_origin_tests(summary))
-    write(os.path.join(output, "tables", "breakdown.tex"), table_breakdown(summary))
+    write(os.path.join(output, "tables", "breakdown.tex"), table_mrr_both(summary, "breakdown"))
     write(os.path.join(output, "tables", "groups.tex"), table_groups(summary))
     write(os.path.join(output, "tables", "receivers.tex"), table_receivers(summary))
     write(os.path.join(output, "tables", "latency.tex"), table_latency(summary))
