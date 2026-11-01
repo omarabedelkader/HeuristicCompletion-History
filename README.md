@@ -24,7 +24,7 @@ Metacello new
 ## Running the History benchmarks
 
 The benchmark replays the last 200 commits of the first-parent history (main line: a merged branch is one step)
-of 30 Pharo projects and, for every call site a commit introduced, asks six completion configurations to complete
+of 30 Pharo projects and, for every call site a commit introduced, asks eight completion configurations to complete
 the expected token from prefixes of 2 to 8 characters:
 
 | Configuration | Message completion | Variable (class name) completion |
@@ -35,6 +35,8 @@ the expected token from prefixes of 2 to 8 characters:
 | HistoryAfterSelf | self/super heuristics, then session history, then the rest of Semantic | as History |
 | Dependency | Semantic, then direct package dependencies | Semantic, then direct package dependencies |
 | Hybrid | History and Dependency | History and Dependency |
+| Hybrid H→D (`HybridHD`) | self/super, session history, rest of Semantic, then direct package dependencies | Semantic, session history, then direct package dependencies |
+| Hybrid D→H (`HybridDH`) | Dependency, then session history before all selectors | Semantic, direct package dependencies, then session history |
 
 While a commit is benchmarked, the history strategies only see the history of the previous commits
 (`CooHistorySnapshot`), so a commit never helps to predict its own call sites.
@@ -63,7 +65,7 @@ For each project, `history-bench/results/<project>/` contains:
   token in the first ten proposals (0 when absent) and the completion time in milliseconds;
 - `<project>-results.ston`, plots (`.svg`, `.png`) and LaTeX tables of the per-project MRR and statistics.
 
-`history-bench/results/summary.{svg,png,md,csv,tex}` compares the five configurations over all projects.
+`history-bench/results/summary.{svg,png,md,csv,tex}` compares the configurations over all projects.
 
 ### The folder for the paper
 

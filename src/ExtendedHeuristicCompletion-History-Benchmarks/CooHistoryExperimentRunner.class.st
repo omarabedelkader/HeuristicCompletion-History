@@ -1,12 +1,13 @@
 "
 I orchestrate a complete project-level History experiment and write its report artifacts.
 
-During the replay of a repository history I run, for every commit, six
-benchmarks over the modified and added methods of the current session:
-    - message completion:   semantic, history, direct-package-dependency
-    - variable completion:  semantic, history, direct-package-dependency
+During the replay of a repository history I run, for every commit, message and variable
+completion benchmarks over the modified and added methods of the current session, one per
+configuration (see #benchmarksForSession:): Baseline, Semantic, History, Dependency,
+HistoryAfterSelf, Hybrid, HybridHD (history after self, then dependencies) and HybridDH
+(dependencies, then history). Every call site is logged by CooCallsiteLog for the external analysis.
 
-The six benchmarks, together with the project statistics, end up in a
+The benchmarks of the first five configurations, together with the project statistics, end up in a
 CooHistoryExperimentResult which is exported as:
     - comparison figures:   <project>-messages.{svg,png},
                             <project>-variables.{svg,png}
@@ -406,6 +407,74 @@ CooHistoryExperimentRunner >> hybridVariableBuilderWithSession: aHistory [
 	^ builder
 ]
 
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> hybridHDMessageBuilderWithSession: aHistory [
+	"Hybrid H->D: HistoryAfterSelf plus the direct package dependencies. The history comes right after
+	the self and super heuristics, the dependencies right before the global fallback."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: (CooSessionMessagesHeuristic new
+					  session: aHistory;
+					  yourself);
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CooDependencyMessageHeuristic new;
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> hybridDHMessageBuilderWithSession: aHistory [
+	"Hybrid D->H: the Dependency chain, then the history, then the global fallback. The history only
+	adds the selectors that neither the semantic heuristics nor the dependencies propose."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder messagesHeuristic: (builder newHeuristicBuilder
+			 add: CoSelfMessageHeuristic new;
+			 add: CoSuperMessageHeuristic new;
+			 add: CoTypedReceiverMessageHeuristic new;
+			 add: CoInitializeInferencedMessageHeuristic new;
+			 add: CoLiteralMessageHeuristic new;
+			 add: CoGlobalVariableMessageHeuristic new;
+			 add: CoVariableWithTypeNameMessageHeuristic new;
+			 add: CooDependencyMessageHeuristic new;
+			 add: (CooSessionMessagesHeuristic new
+					  session: aHistory;
+					  yourself);
+			 add: CoUnknownMessageHeuristic new;
+			 build).
+	^ builder
+]
+
+{ #category : 'benchs' }
+CooHistoryExperimentRunner >> hybridDHVariableBuilderWithSession: aHistory [
+	"The classes of the direct package dependencies, then the history classes, then all globals."
+
+	| builder |
+	builder := CoASTHeuristicsResultSetBuilder new.
+	builder variablesHeuristic: (builder newHeuristicBuilder
+			 add: CoLocalScopeVariablesHeuristic new;
+			 add: CoWorkspaceVariablesHeuristic new;
+			 add: CoInstanceAccessibleVariablesHeuristic new;
+			 add: (CoGlobalVariablesHeuristic new globalVariableFetcherClass:
+					  CooDependencyGlobalVariableFetcher);
+			 add: (CooSessionVariableHeuristic new
+					  session: aHistory;
+					  yourself);
+			 add: CoGlobalVariablesHeuristic new;
+			 build).
+	^ builder
+]
+
 { #category : 'running' }
 CooHistoryExperimentRunner >> initialize [
 
@@ -445,7 +514,13 @@ CooHistoryExperimentRunner >> benchmarksForSession: aSession [
 			(self historyVariableBuilderWithSession: historySnapshot) }.
 		#Hybrid -> {
 			(self hybridMessageBuilderWithSession: historySnapshot).
-			(self hybridVariableBuilderWithSession: historySnapshot) } } do: [ :strategy |
+			(self hybridVariableBuilderWithSession: historySnapshot) }.
+		#HybridHD -> {
+			(self hybridHDMessageBuilderWithSession: historySnapshot).
+			(self hybridVariableBuilderWithSession: historySnapshot) }.
+		#HybridDH -> {
+			(self hybridDHMessageBuilderWithSession: historySnapshot).
+			(self hybridDHVariableBuilderWithSession: historySnapshot) } } do: [ :strategy |
 		benchmarks
 			at: #message -> strategy key
 			put: (self

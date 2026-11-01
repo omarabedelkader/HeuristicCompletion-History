@@ -28,16 +28,31 @@ from collections import defaultdict
 
 # Every configuration the benchmark may run, in display order; STRATEGIES is narrowed to the ones
 # present in the data of every project when the results are loaded.
-ALL_STRATEGIES = ["Baseline", "Semantic", "History", "HistoryAfterSelf", "Dependency", "Hybrid"]
+ALL_STRATEGIES = ["Baseline", "Semantic", "History", "HistoryAfterSelf", "Dependency", "Hybrid", "HybridHD", "HybridDH"]
 STRATEGIES = list(ALL_STRATEGIES)
-SHORT = {"Baseline": "B", "Semantic": "S", "History": "H", "HistoryAfterSelf": "Hs", "Dependency": "D", "Hybrid": "Y"}
-LABEL = {"HistoryAfterSelf": "H.\\,after self"}
+SHORT = {"Baseline": "B", "Semantic": "S", "History": "H", "HistoryAfterSelf": "Hs", "Dependency": "D", "Hybrid": "Y",
+         "HybridHD": "HD", "HybridDH": "DH"}
+LABEL = {"HistoryAfterSelf": "H.\\,after self", "HybridHD": "Hybrid H$\\to$D", "HybridDH": "Hybrid D$\\to$H"}
 KINDS = ["message", "variable"]
 PREFIXES = range(2, 9)
 ALL_COMPARISONS = [("History", "Semantic"), ("Dependency", "Semantic"), ("History", "Dependency"),
                    ("Hybrid", "History"), ("Hybrid", "Dependency"),
-                   ("HistoryAfterSelf", "Semantic"), ("HistoryAfterSelf", "History"), ("HistoryAfterSelf", "Dependency")]
+                   ("HistoryAfterSelf", "Semantic"), ("HistoryAfterSelf", "History"), ("HistoryAfterSelf", "Dependency"),
+                   ("HybridHD", "Dependency"), ("HybridHD", "Hybrid"), ("HybridHD", "HistoryAfterSelf"),
+                   ("HybridDH", "Dependency"), ("HybridHD", "HybridDH")]
 COMPARISONS = list(ALL_COMPARISONS)
+# Display names of the configurations (CooHistoryExperimentConfiguration class >> #name:), keyed by the
+# result folder. A project whose folder holds no complete results (failed, timed out or stopped) is still
+# listed in the per-project tables, with "--" in every cell.
+DISPLAY_NAMES = {"album": "Album", "alexandrie": "Alexandrie", "bloc": "Bloc", "chanel": "Chanel",
+                 "chatPharo": "ChatPharo", "dataFrame": "DataFrame", "druid": "Druid", "fame": "Fame",
+                 "famix": "FAMIX", "fastJava": "FASTJava", "fastPython": "FASTPython",
+                 "fastTypescript": "FASTTypescript", "gitProjectHealth": "GitProjectHealth", "glorp": "Glorp",
+                 "microdown": "Microdown", "moose": "Moose", "mooseCI": "MooseCI", "mooseIDE": "MooseIDE",
+                 "openPonk": "OpenPonk", "osSubprocess": "OSSubprocess", "pharoLauncher": "PharoLauncher",
+                 "pillar": "Pillar", "polyMath": "PolyMath", "roassal": "Roassal", "seaside": "Seaside",
+                 "teapot": "Teapot", "tinyLogger": "TinyLogger", "toplo": "Toplo", "treeSitter": "TreeSitter",
+                 "voyage": "Voyage"}
 GROUPS = ["history only", "structure only", "both", "neither"]
 DEPTH_BINS = [(0, 0), (1, 10), (11, 50), (51, 200), (201, 1000), (1001, 10 ** 9)]
 
@@ -380,37 +395,81 @@ def latex_name(name):
 
 def bold_best(values):
     best = max(v for v in values if not math.isnan(v))
-    return [f"\\textbf{{{fmt(v)}}}" if abs(v - best) < 5e-4 else fmt(v) for v in values]
+    return [f"\\best{{{fmt(v)}}}" if fmt(v) == fmt(best) else fmt(v) for v in values]
+
+
+SEPARATOR = "!{\\color{black!40}\\vrule width 0.6pt}"  # thin gray line between column groups
+
+
+def shade_header(text):
+    """Gray background on the header rows of a table (between \\toprule and the first \\midrule).
+    The paper defines the colors tabhead and bestbg and the macro \\best{} (bold on a shaded cell)."""
+    lines, inside = [], False
+    for line in text.split("\n"):
+        if line.startswith("\\toprule"):
+            inside = True
+        elif line.startswith("\\midrule"):
+            inside = False
+        elif inside and line.lstrip().startswith("\\cmidrule"):
+            continue  # a rule inside the header would cut the gray band
+        elif inside and line.rstrip().endswith("\\\\"):
+            line = "\\rowcolor{tabhead}" + line
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def write(path, text):
+    if path.endswith(".tex") and os.sep + "tables" + os.sep in path:
+        text = shade_header(text)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as stream:
         stream.write(text)
 
 
+def project_rows(summary, kind=None):
+    """(name, entry) for every project in name order; entry is None for a project without results."""
+    rows = [(name, entry) for name, entry in summary["projects"].items()
+            if kind is None or entry[kind]["callsites"]]
+    return sorted(rows, key=lambda row: row[0].lower())
+
+
+def missing_row(name, cells):
+    return latex_name(name) + " & " + " & ".join(["--"] * cells) + "\\\\"
+
+
 def table_subjects(summary):
-    lines = ["\\begin{tabular}{lrrrrrr}", "\\toprule",
-             "Project & Pkgs & Methods & Commits & Hist.\\ methods & Msg.\\ sites & Var.\\ sites\\\\", "\\midrule"]
-    for name, entry in summary["projects"].items():
+    """Subject projects, laid out in two side-by-side halves to halve the height of the table."""
+    header = "Project & Pkgs & Methods & Commits & Changes & Msg. & Var."
+    rows = []
+    for name, entry in project_rows(summary):
+        if entry is None:
+            rows.append(f"{latex_name(name)} & " + " & ".join(["--"] * 6))
+            continue
         s = entry["statistics"]
-        lines.append(f"{latex_name(name)} & {s.get('packages', 0)} & {s.get('methods', 0):,} & "
-                     f"{s.get('commitsAnalyzed', 0)} & {s.get('historyMethods', 0):,} & "
-                     f"{entry['message']['callsites']:,} & {entry['variable']['callsites']:,}\\\\")
+        rows.append(f"{latex_name(name)} & {s.get('packages', 0)} & {s.get('methods', 0):,} & "
+                    f"{s.get('commitsAnalyzed', 0)} & {s.get('historyMethods', 0):,} & "
+                    f"{entry['message']['callsites']:,} & {entry['variable']['callsites']:,}")
     total = lambda key: sum(e["statistics"].get(key, 0) for e in summary["projects"].values())
-    lines += ["\\midrule",
-              f"Total & {total('packages')} & {total('methods'):,} & {total('commitsAnalyzed'):,} & "
-              f"{total('historyMethods'):,} & {summary['pooled']['message']['callsites']:,} & "
-              f"{summary['pooled']['variable']['callsites']:,}\\\\",
-              "\\bottomrule", "\\end{tabular}"]
+    total_row = (f"\\multicolumn{{14}}{{c}}{{\\textbf{{Total:}} {total('packages')} packages, {total('methods'):,} methods, "
+                 f"{total('commitsAnalyzed'):,} commits, {total('historyMethods'):,} changes, "
+                 f"{summary['pooled']['message']['callsites']:,} message and {summary['pooled']['variable']['callsites']:,} class-name call sites}}")
+    half = (len(rows) + 1) // 2
+    left, right = rows[:half], rows[half:]
+    blank = " & ".join([""] * 7)
+    right += [blank] * (half - len(right))
+    lines = ["\\begin{tabular}{lrrrrrr" + SEPARATOR + "lrrrrrr}", "\\toprule",
+             f"{header} & {header}\\\\", "\\midrule"]
+    lines += [f"{a} & {b}\\\\" for a, b in zip(left, right)]
+    lines += ["\\midrule", f"{total_row}\\\\", "\\bottomrule", "\\end{tabular}"]
     return "\n".join(lines) + "\n"
 
 
 def table_mrr(summary, kind):
     lines = ["\\begin{tabular}{l" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Project & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
-    for name, entry in summary["projects"].items():
-        if not entry[kind]["callsites"]:
+             "Project & " + " & ".join(SHORT[s] for s in STRATEGIES) + "\\\\", "\\midrule"]
+    for name, entry in project_rows(summary, kind):
+        if entry is None:
+            lines.append(missing_row(name, len(STRATEGIES)))
             continue
         lines.append(latex_name(name) + " & " + " & ".join(bold_best([entry[kind]["mrr"][s] for s in STRATEGIES])) + "\\\\")
     pooled = summary["pooled"][kind]
@@ -422,9 +481,65 @@ def table_mrr(summary, kind):
     return "\n".join(lines) + "\n"
 
 
+def table_mrr_both(summary):
+    """Message and class-name MRR@10 per project, side by side. Next to every value, a small superscript
+    gives its change relative to Semantic in percent, in green or red (\\dif, \\up, \\down)."""
+    n = len(STRATEGIES)
+    spec = "r@{}l" * n
+    separator = SEPARATOR
+    # multicolumn cells drop the separator of the column spec, so the last cell of the message half repeats it
+    code_cells = lambda last_sep: " & ".join(
+        f"\\multicolumn{{2}}{{c{separator if last_sep and k == n - 1 else ''}}}{{{SHORT[st]}}}" for k, st in enumerate(STRATEGIES))
+    lines = ["\\begin{tabular}{l" + spec + separator + spec + "}", "\\toprule",
+             f"& \\multicolumn{{{2 * n}}}{{c{separator}}}{{Message completion}} & \\multicolumn{{{2 * n}}}{{c}}{{Class-name completion}}\\\\",
+             f"\\cmidrule(lr){{2-{2 * n + 1}}}\\cmidrule(lr){{{2 * n + 2}-{4 * n + 1}}}",
+             f"Project & {code_cells(True)} & {code_cells(False)}\\\\", "\\midrule"]
+
+    def diff(value, reference):
+        percent_change = round((value - reference) / reference * 100) if reference else 0
+        if percent_change > 0:
+            return f"\\dif{{\\up{{+{percent_change}\\%}}}}"
+        if percent_change < 0:
+            return f"\\dif{{\\down{{{percent_change}\\%}}}}"
+        return "\\dif{0\\%}"
+
+    def cells(values):
+        shown = bold_best(values)
+        reference = values[STRATEGIES.index("Semantic")] if "Semantic" in STRATEGIES else None
+        out = []
+        for strategy, value, text in zip(STRATEGIES, values, shown):
+            out += [text, "" if reference is None or strategy == "Semantic" else diff(value, reference)]
+        return out
+
+    def half(entry, kind):
+        if entry is None or not entry[kind]["callsites"]:
+            return ["--", ""] * n
+        return cells([entry[kind]["mrr"][s] for s in STRATEGIES])
+
+    for name, entry in project_rows(summary):
+        lines.append(latex_name(name) + " & " + " & ".join(half(entry, "message") + half(entry, "variable")) + "\\\\")
+    m, v = summary["pooled"]["message"], summary["pooled"]["variable"]
+    best_in = lambda pooled: [c for s in STRATEGIES for c in (str(pooled["projects_where_best"][s]), "")]
+    plain = lambda values: [c for value in values for c in (value, "")]
+    both = lambda get: cells([get(m, s) for s in STRATEGIES]) + cells([get(v, s) for s in STRATEGIES])
+    lines += ["\\midrule",
+              "Mean of projects & " + " & ".join(both(lambda p, s: p["macro"][s])) + "\\\\",
+              "All call sites & " + " & ".join(both(lambda p, s: p["mrr"][s])) + "\\\\",
+              "Best in (projects) & " + " & ".join(best_in(m) + best_in(v)) + "\\\\",
+              "\\midrule"]
+    for k in (1, 5, 10):
+        lines.append(f"Hit@{k} & " + " & ".join(both(lambda p, s: p["hit"][s][k])) + "\\\\")
+    lines += ["\\midrule"]
+    for label, key, row_label in (("median", "median", "Time, median (ms)"), ("p95", "p95", "Time, 95th pct.\\ (ms)")):
+        lines.append(f"{row_label} & " + " & ".join(
+            plain([fmt(m["latency"][s][key], 0) for s in STRATEGIES]) + plain([fmt(v["latency"][s][key], 0) for s in STRATEGIES])) + "\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
 def table_hits(summary):
     lines = ["\\begin{tabular}{ll" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Kind & Metric & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
+             "Kind & Metric & " + " & ".join(SHORT[s] for s in STRATEGIES) + "\\\\", "\\midrule"]
     for kind in KINDS:
         pooled = summary["pooled"][kind]
         rows = [("MRR@10", [pooled["mrr"][s] for s in STRATEGIES])]
@@ -441,10 +556,11 @@ def table_hits(summary):
 def table_hit_rates(summary, kind):
     lines = ["\\begin{tabular}{lrrrrr}", "\\toprule",
              "Project & In hist. & In own pkg. & In dep. & H$-$S & H$-$D\\\\", "\\midrule"]
-    for name, entry in summary["projects"].items():
-        e = entry[kind]
-        if not e["callsites"]:
+    for name, entry in project_rows(summary, kind):
+        if entry is None:
+            lines.append(missing_row(name, 5))
             continue
+        e = entry[kind]
         lines.append(f"{latex_name(name)} & {percent(e['hit_rates']['in_history'])} & "
                      f"{percent(e['hit_rates']['in_own_package'])} & {percent(e['hit_rates']['in_dependency'])} & "
                      f"{e['mrr']['History'] - e['mrr']['Semantic']:+.3f} & {e['mrr']['History'] - e['mrr']['Dependency']:+.3f}\\\\")
@@ -483,34 +599,90 @@ def table_receivers(summary):
     return "\n".join(lines) + "\n"
 
 
+def signed(text):
+    """Color a signed number: \\up{} (positive) or \\down{} (negative), both defined in the paper."""
+    value = float(re.sub(r"[^0-9.+-]", "", text.split("$")[0]) or 0)
+    if value > 0:
+        return f"\\up{{{text}}}"
+    if value < 0:
+        return f"\\down{{{text}}}"
+    return text
+
+
+def table_origin_tests(summary):
+    """Per project, for message and class-name completion: where the expected token comes from,
+    and the gain of History over Semantic and over Dependency."""
+    group = "rrr" + SEPARATOR + "rr"
+    lines = ["\\begin{tabular}{l" + group + SEPARATOR + group + "}", "\\toprule",
+             "& \\multicolumn{5}{c" + SEPARATOR + "}{Message completion} & \\multicolumn{5}{c}{Class-name completion}\\\\",
+             "& \\multicolumn{3}{c" + SEPARATOR + "}{Token found in} & \\multicolumn{2}{c" + SEPARATOR + "}{H minus}"
+             " & \\multicolumn{3}{c" + SEPARATOR + "}{Token found in} & \\multicolumn{2}{c}{H minus}\\\\",
+             "Project & history & own pkg. & dep. & S & D & history & own pkg. & dep. & S & D\\\\", "\\midrule"]
+
+    def half(e):
+        if e is None or not e["callsites"]:
+            return ["--"] * 5
+        rates, mrr = e["hit_rates"], e["mrr"]
+        return [percent(rates["in_history"]), percent(rates["in_own_package"]), percent(rates["in_dependency"]),
+                signed(f"{mrr['History'] - mrr['Semantic']:+.3f}"), signed(f"{mrr['History'] - mrr['Dependency']:+.3f}")]
+
+    for name, entry in project_rows(summary):
+        lines.append(latex_name(name) + " & " + " & ".join(half(entry["message"]) + half(entry["variable"])) + "\\\\")
+    pooled = summary["pooled"]
+    lines += ["\\midrule", "All & " + " & ".join(half(pooled["message"]) + half(pooled["variable"])) + "\\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
+def table_breakdown(summary):
+    """MRR@10 by origin of the token (both kinds) and by kind of receiver (messages)."""
+    n = len(STRATEGIES)
+    lines = ["\\begin{tabular}{lr" + "r" * n + "}", "\\toprule",
+             "& Sites & " + " & ".join(SHORT[s] for s in STRATEGIES) + "\\\\", "\\midrule"]
+    section = lambda title: f"\\multicolumn{{{n + 2}}}{{l}}{{\\textit{{{title}}}}}\\\\"
+    for kind, title in (("message", "Message, by origin of the token"), ("variable", "Class name, by origin of the token")):
+        lines.append(section(title))
+        for group in GROUPS:
+            g = summary["pooled"][kind]["groups"][group]
+            values = bold_best([g["mrr"][s] for s in STRATEGIES]) if g["callsites"] else ["--"] * n
+            lines.append(f"\\quad {group} & {g['callsites']:,} & " + " & ".join(values) + "\\\\")
+    lines.append(section("Message, by kind of receiver"))
+    receivers = summary["pooled"]["message"]["receivers"]
+    for receiver, r in sorted(receivers.items(), key=lambda item: -item[1]["callsites"]):
+        lines.append(f"\\quad \\texttt{{{receiver}}} & {r['callsites']:,} & " + " & ".join(bold_best([r["mrr"][s] for s in STRATEGIES])) + "\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
 def table_tests(summary, kind):
     shown = [("History", "Semantic"), ("Dependency", "Semantic"), ("History", "Dependency"), ("Hybrid", "Dependency")]
     lines = ["\\begin{tabular}{l" + "rr" * len(shown) + "}", "\\toprule",
              "& " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{SHORT[a]} vs {SHORT[b]}}}" for a, b in shown) + "\\\\",
              " ".join(f"\\cmidrule(lr){{{2 + 2 * i}-{3 + 2 * i}}}" for i in range(len(shown))),
              "Project & " + " & ".join("$\\Delta$ & $r$" for _ in shown) + "\\\\", "\\midrule"]
-    for name, entry in summary["projects"].items():
-        if not entry[kind]["callsites"]:
+    for name, entry in project_rows(summary, kind):
+        if entry is None:
+            lines.append(missing_row(name, 2 * len(shown)))
             continue
         cells = []
         for a, b in shown:
             t = entry[kind]["tests"][f"{a}-{b}"]
             marker = "$^{*}$" if t.get("p_holm", 1) < 0.05 else ""
-            cells += [f"{t['delta_mrr']:+.3f}{marker}", f"{t['rank_biserial']:+.2f}"]
+            cells += [signed(f"{t['delta_mrr']:+.3f}") + marker, signed(f"{t['rank_biserial']:+.2f}")]
         lines.append(latex_name(name) + " & " + " & ".join(cells) + "\\\\")
     pooled = summary["pooled"][kind]
     cells = []
     for a, b in shown:
         t = pooled["tests"][f"{a}-{b}"]
         marker = "$^{*}$" if t["p"] < 0.05 else ""
-        cells += [f"{t['delta_mrr']:+.3f}{marker}", f"{t['rank_biserial']:+.2f}"]
+        cells += [signed(f"{t['delta_mrr']:+.3f}") + marker, signed(f"{t['rank_biserial']:+.2f}")]
     lines += ["\\midrule", "All & " + " & ".join(cells) + "\\\\", "\\bottomrule", "\\end{tabular}"]
     return "\n".join(lines) + "\n"
 
 
 def table_latency(summary):
     lines = ["\\begin{tabular}{l" + "r" * len(STRATEGIES) + "}", "\\toprule",
-             "Completion time (ms) & " + " & ".join(LABEL.get(s, s) for s in STRATEGIES) + "\\\\", "\\midrule"]
+             "Completion time (ms) & " + " & ".join(SHORT[s] for s in STRATEGIES) + "\\\\", "\\midrule"]
     for kind in KINDS:
         latency = summary["pooled"][kind]["latency"]
         lines.append(f"{kind.capitalize()}, median & " + " & ".join(fmt(latency[s]['median'], 0) for s in STRATEGIES) + "\\\\")
@@ -559,6 +731,8 @@ def macros(summary):
     definitions = []
     define = lambda name, value: definitions.append(f"\\newcommand{{{name}}}{{{value}}}")
     define(macro_name("Projects"), len(summary["projects"]))
+    define(macro_name("Projects selected"), len(summary["projects"]) + len(summary.get("missing", [])))
+    define(macro_name("Projects missing"), len(summary.get("missing", [])))
     define(macro_name("Commits"), f"{sum(e['statistics'].get('commitsAnalyzed', 0) for e in summary['projects'].values()):,}")
     for kind in KINDS:
         pooled = summary["pooled"][kind]
@@ -581,6 +755,9 @@ def macros(summary):
                               if e[kind]["callsites"] and e[kind]["tests"][comparison].get("p_holm", 1) < 0.05
                               and e[kind]["tests"][comparison]["delta_mrr"] > 0)
             define(macro_name(kind, "Significant", comparison), significant)
+            a, b = comparison.split("-")
+            better = sum(1 for e in summary["projects"].values() if e[kind]["callsites"] and e[kind]["mrr"][a] > e[kind]["mrr"][b])
+            define(macro_name(kind, "Better", comparison), better)
         for label, value in summary["correlations"][kind].items():
             if label == "points":
                 continue
@@ -599,6 +776,7 @@ def main():
         sys.exit(__doc__)
     results, output = sys.argv[1], sys.argv[2]
     projects = {}
+    missing = []
     for folder in sorted(os.listdir(results)):
         path = os.path.join(results, folder)
         if os.path.isdir(path):
@@ -606,6 +784,9 @@ def main():
             if project:
                 projects[project["statistics"]["project"]] = project
                 print(f"loaded {project['statistics']['project']}: {len(project['callsites'])} call sites")
+            else:
+                missing.append(DISPLAY_NAMES.get(folder, folder))
+                print(f"no complete results for {folder}: listed with --")
     if not projects:
         sys.exit(f"No project results found in {results}")
     present = None
@@ -617,9 +798,13 @@ def main():
     print("configurations: " + ", ".join(STRATEGIES))
 
     summary = analyse(projects)
+    summary["missing"] = sorted(missing, key=str.lower)
     write(os.path.join(output, "summary.json"), json.dumps(summary, indent=1, default=str))
     write(os.path.join(output, "tables", "subjects.tex"), table_subjects(summary))
     write(os.path.join(output, "tables", "hits.tex"), table_hits(summary))
+    write(os.path.join(output, "tables", "mrr.tex"), table_mrr_both(summary))
+    write(os.path.join(output, "tables", "origin-tests.tex"), table_origin_tests(summary))
+    write(os.path.join(output, "tables", "breakdown.tex"), table_breakdown(summary))
     write(os.path.join(output, "tables", "groups.tex"), table_groups(summary))
     write(os.path.join(output, "tables", "receivers.tex"), table_receivers(summary))
     write(os.path.join(output, "tables", "latency.tex"), table_latency(summary))
