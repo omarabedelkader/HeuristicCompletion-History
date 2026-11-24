@@ -4,7 +4,7 @@ I orchestrate a complete project-level History experiment and write its report a
 During the replay of a repository history I run, for every commit, message and variable
 completion benchmarks over the modified and added methods of the current session, one per
 configuration (see #benchmarksForSession:): Baseline, Semantic, History, Dependency,
-HistoryAfterSelf, Hybrid, HybridHD (history after self, then dependencies) and HybridDH
+Hybrid, HybridHD (history after self and super, then dependencies) and HybridDH
 (dependencies, then history). Every call site is logged by CooCallsiteLog for the external analysis.
 
 The benchmarks of the first five configurations, together with the project statistics, end up in a
@@ -297,30 +297,6 @@ CooHistoryExperimentRunner >> completeSemanticsVariableBuilder [
 ]
 
 { #category : 'benchs' }
-CooHistoryExperimentRunner >> historyAfterSelfMessageBuilderWithSession: aHistory [
-	"A variant of the History builder: the session history comes right after the self and super
-	heuristics instead of first. These two heuristics only apply to sends to self and super, which they
-	rank well; for every other send the history still comes first. Class-name completion is unchanged."
-
-	| builder |
-	builder := CoASTHeuristicsResultSetBuilder new.
-	builder messagesHeuristic: (builder newHeuristicBuilder
-		add: CoSelfMessageHeuristic new;
-		add: CoSuperMessageHeuristic new;
-		add: (CooSessionMessagesHeuristic new
-			session: aHistory;
-			yourself);
-		add: CoTypedReceiverMessageHeuristic new;
-		add: CoInitializeInferencedMessageHeuristic new;
-		add: CoLiteralMessageHeuristic new;
-		add: CoGlobalVariableMessageHeuristic new;
-		add: CoVariableWithTypeNameMessageHeuristic new;
-		add: CoUnknownMessageHeuristic new;
-		build).
-	^ builder
-]
-
-{ #category : 'benchs' }
 CooHistoryExperimentRunner >> historyMessageBuilderWithSession: aSession [
 
 	"The session heuristic comes first. Placed after the semantic heuristics it can never
@@ -409,8 +385,8 @@ CooHistoryExperimentRunner >> hybridVariableBuilderWithSession: aHistory [
 
 { #category : 'benchs' }
 CooHistoryExperimentRunner >> hybridHDMessageBuilderWithSession: aHistory [
-	"Hybrid H->D: HistoryAfterSelf plus the direct package dependencies. The history comes right after
-	the self and super heuristics, the dependencies right before the global fallback."
+	"Hybrid H->D: History and the direct package dependencies. The history comes right after the self
+	and super heuristics, the dependencies right before the global fallback."
 
 	| builder |
 	builder := CoASTHeuristicsResultSetBuilder new.
@@ -509,9 +485,6 @@ CooHistoryExperimentRunner >> benchmarksForSession: aSession [
 		#Dependency -> {
 			self completeDirectDependencyMessageBuilder.
 			self completeDirectDependencyVariableBuilder }.
-		#HistoryAfterSelf -> {
-			(self historyAfterSelfMessageBuilderWithSession: historySnapshot).
-			(self historyVariableBuilderWithSession: historySnapshot) }.
 		#Hybrid -> {
 			(self hybridMessageBuilderWithSession: historySnapshot).
 			(self hybridVariableBuilderWithSession: historySnapshot) }.
